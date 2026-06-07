@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Jarvis — Estudos</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060612;--card:#0d0d1f;--card2:#131328;--bdr:#1e1e3f;
+  --cyan:#00f5d4;--pink:#ff2d78;--yel:#ffd60a;--pur:#7c3aed;
+  --blu:#3b82f6;--ora:#ff6b2b;--grn:#22c55e;--red:#ef4444;
+  --txt:#eeeeff;--sub:#6666aa;--r:16px;
+  --g1:linear-gradient(135deg,#00f5d4,#3b82f6);
+  --g2:linear-gradient(135deg,#ff2d78,#7c3aed);
+  --g3:linear-gradient(135deg,#ffd60a,#ff6b2b);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overscroll-behavior:none;}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--txt);
+  min-height:100%;display:flex;flex-direction:column;max-width:480px;margin:0 auto;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 100% 40% at 50% -5%,rgba(124,58,237,.08) 0%,transparent 65%),
+             radial-gradient(ellipse 50% 30% at 95% 85%,rgba(0,245,212,.05) 0%,transparent 60%);}
+
+#scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 0 90px;position:relative;z-index:1;}
+#scroll::-webkit-scrollbar{display:none;}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px 10px;background:rgba(6,6,18,.95);backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:50;}
+.tbar-logo{font-weight:800;font-size:1.05rem;letter-spacing:-.02em;
+  background:var(--g2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.tbar-date{font-size:.72rem;color:var(--sub);font-family:'JetBrains Mono',monospace;margin-top:1px;}
+.tbar-btn{width:34px;height:34px;border-radius:11px;border:1px solid var(--bdr);
+  background:var(--card2);color:var(--txt);font-size:.95rem;cursor:pointer;display:grid;place-items:center;}
+
+/* BOTTOM NAV */
+.bottomnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;background:rgba(6,6,18,.97);backdrop-filter:blur(24px);
+  border-top:1px solid var(--bdr);display:grid;grid-template-columns:repeat(5,1fr);
+  z-index:100;padding-bottom:env(safe-area-inset-bottom,0px);}
+.bnav{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:9px 4px 7px;cursor:pointer;border:none;background:transparent;
+  color:var(--sub);font-family:'Space Grotesk',sans-serif;font-size:.58rem;font-weight:600;
+  gap:3px;text-transform:uppercase;letter-spacing:.05em;}
+.bnav.act{color:var(--cyan);}
+.bnav-ic{font-size:1.2rem;line-height:1;}
+
+/* TABS */
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:14px 16px 0;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{padding:8px 16px;border-radius:20px;border:1px solid var(--bdr);background:var(--card2);
+  font-size:.76rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:.15s;
+  color:var(--sub);font-family:'Space Grotesk',sans-serif;}
+.tab.act{background:rgba(124,58,237,.12);border-color:rgba(124,58,237,.4);color:var(--pur);}
+
+.sec{padding:14px 16px 0;}
+.pg-tab{display:none;}.pg-tab.act{display:block;}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;margin-bottom:12px;}
+.card-title{font-weight:700;font-size:.88rem;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.sec-title{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--sub);
+  margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--bdr);}
+
+/* URGENTE CARD */
+.urgente-card{
+  background:linear-gradient(135deg,rgba(255,45,120,.1),rgba(124,58,237,.08));
+  border:1px solid rgba(255,45,120,.3);border-radius:18px;padding:18px;margin-bottom:12px;
+  position:relative;overflow:hidden;
+}
+.urgente-card::before{content:'';position:absolute;top:-30px;right:-30px;width:100px;height:100px;
+  border-radius:50%;background:radial-gradient(circle,rgba(255,45,120,.15),transparent 70%);}
+.urgente-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--pink);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.urgente-titulo{font-weight:800;font-size:1.15rem;margin-bottom:4px;}
+.urgente-sub{font-size:.78rem;color:var(--sub);margin-bottom:10px;}
+.urgente-countdown{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:800;
+  color:var(--pink);letter-spacing:-.02em;}
+.urgente-dias-label{font-size:.7rem;color:var(--sub);margin-top:2px;}
+
+/* SUMMARY */
+.sum-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px;}
+.sum-card{background:var(--card);border:1px solid var(--bdr);border-radius:14px;
+  padding:14px 12px;position:relative;overflow:hidden;cursor:pointer;transition:.15s;}
+.sum-card:active{transform:scale(.97);}
+.sum-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--c,var(--pur));}
+.sum-card.p{--c:var(--pur)}.sum-card.c{--c:var(--cyan)}.sum-card.y{--c:var(--yel)}.sum-card.g{--c:var(--grn)}
+.sum-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--sub);margin-bottom:5px;}
+.sum-val{font-weight:800;font-size:1.4rem;letter-spacing:-.03em;font-family:'JetBrains Mono',monospace;}
+.sum-sub{font-size:.68rem;color:var(--sub);margin-top:2px;}
+
+/* PROGRESS */
+.prog-wrap{margin-bottom:10px;}
+.prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.prog-label{font-size:.8rem;font-weight:600;}
+.prog-val{font-size:.72rem;color:var(--sub);font-family:'JetBrains Mono',monospace;}
+.prog-track{height:7px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:999px;transition:width .8s ease;}
+
+/* CURSO CARD */
+.curso-card{background:var(--card2);border:1px solid var(--bdr);border-radius:14px;
+  padding:14px;margin-bottom:10px;cursor:pointer;transition:.15s;position:relative;}
+.curso-card:active{transform:scale(.98);}
+.curso-card.urgente-bdr{border-color:rgba(255,45,120,.4);}
+.curso-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;}
+.curso-ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;
+  font-size:1rem;flex-shrink:0;}
+.curso-info{flex:1;}
+.curso-nome{font-weight:700;font-size:.88rem;line-height:1.3;}
+.curso-tipo{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+  color:var(--sub);margin-top:2px;}
+.curso-badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+.badge{padding:2px 8px;border-radius:999px;font-size:.65rem;font-weight:700;border:1px solid;}
+.badge-p{color:var(--pur);border-color:rgba(124,58,237,.3);background:rgba(124,58,237,.08);}
+.badge-c{color:var(--cyan);border-color:rgba(0,245,212,.3);background:rgba(0,245,212,.06);}
+.badge-y{color:var(--yel);border-color:rgba(255,214,10,.3);background:rgba(255,214,10,.06);}
+.badge-g{color:var(--grn);border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06);}
+.badge-s{color:var(--sub);border-color:var(--bdr);background:transparent;}
+.badge-r{color:var(--pink);border-color:rgba(255,45,120,.3);background:rgba(255,45,120,.08);}
+.curso-edit{position:absolute;top:12px;right:12px;background:none;border:none;
+  color:var(--sub);font-size:.85rem;cursor:pointer;padding:4px;}
+
+/* MODULO MAPA */
+.modulo-item{display:flex;align-items:center;gap:10px;padding:10px 0;
+  border-bottom:1px solid var(--bdr);cursor:pointer;}
+.modulo-item:last-child{border-bottom:none;}
+.modulo-status{width:20px;height:20px;border-radius:6px;border:2px solid var(--bdr);
+  flex-shrink:0;display:grid;place-items:center;font-size:.75rem;transition:.15s;}
+.modulo-status.done{background:var(--grn);border-color:var(--grn);}
+.modulo-status.andamento{background:rgba(255,214,10,.15);border-color:var(--yel);}
+.modulo-nome{flex:1;font-size:.84rem;font-weight:600;}
+.modulo-nome.done{text-decoration:line-through;color:var(--sub);}
+.modulo-horas{font-size:.72rem;color:var(--sub);font-family:'JetBrains Mono',monospace;}
+
+/* SESSAO HISTORICO */
+.sessao-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--bdr);}
+.sessao-item:last-child{border-bottom:none;}
+.sessao-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.sessao-info{flex:1;}
+.sessao-curso{font-weight:700;font-size:.84rem;}
+.sessao-conteudo{font-size:.75rem;color:var(--sub);margin-top:2px;line-height:1.5;}
+.sessao-meta{font-size:.7rem;color:var(--sub);margin-top:3px;font-family:'JetBrains Mono',monospace;}
+.sessao-horas{font-weight:800;font-size:.9rem;color:var(--pur);font-family:'JetBrains Mono',monospace;flex-shrink:0;}
+
+/* POMODORO */
+.pomo-wrap{text-align:center;padding:10px 0;}
+.pomo-ring{width:140px;height:140px;margin:0 auto 16px;position:relative;}
+.pomo-svg{transform:rotate(-90deg);}
+.pomo-bg{fill:none;stroke:var(--bdr);stroke-width:8;}
+.pomo-fill{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .5s linear;}
+.pomo-time{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.pomo-min{font-size:2rem;font-weight:800;font-family:'JetBrains Mono',monospace;letter-spacing:-.04em;}
+.pomo-seg{font-size:.78rem;color:var(--sub);}
+.pomo-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--sub);margin-bottom:16px;}
+.pomo-btns{display:flex;gap:10px;justify-content:center;}
+.pomo-btn{padding:10px 20px;border-radius:12px;border:none;cursor:pointer;
+  font-family:'Space Grotesk',sans-serif;font-size:.85rem;font-weight:700;transition:.15s;}
+.pomo-btn:active{transform:scale(.95);}
+.pomo-btn.start{background:var(--g1);color:#060612;}
+.pomo-btn.pause{background:rgba(255,214,10,.1);border:1px solid rgba(255,214,10,.3);color:var(--yel);}
+.pomo-btn.reset{background:rgba(255,45,120,.08);border:1px solid rgba(255,45,120,.2);color:var(--pink);}
+.pomo-ciclos{font-size:.72rem;color:var(--sub);margin-top:12px;}
+
+/* FLASHCARD */
+.flashcard{perspective:1000px;margin-bottom:16px;cursor:pointer;}
+.flashcard-inner{position:relative;width:100%;height:180px;transform-style:preserve-3d;transition:.5s;}
+.flashcard-inner.flipped{transform:rotateY(180deg);}
+.flashcard-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:16px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center;}
+.flashcard-front{background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(0,245,212,.08));
+  border:1px solid rgba(124,58,237,.3);}
+.flashcard-back{background:linear-gradient(135deg,rgba(34,197,94,.12),rgba(0,245,212,.08));
+  border:1px solid rgba(34,197,94,.3);transform:rotateY(180deg);}
+.flashcard-hint{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--sub);margin-bottom:12px;}
+.flashcard-pergunta{font-size:.95rem;font-weight:700;line-height:1.5;}
+.flashcard-resposta{font-size:.88rem;line-height:1.6;color:var(--txt);}
+.flashcard-tap{font-size:.68rem;color:var(--sub);margin-top:10px;}
+.fc-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.fc-btn{padding:10px;border-radius:11px;border:none;cursor:pointer;
+  font-family:'Space Grotesk',sans-serif;font-size:.78rem;font-weight:700;transition:.15s;}
+.fc-btn.facil{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:var(--grn);}
+.fc-btn.medio{background:rgba(255,214,10,.1);border:1px solid rgba(255,214,10,.25);color:var(--yel);}
+.fc-btn.dificil{background:rgba(255,45,120,.1);border:1px solid rgba(255,45,120,.25);color:var(--pink);}
+
+/* IDIOMAS */
+.lang-card{background:var(--card2);border:1px solid var(--bdr);border-radius:14px;
+  padding:14px;margin-bottom:10px;cursor:pointer;transition:.15s;}
+.lang-card:active{transform:scale(.98);}
+.lang-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.lang-flag{font-size:1.6rem;}
+.lang-nome{font-weight:700;font-size:.9rem;}
+.lang-nivel{font-size:.72rem;color:var(--sub);}
+.lang-streak{font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--yel);font-weight:700;margin-left:auto;}
+
+/* LIST */
+.list-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--bdr);}
+.list-item:last-child{border-bottom:none;}
+.list-ico{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:1rem;flex-shrink:0;}
+.list-info{flex:1;min-width:0;}
+.list-title{font-weight:600;font-size:.84rem;}
+.list-sub{font-size:.7rem;color:var(--sub);margin-top:2px;}
+.list-right{font-weight:700;font-size:.85rem;flex-shrink:0;font-family:'JetBrains Mono',monospace;color:var(--sub);}
+
+/* SUGESTAO IA */
+.sugestao-ia{background:linear-gradient(135deg,rgba(124,58,237,.1),rgba(0,245,212,.06));
+  border:1px solid rgba(124,58,237,.25);border-radius:14px;padding:14px;margin-bottom:12px;}
+.sugestao-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--pur);margin-bottom:8px;}
+.sugestao-txt{font-size:.84rem;line-height:1.6;margin-bottom:10px;}
+.sug-btns{display:flex;gap:8px;}
+.sug-btn{flex:1;padding:9px;border-radius:10px;border:none;cursor:pointer;
+  font-family:'Space Grotesk',sans-serif;font-size:.78rem;font-weight:700;transition:.15s;}
+.sug-btn.ok{background:var(--g1);color:#060612;}
+.sug-btn.skip{background:rgba(255,214,10,.08);border:1px solid rgba(255,214,10,.2);color:var(--yel);}
+
+/* FAB */
+.fab{position:fixed;bottom:76px;right:calc(50% - 230px);width:52px;height:52px;border-radius:50%;
+  border:none;background:var(--g2);color:#fff;font-size:1.35rem;cursor:pointer;
+  box-shadow:0 4px 24px rgba(124,58,237,.4);display:grid;place-items:center;z-index:99;transition:.15s;}
+.fab:active{transform:scale(.92);}
+@media(max-width:480px){.fab{right:14px;}}
+
+/* OVERLAY */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(12px);
+  z-index:200;display:none;flex-direction:column;justify-content:flex-end;}
+.overlay.open{display:flex;}
+.sheet{background:var(--card);border-radius:24px 24px 0 0;border:1px solid var(--bdr);
+  border-bottom:none;padding:6px 20px calc(24px + env(safe-area-inset-bottom,0px));
+  max-height:92vh;overflow-y:auto;}
+.sheet::-webkit-scrollbar{display:none;}
+.sheet-handle{width:36px;height:4px;border-radius:2px;background:var(--bdr);margin:10px auto 16px;}
+.sheet-title{font-weight:800;font-size:1.05rem;margin-bottom:18px;text-align:center;}
+
+/* FORM */
+.fg{margin-bottom:14px;}
+.fl{display:block;font-size:.7rem;font-weight:700;color:var(--sub);margin-bottom:6px;
+  text-transform:uppercase;letter-spacing:.07em;}
+.fi{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:12px;
+  padding:12px 14px;color:var(--txt);font-family:'Space Grotesk',sans-serif;font-size:.9rem;
+  outline:none;transition:.15s;}
+.fi:focus{border-color:var(--pur);box-shadow:0 0 0 3px rgba(124,58,237,.1);}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+select.fi{appearance:none;cursor:pointer;}
+textarea.fi{resize:none;line-height:1.5;}
+
+/* BOTOES */
+.btn{width:100%;padding:13px;border-radius:13px;border:none;cursor:pointer;
+  font-family:'Space Grotesk',sans-serif;font-size:.9rem;font-weight:700;margin-bottom:8px;transition:.15s;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--g2);color:#fff;}
+.btn-ghost{background:transparent;border:1px solid var(--bdr);color:var(--txt);}
+.btn-danger{background:rgba(255,45,120,.1);border:1px solid rgba(255,45,120,.3);color:var(--pink);}
+.btn-grn{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:var(--grn);}
+.btn-sm{padding:7px 14px;width:auto;border-radius:9px;font-size:.78rem;margin-bottom:0;}
+
+/* IA BUBBLE */
+.ia-bubble{padding:10px 14px;border-radius:14px;font-size:.84rem;line-height:1.6;margin-bottom:8px;}
+.ia-bubble.jarvis{background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.2);border-radius:14px 14px 14px 4px;}
+.ia-loading{color:var(--sub);font-style:italic;}
+
+/* TOAST */
+.toast{position:fixed;bottom:98px;left:50%;transform:translateX(-50%) translateY(10px);
+  background:var(--card2);border:1px solid var(--bdr);border-radius:12px;
+  padding:10px 18px;font-size:.82rem;font-weight:600;opacity:0;transition:.25s;
+  z-index:300;white-space:nowrap;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+.divider{height:1px;background:var(--bdr);margin:14px 0;}
+.spacer{height:12px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="tbar-logo">📚 Estudos</div>
+    <div class="tbar-date" id="tbar-date">—</div>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="tbar-btn" onclick="abrirIAEstudos()">🤖</button>
+    <button class="tbar-btn" onclick="abrirAddCurso()">＋</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab act" onclick="mudarTab('painel')" id="tab-painel">📊 Painel</button>
+  <button class="tab" onclick="mudarTab('cursos')" id="tab-cursos">🎓 Cursos</button>
+  <button class="tab" onclick="mudarTab('pomodoro')" id="tab-pomodoro">⏱ Pomodoro</button>
+  <button class="tab" onclick="mudarTab('flashcards')" id="tab-flashcards">🃏 Flashcards</button>
+  <button class="tab" onclick="mudarTab('idiomas')" id="tab-idiomas">🌍 Idiomas</button>
+</div>
+
+<div id="scroll">
+  <div class="sec">
+
+    <!-- ══ PAINEL ══ -->
+    <div class="pg-tab act" id="pg-painel">
+      <div class="spacer"></div>
+      <div id="urgente-wrap"></div>
+      <div id="sugestao-ia-wrap"></div>
+      <div id="painel-summary"></div>
+      <div class="card">
+        <div class="card-title">📋 Histórico de Sessões
+          <button onclick="abrirRegistroSessao()" style="margin-left:auto;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25);color:var(--pur);padding:4px 10px;border-radius:8px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif">+ Registrar</button>
+        </div>
+        <div id="historico-sessoes"></div>
+      </div>
+    </div>
+
+    <!-- ══ CURSOS ══ -->
+    <div class="pg-tab" id="pg-cursos">
+      <div class="spacer"></div>
+      <div class="sec-title">🎓 Pós-Graduações</div>
+      <div id="lista-pos"></div>
+      <div class="sec-title" style="margin-top:16px">📖 Cursos</div>
+      <div id="lista-cursos"></div>
+      <button class="btn btn-ghost" onclick="abrirAddCurso()" style="margin-top:4px">+ Adicionar curso / pós</button>
+      <div class="spacer"></div>
+    </div>
+
+    <!-- ══ POMODORO ══ -->
+    <div class="pg-tab" id="pg-pomodoro">
+      <div class="spacer"></div>
+      <div class="card">
+        <div class="card-title">⏱ Pomodoro</div>
+        <div class="fg">
+          <label class="fl">Estudando:</label>
+          <select class="fi" id="pomo-curso" onchange="atualizarPomoCurso()">
+            <option value="">Selecione o curso...</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label class="fl">Conteúdo desta sessão:</label>
+          <input class="fi" id="pomo-conteudo" placeholder="Ex: Módulo 3 — NR-7 Ergonomia">
+        </div>
+        <div class="pomo-wrap">
+          <div class="pomo-ring">
+            <svg class="pomo-svg" width="140" height="140" viewBox="0 0 140 140">
+              <circle class="pomo-bg" cx="70" cy="70" r="58"/>
+              <circle class="pomo-fill" id="pomo-arc" cx="70" cy="70" r="58"
+                stroke="var(--pur)" stroke-dasharray="364.4" stroke-dashoffset="0"/>
+            </svg>
+            <div class="pomo-time">
+              <div class="pomo-min" id="pomo-display">25:00</div>
+              <div class="pomo-seg" id="pomo-fase">Foco</div>
+            </div>
+          </div>
+          <div class="pomo-label" id="pomo-label">Pronto para começar</div>
+          <div class="pomo-btns">
+            <button class="pomo-btn start" id="pomo-start" onclick="togglePomodoro()">▶ Iniciar</button>
+            <button class="pomo-btn reset" onclick="resetPomodoro()">↺ Reset</button>
+          </div>
+          <div class="pomo-ciclos" id="pomo-ciclos">🍅 0 pomodoros hoje</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">⚙️ Configuração</div>
+        <div class="fr2">
+          <div class="fg" style="margin-bottom:0">
+            <label class="fl">Foco (min)</label>
+            <input class="fi" type="number" id="cfg-foco" value="25" min="5" max="60" onchange="resetPomodoro()">
+          </div>
+          <div class="fg" style="margin-bottom:0">
+            <label class="fl">Pausa (min)</label>
+            <input class="fi" type="number" id="cfg-pausa" value="5" min="1" max="30" onchange="resetPomodoro()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ FLASHCARDS ══ -->
+    <div class="pg-tab" id="pg-flashcards">
+      <div class="spacer"></div>
+      <div class="card">
+        <div class="card-title">🃏 Flashcards
+          <button onclick="abrirAddFlashcard()" style="margin-left:auto;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.25);color:var(--pur);padding:4px 10px;border-radius:8px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif">+ Criar</button>
+        </div>
+        <div class="fg">
+          <label class="fl">Filtrar por curso:</label>
+          <select class="fi" id="fc-filtro" onchange="renderFlashcards()">
+            <option value="">Todos os cursos</option>
+          </select>
+        </div>
+        <div id="flashcard-wrap"></div>
+        <div id="fc-stats" style="font-size:.75rem;color:var(--sub);margin-top:10px;text-align:center"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🤖 Gerar com IA</div>
+        <div class="fg">
+          <label class="fl">Tema ou conteúdo</label>
+          <input class="fi" id="fc-ia-tema" placeholder="Ex: NR-7, ergonomia, perícia médica...">
+        </div>
+        <div class="fr2">
+          <div class="fg" style="margin-bottom:0">
+            <label class="fl">Curso</label>
+            <select class="fi" id="fc-ia-curso">
+              <option value="">Geral</option>
+            </select>
+          </div>
+          <div class="fg" style="margin-bottom:0">
+            <label class="fl">Quantidade</label>
+            <select class="fi" id="fc-ia-qtd">
+              <option value="3">3 cards</option>
+              <option value="5" selected>5 cards</option>
+              <option value="10">10 cards</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="gerarFlashcardsIA()" style="margin-top:12px">🤖 Gerar flashcards</button>
+      </div>
+    </div>
+
+    <!-- ══ IDIOMAS ══ -->
+    <div class="pg-tab" id="pg-idiomas">
+      <div class="spacer"></div>
+      <div id="idiomas-lista"></div>
+      <button class="btn btn-ghost" onclick="abrirAddIdioma()">+ Adicionar idioma</button>
+      <div class="spacer"></div>
+    </div>
+
+    <div class="spacer"></div>
+  </div>
+</div>
+
+<button class="fab" onclick="fabAction()">📚</button>
+
+<nav class="bottomnav">
+  <button class="bnav"><span class="bnav-ic">🏠</span><span>Hoje</span></button>
+  <button class="bnav"><span class="bnav-ic">💪</span><span>Saúde</span></button>
+  <button class="bnav act"><span class="bnav-ic">📚</span><span>Estudos</span></button>
+  <button class="bnav"><span class="bnav-ic">💰</span><span>Finanças</span></button>
+  <button class="bnav"><span class="bnav-ic">☰</span><span>Mais</span></button>
+</nav>
+
+<div class="overlay" id="overlay" onclick="fecharSheet()">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div id="sheet-content"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════ STATE ═══════ */
+const KEY='jarvis_estudos_v1';
+let S={
+  cursos:[
+    {id:'c1',nome:'Medicina do Trabalho e Ergonomia',tipo:'pos',status:'andamento',
+     progresso:0,horas_mes:0,meta_horas:20,prazo:'',modulos:[],cor:'var(--pur)'},
+    {id:'c2',nome:'Perícia e Medicina Legal',tipo:'pos',status:'iniciando',
+     progresso:0,horas_mes:0,meta_horas:20,prazo:'',modulos:[],cor:'var(--pink)'},
+    {id:'c3',nome:'Medicina do Tráfego',tipo:'pos',status:'iniciando',
+     progresso:0,horas_mes:0,meta_horas:20,prazo:'',modulos:[],cor:'var(--ora)'},
+    {id:'c4',nome:'Exame Ortopédico',tipo:'curso',status:'andamento',
+     progresso:0,horas_mes:0,meta_horas:10,prazo:'',modulos:[],cor:'var(--blu)'},
+    {id:'c5',nome:'Otorrino Básico',tipo:'curso',status:'andamento',
+     progresso:0,horas_mes:0,meta_horas:10,prazo:'',modulos:[],cor:'var(--cyan)'},
+  ],
+  idiomas:[
+    {id:'i1',nome:'Inglês',bandeira:'🇬🇧',nivel:'Básico',meta:'Ler artigos médicos',horas_mes:0,meta_horas:10,dias:0,ativo:false},
+    {id:'i2',nome:'Espanhol',bandeira:'🇪🇸',nivel:'Básico',meta:'',horas_mes:0,meta_horas:8,dias:0,ativo:false},
+    {id:'i3',nome:'Italiano',bandeira:'🇮🇹',nivel:'Não iniciado',meta:'',horas_mes:0,meta_horas:6,dias:0,ativo:false},
+    {id:'i4',nome:'Mandarim',bandeira:'🇨🇳',nivel:'Não iniciado',meta:'',horas_mes:0,meta_horas:5,dias:0,ativo:false},
+  ],
+  sessoes:[],
+  flashcards:[],
+  fc_resultados:[],
+  pomo_ciclos:0,
+  pomo_data:'',
+};
+function loadS(){try{const d=localStorage.getItem(KEY);if(d)S={...S,...JSON.parse(d)};}catch(e){}}
+function saveS(){localStorage.setItem(KEY,JSON.stringify(S));}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function pct(a,b){return b>0?Math.min(100,Math.round(a/b*100)):0;}
+loadS();
+
+const DIAS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const MESES=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+function hoje(){return new Date();}
+function hojeISO(){return hoje().toISOString().split('T')[0];}
+function hojeStr(){const d=hoje();return `${DIAS[d.getDay()]}, ${d.getDate()} ${MESES[d.getMonth()]} ${d.getFullYear()}`;}
+function diasAte(iso){if(!iso)return null;const d=new Date(iso+'T12:00:00');return Math.ceil((d-hoje())/864e5);}
+
+/* ═══════ TABS ═══════ */
+let tabAtual='painel';
+function mudarTab(t){
+  tabAtual=t;
+  document.querySelectorAll('.pg-tab').forEach(p=>p.classList.remove('act'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('act'));
+  document.getElementById('pg-'+t)?.classList.add('act');
+  document.getElementById('tab-'+t)?.classList.add('act');
+  ({painel:renderPainel,cursos:renderCursos,pomodoro:renderPomodoro,
+    flashcards:renderFlashcards,idiomas:renderIdiomas})[t]?.();
+}
+function fabAction(){
+  ({painel:abrirRegistroSessao,cursos:abrirAddCurso,
+    pomodoro:togglePomodoro,flashcards:abrirAddFlashcard,idiomas:abrirAddIdioma})[tabAtual]?.();
+}
+
+/* ═══════ PAINEL ═══════ */
+function renderPainel(){
+  renderUrgente();
+  renderSugestaoIA();
+  renderPainelSummary();
+  renderHistoricoSessoes();
+}
+
+function renderUrgente(){
+  const proxima = S.cursos
+    .filter(c=>c.prazo&&diasAte(c.prazo)!==null)
+    .sort((a,b)=>diasAte(a.prazo)-diasAte(b.prazo))[0];
+
+  if(!proxima||diasAte(proxima.prazo)===null){
+    document.getElementById('urgente-wrap').innerHTML=`
+      <div class="card" style="margin-bottom:12px">
+        <div class="card-title">📅 Próxima Entrega</div>
+        <div style="font-size:.82rem;color:var(--sub);text-align:center;padding:10px 0">
+          Nenhuma prova ou entrega cadastrada.<br>Edite um curso para adicionar datas.
+        </div>
+      </div>`;
+    return;
+  }
+  const dias=diasAte(proxima.prazo);
+  const urgente=dias<=7;
+  document.getElementById('urgente-wrap').innerHTML=`
+    <div class="urgente-card" style="${urgente?'':'background:linear-gradient(135deg,rgba(124,58,237,.08),rgba(0,245,212,.05));border-color:rgba(124,58,237,.25);'}">
+      <div class="urgente-label">${urgente?'🚨 URGENTE':'📅 PRÓXIMO PRAZO'}</div>
+      <div class="urgente-titulo">${proxima.nome}</div>
+      <div class="urgente-sub">Prazo: ${new Date(proxima.prazo+'T12:00:00').toLocaleDateString('pt-BR')}</div>
+      <div class="urgente-countdown" style="${urgente?'':'color:var(--pur)'}">${dias} dias</div>
+      <div class="urgente-dias-label">restantes</div>
+      ${proxima.horas_mes<proxima.meta_horas?`
+        <div style="margin-top:10px;font-size:.76rem;color:var(--sub)">
+          ⚠️ ${proxima.horas_mes}h estudadas de ${proxima.meta_horas}h necessárias
+        </div>`:''} 
+    </div>`;
+}
+
+function renderSugestaoIA(){
+  const agora=hoje().getHours();
+  const cursosPendentes=S.cursos.filter(c=>c.status==='andamento'&&c.horas_mes<c.meta_horas);
+  if(!cursosPendentes.length){document.getElementById('sugestao-ia-wrap').innerHTML='';return;}
+  const comPrazo=cursosPendentes.filter(c=>c.prazo).sort((a,b)=>diasAte(a.prazo)-diasAte(b.prazo));
+  const sugerido=comPrazo[0]||cursosPendentes[0];
+  const falta=sugerido.meta_horas-sugerido.horas_mes;
+
+  let horario='';
+  if(agora>=21&&agora<23) horario='Agora (21h–22h) é um bom momento';
+  else if(agora>=12&&agora<13) horario='Aproveite o almoço para 20 min de revisão';
+  else if(agora>=17&&agora<18) horario='Você tem ~1h livre antes da pós';
+  else horario='Sábado 10h–12h é seu melhor bloco da semana';
+
+  document.getElementById('sugestao-ia-wrap').innerHTML=`
+    <div class="sugestao-ia">
+      <div class="sugestao-label">🤖 Jarvis sugere</div>
+      <div class="sugestao-txt">
+        <strong>${sugerido.nome}</strong> precisa de mais <strong>${falta}h</strong> este mês.
+        ${sugerido.prazo?`Prazo em ${diasAte(sugerido.prazo)} dias. `:''}
+        ${horario} para uma sessão de estudo.
+      </div>
+      <div class="sug-btns">
+        <button class="sug-btn ok" onclick="iniciarPomodoroRapido('${sugerido.id}')">▶ Estudar agora</button>
+        <button class="sug-btn skip" onclick="document.getElementById('sugestao-ia-wrap').innerHTML=''">Depois</button>
+      </div>
+    </div>`;
+}
+
+function renderPainelSummary(){
+  const totalHoras=S.sessoes.filter(s=>{
+    const d=new Date(s.data_iso+'T12:00:00');
+    return d.getMonth()===hoje().getMonth()&&d.getFullYear()===hoje().getFullYear();
+  }).reduce((a,s)=>a+s.horas,0);
+  const metaTotal=S.cursos.reduce((a,c)=>a+c.meta_horas,0);
+  const streak=calcularStreak();
+  const totalFlash=S.flashcards.length;
+  const sessoesHoje=S.sessoes.filter(s=>s.data_iso===hojeISO()).length;
+
+  document.getElementById('painel-summary').innerHTML=`
+    <div class="sum-grid" style="margin-bottom:12px">
+      <div class="sum-card p">
+        <div class="sum-label">Horas/mês</div>
+        <div class="sum-val">${totalHoras.toFixed(1)}<span style="font-size:.75rem;font-weight:500">h</span></div>
+        <div class="sum-sub">Meta: ${metaTotal}h</div>
+      </div>
+      <div class="sum-card y">
+        <div class="sum-label">Streak</div>
+        <div class="sum-val">${streak}<span style="font-size:.75rem"> 🔥</span></div>
+        <div class="sum-sub">dias consecutivos</div>
+      </div>
+      <div class="sum-card c">
+        <div class="sum-label">Hoje</div>
+        <div class="sum-val">${sessoesHoje}<span style="font-size:.75rem;font-weight:500"> sess.</span></div>
+        <div class="sum-sub">${S.sessoes.filter(s=>s.data_iso===hojeISO()).reduce((a,s)=>a+s.horas,0).toFixed(1)}h estudadas</div>
+      </div>
+      <div class="sum-card g">
+        <div class="sum-label">Flashcards</div>
+        <div class="sum-val">${totalFlash}</div>
+        <div class="sum-sub">criados</div>
+      </div>
+    </div>
+    <div class="prog-wrap">
+      <div class="prog-top">
+        <span class="prog-label">Progresso geral do mês</span>
+        <span class="prog-val">${pct(totalHoras,metaTotal)}%</span>
+      </div>
+      <div class="prog-track" style="height:10px">
+        <div class="prog-fill" style="width:${pct(totalHoras,metaTotal)}%;background:var(--g2)"></div>
+      </div>
+    </div>`;
+}
+
+function renderHistoricoSessoes(){
+  document.getElementById('historico-sessoes').innerHTML=S.sessoes.length===0
+    ?`<div style="text-align:center;padding:20px;color:var(--sub);font-size:.82rem">Nenhuma sessão registrada ainda.<br>Toque em "+ Registrar" para começar.</div>`
+    :S.sessoes.slice(-10).reverse().map(s=>{
+      const curso=S.cursos.find(c=>c.id===s.curso_id);
+      return `<div class="sessao-item">
+        <div class="sessao-dot" style="background:${curso?.cor||'var(--pur)'}"></div>
+        <div class="sessao-info">
+          <div class="sessao-curso">${curso?.nome||s.curso_nome||'—'}</div>
+          <div class="sessao-conteudo">${s.conteudo||'Sem descrição'}</div>
+          <div class="sessao-meta">${s.data_iso} · Pomodoros: ${s.pomodoros||0}</div>
+        </div>
+        <div class="sessao-horas">${s.horas}h</div>
+      </div>`;
+    }).join('');
+}
+
+function calcularStreak(){
+  const datas=[...new Set(S.sessoes.map(s=>s.data_iso))].sort().reverse();
+  let streak=0;const d=new Date();
+  for(const dt of datas){
+    const diff=Math.round((d-new Date(dt+'T12:00:00'))/864e5);
+    if(diff<=1){streak++;d.setDate(d.getDate()-1);}else break;
+  }
+  return streak;
+}
+
+/* ═══════ CURSOS ═══════ */
+function renderCursos(){
+  const pos=S.cursos.filter(c=>c.tipo==='pos');
+  const cursos=S.cursos.filter(c=>c.tipo==='curso');
+  document.getElementById('lista-pos').innerHTML=pos.map(c=>buildCursoCard(c)).join('');
+  document.getElementById('lista-cursos').innerHTML=cursos.map(c=>buildCursoCard(c)).join('');
+  // popular selects do pomodoro e flashcard
+  popularSelects();
+}
+
+function buildCursoCard(c){
+  const dias=c.prazo?diasAte(c.prazo):null;
+  const urgente=dias!==null&&dias<=14;
+  return `<div class="curso-card ${urgente?'urgente-bdr':''}" onclick="abrirCursoDetalhe('${c.id}')">
+    <button class="curso-edit" onclick="event.stopPropagation();abrirEditCurso('${c.id}')">✏️</button>
+    <div class="curso-top">
+      <div class="curso-ic" style="background:${c.cor}22;border:1px solid ${c.cor}44">
+        ${c.tipo==='pos'?'🎓':'📖'}
+      </div>
+      <div class="curso-info">
+        <div class="curso-nome">${c.nome}</div>
+        <div class="curso-tipo">${c.tipo==='pos'?'Pós-Graduação':'Curso'}</div>
+        <div class="curso-badges">
+          <span class="badge ${statusBadge(c.status)}">${c.status}</span>
+          ${c.prazo?`<span class="badge ${dias<=7?'badge-r':dias<=14?'badge-y':'badge-s'}">${dias}d</span>`:''}
+          <span class="badge badge-s">${c.horas_mes}/${c.meta_horas}h</span>
+        </div>
+      </div>
+    </div>
+    <div class="prog-wrap" style="margin-bottom:0">
+      <div class="prog-top">
+        <span class="prog-label" style="font-size:.75rem">${c.modulos.length?c.modulos.filter(m=>m.status==='done').length+'/'+c.modulos.length+' módulos':'Progresso'}</span>
+        <span class="prog-val">${c.progresso}%</span>
+      </div>
+      <div class="prog-track">
+        <div class="prog-fill" style="width:${c.progresso}%;background:${c.cor}"></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function statusBadge(s){return{andamento:'badge-c',iniciando:'badge-y',concluido:'badge-g',pausado:'badge-s'}[s]||'badge-s';}
+
+function abrirCursoDetalhe(id){
+  const c=S.cursos.find(x=>x.id===id);if(!c)return;
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">${c.nome}</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+      <span class="badge ${statusBadge(c.status)}">${c.status}</span>
+      ${c.prazo?`<span class="badge badge-s">Prazo: ${new Date(c.prazo+'T12:00:00').toLocaleDateString('pt-BR')}</span>`:''}
+      <span class="badge badge-s">${c.horas_mes}/${c.meta_horas}h este mês</span>
+    </div>
+    <div class="prog-wrap">
+      <div class="prog-top"><span class="prog-label">Progresso geral</span><span class="prog-val">${c.progresso}%</span></div>
+      <div class="prog-track" style="height:10px"><div class="prog-fill" style="width:${c.progresso}%;background:${c.cor}"></div></div>
+    </div>
+    <div class="divider"></div>
+    <div style="font-weight:700;font-size:.9rem;margin-bottom:10px">🗺 Mapa de Conteúdo</div>
+    ${c.modulos.length===0?`<div style="font-size:.8rem;color:var(--sub);margin-bottom:12px">Nenhum módulo cadastrado ainda.</div>`:''}
+    ${c.modulos.map((m,i)=>`
+      <div class="modulo-item" onclick="toggleModulo('${id}',${i})">
+        <div class="modulo-status ${m.status==='done'?'done':m.status==='andamento'?'andamento':''}">
+          ${m.status==='done'?'✓':m.status==='andamento'?'▶':''}
+        </div>
+        <div class="modulo-nome ${m.status==='done'?'done':''}">${m.nome}</div>
+        <div class="modulo-horas">${m.horas||0}h</div>
+      </div>`).join('')}
+    <button class="btn btn-ghost" onclick="abrirAddModulo('${id}')" style="margin-top:10px;margin-bottom:8px">+ Adicionar módulo</button>
+    <button class="btn btn-primary" onclick="fecharSheet();mudarTab('pomodoro');iniciarPomodoroRapido('${id}')">▶ Estudar agora</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Fechar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function toggleModulo(cursoId,idx){
+  const c=S.cursos.find(x=>x.id===cursoId);if(!c)return;
+  const m=c.modulos[idx];
+  m.status=m.status==='done'?'':m.status==='andamento'?'done':'andamento';
+  const done=c.modulos.filter(x=>x.status==='done').length;
+  c.progresso=c.modulos.length?Math.round(done/c.modulos.length*100):0;
+  saveS();abrirCursoDetalhe(cursoId);
+}
+
+function abrirAddModulo(cursoId){
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">+ Novo Módulo</div>
+    <div class="fg"><label class="fl">Nome do módulo</label>
+      <input class="fi" id="nm-nome" placeholder="Ex: Módulo 3 — NR-7 Ergonomia"></div>
+    <div class="fg"><label class="fl">Horas estimadas</label>
+      <input class="fi" type="number" id="nm-horas" placeholder="4" step="0.5"></div>
+    <button class="btn btn-primary" onclick="salvarModulo('${cursoId}')">+ Adicionar</button>
+    <button class="btn btn-ghost" onclick="abrirCursoDetalhe('${cursoId}')">Voltar</button>`;
+}
+
+function salvarModulo(cursoId){
+  const nome=document.getElementById('nm-nome').value.trim();
+  if(!nome){toast('⚠️ Informe o nome');return;}
+  const c=S.cursos.find(x=>x.id===cursoId);
+  c.modulos.push({nome,horas:parseFloat(document.getElementById('nm-horas').value)||0,status:''});
+  saveS();abrirCursoDetalhe(cursoId);toast('✓ Módulo adicionado!');
+}
+
+/* ═══════ ADD / EDIT CURSO ═══════ */
+function abrirAddCurso(){
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">🎓 Novo Curso / Pós</div>
+    <div class="fg"><label class="fl">Nome</label>
+      <input class="fi" id="nc-nome" placeholder="Ex: Medicina do Trabalho..."></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Tipo</label>
+        <select class="fi" id="nc-tipo">
+          <option value="pos">🎓 Pós-Graduação</option>
+          <option value="curso">📖 Curso</option>
+        </select></div>
+      <div class="fg"><label class="fl">Status</label>
+        <select class="fi" id="nc-status">
+          <option value="iniciando">🔵 Iniciando</option>
+          <option value="andamento">🟡 Em andamento</option>
+          <option value="concluido">🟢 Concluído</option>
+          <option value="pausado">⚫ Pausado</option>
+        </select></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Horas/mês</label>
+        <input class="fi" type="number" id="nc-hmes" value="0" step="0.5"></div>
+      <div class="fg"><label class="fl">Meta horas/mês</label>
+        <input class="fi" type="number" id="nc-meta" value="20" step="0.5"></div>
+    </div>
+    <div class="fg"><label class="fl">Prazo / Data da prova</label>
+      <input class="fi" type="date" id="nc-prazo"></div>
+    <div class="fg"><label class="fl">Cor</label>
+      <select class="fi" id="nc-cor">
+        <option value="var(--pur)">🟣 Roxo</option>
+        <option value="var(--cyan)">🔵 Ciano</option>
+        <option value="var(--pink)">🩷 Rosa</option>
+        <option value="var(--grn)">🟢 Verde</option>
+        <option value="var(--yel)">🟡 Amarelo</option>
+        <option value="var(--ora)">🟠 Laranja</option>
+      </select></div>
+    <button class="btn btn-primary" onclick="salvarCurso()">✓ Adicionar</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function salvarCurso(){
+  const nome=document.getElementById('nc-nome').value.trim();
+  if(!nome){toast('⚠️ Informe o nome');return;}
+  S.cursos.push({id:uid(),nome,tipo:document.getElementById('nc-tipo').value,
+    status:document.getElementById('nc-status').value,
+    horas_mes:parseFloat(document.getElementById('nc-hmes').value)||0,
+    meta_horas:parseFloat(document.getElementById('nc-meta').value)||20,
+    prazo:document.getElementById('nc-prazo').value,
+    progresso:0,modulos:[],cor:document.getElementById('nc-cor').value});
+  saveS();fecharSheet();renderCursos();toast('✓ Curso adicionado!');
+}
+
+function abrirEditCurso(id){
+  const c=S.cursos.find(x=>x.id===id);if(!c)return;
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">✏️ Editar</div>
+    <div class="fg"><label class="fl">Nome</label><input class="fi" id="ec-nome" value="${c.nome}"></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Status</label>
+        <select class="fi" id="ec-status">
+          ${['iniciando','andamento','concluido','pausado'].map(s=>`<option value="${s}" ${c.status===s?'selected':''}>${s}</option>`).join('')}
+        </select></div>
+      <div class="fg"><label class="fl">Progresso %</label>
+        <input class="fi" type="number" id="ec-prog" value="${c.progresso}" min="0" max="100"></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Horas/mês</label>
+        <input class="fi" type="number" id="ec-hmes" value="${c.horas_mes}" step="0.5"></div>
+      <div class="fg"><label class="fl">Meta horas/mês</label>
+        <input class="fi" type="number" id="ec-meta" value="${c.meta_horas}" step="0.5"></div>
+    </div>
+    <div class="fg"><label class="fl">Prazo / Data prova</label>
+      <input class="fi" type="date" id="ec-prazo" value="${c.prazo||''}"></div>
+    <button class="btn btn-primary" onclick="salvarEditCurso('${id}')">💾 Salvar</button>
+    <button class="btn btn-danger" onclick="deletarCurso('${id}')">🗑 Excluir</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function salvarEditCurso(id){
+  const c=S.cursos.find(x=>x.id===id);if(!c)return;
+  c.nome=document.getElementById('ec-nome').value;
+  c.status=document.getElementById('ec-status').value;
+  c.progresso=parseInt(document.getElementById('ec-prog').value)||0;
+  c.horas_mes=parseFloat(document.getElementById('ec-hmes').value)||0;
+  c.meta_horas=parseFloat(document.getElementById('ec-meta').value)||20;
+  c.prazo=document.getElementById('ec-prazo').value;
+  saveS();fecharSheet();renderCursos();toast('✓ Atualizado!');
+}
+
+function deletarCurso(id){
+  if(!confirm('Excluir este curso?'))return;
+  S.cursos=S.cursos.filter(x=>x.id!==id);
+  saveS();fecharSheet();renderCursos();toast('🗑 Excluído');
+}
+
+/* ═══════ REGISTRO SESSÃO ═══════ */
+function abrirRegistroSessao(){
+  popularSelects();
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">📚 Registrar Sessão</div>
+    <div class="fg"><label class="fl">Curso</label>
+      <select class="fi" id="rs-curso">
+        <option value="">Selecione...</option>
+        ${S.cursos.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('')}
+      </select></div>
+    <div class="fg"><label class="fl">O que estudou?</label>
+      <textarea class="fi" id="rs-conteudo" rows="2" placeholder="Ex: Módulo 3 — NR-7, Ergonomia do trabalho..."></textarea></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Horas</label>
+        <input class="fi" type="number" id="rs-horas" inputmode="decimal" placeholder="1.5" step="0.25" value="1"></div>
+      <div class="fg"><label class="fl">Data</label>
+        <input class="fi" type="date" id="rs-data" value="${hojeISO()}"></div>
+    </div>
+    <div class="fg"><label class="fl">Pomodoros completados</label>
+      <input class="fi" type="number" id="rs-pomo" inputmode="numeric" placeholder="0" value="0"></div>
+    <button class="btn btn-primary" onclick="salvarSessao()">📚 Registrar sessão</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function salvarSessao(){
+  const cid=document.getElementById('rs-curso').value;
+  const horas=parseFloat(document.getElementById('rs-horas').value)||0;
+  if(!cid){toast('⚠️ Selecione o curso');return;}
+  if(!horas){toast('⚠️ Informe as horas');return;}
+  const curso=S.cursos.find(c=>c.id===cid);
+  if(curso) curso.horas_mes=(curso.horas_mes||0)+horas;
+  S.sessoes.push({id:uid(),curso_id:cid,curso_nome:curso?.nome||'',
+    conteudo:document.getElementById('rs-conteudo').value,
+    horas,pomodoros:parseInt(document.getElementById('rs-pomo').value)||0,
+    data_iso:document.getElementById('rs-data').value});
+  saveS();fecharSheet();renderPainel();toast(`✅ +${horas}h em ${curso?.nome||'estudo'}!`);
+}
+
+/* ═══════ POMODORO ═══════ */
+let pomoTimer=null,pomoSeg=0,pomoRodando=false,pomoFase='foco',pomoCiclosHoje=0;
+
+function renderPomodoro(){
+  popularSelects();
+  const hoje_iso=hojeISO();
+  if(S.pomo_data!==hoje_iso){S.pomo_ciclos=0;S.pomo_data=hoje_iso;saveS();}
+  pomoCiclosHoje=S.pomo_ciclos||0;
+  atualizarPomoCiclos();
+  resetPomodoro();
+}
+
+function atualizarPomoCurso(){}
+
+function iniciarPomodoroRapido(cursoId){
+  mudarTab('pomodoro');
+  setTimeout(()=>{
+    const sel=document.getElementById('pomo-curso');
+    if(sel) sel.value=cursoId;
+  },100);
+}
+
+function getPomoMinutos(fase){
+  return fase==='foco'
+    ?(parseInt(document.getElementById('cfg-foco')?.value)||25)
+    :(parseInt(document.getElementById('cfg-pausa')?.value)||5);
+}
+
+function togglePomodoro(){
+  if(!pomoRodando){
+    if(pomoSeg===0) pomoSeg=getPomoMinutos(pomoFase)*60;
+    pomoRodando=true;
+    document.getElementById('pomo-start').textContent='⏸ Pausar';
+    document.getElementById('pomo-start').className='pomo-btn pause';
+    document.getElementById('pomo-label').textContent=pomoFase==='foco'?'🎯 Em foco...':'☕ Pausa...';
+    pomoTimer=setInterval(tickPomodoro,1000);
+  } else {
+    pomoRodando=false;clearInterval(pomoTimer);
+    document.getElementById('pomo-start').textContent='▶ Continuar';
+    document.getElementById('pomo-start').className='pomo-btn start';
+    document.getElementById('pomo-label').textContent='Pausado';
+  }
+}
+
+function tickPomodoro(){
+  pomoSeg--;
+  atualizarDisplayPomo();
+  if(pomoSeg<=0){
+    clearInterval(pomoTimer);pomoRodando=false;
+    if(pomoFase==='foco'){
+      pomoCiclosHoje++;S.pomo_ciclos=pomoCiclosHoje;S.pomo_data=hojeISO();saveS();
+      atualizarPomoCiclos();
+      // auto-registrar sessão
+      const cid=document.getElementById('pomo-curso')?.value;
+      const conteudo=document.getElementById('pomo-conteudo')?.value||'';
+      if(cid){
+        const curso=S.cursos.find(c=>c.id===cid);
+        const horas=getPomoMinutos('foco')/60;
+        if(curso) curso.horas_mes=(curso.horas_mes||0)+horas;
+        S.sessoes.push({id:uid(),curso_id:cid,curso_nome:curso?.nome||'',
+          conteudo,horas,pomodoros:1,data_iso:hojeISO()});
+        saveS();
+      }
+      toast('🍅 Pomodoro concluído! Hora da pausa.');
+      pomoFase='pausa';
+    } else {
+      pomoFase='foco';toast('☕ Pausa concluída! Hora de focar.');
+    }
+    pomoSeg=getPomoMinutos(pomoFase)*60;
+    document.getElementById('pomo-start').textContent='▶ Iniciar';
+    document.getElementById('pomo-start').className='pomo-btn start';
+    document.getElementById('pomo-label').textContent='Pronto para começar';
+    document.getElementById('pomo-fase').textContent=pomoFase==='foco'?'Foco':'Pausa';
+    atualizarDisplayPomo();
+  }
+}
+
+function atualizarDisplayPomo(){
+  const m=Math.floor(pomoSeg/60),s=pomoSeg%60;
+  const el=document.getElementById('pomo-display');
+  if(el) el.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  const total=getPomoMinutos(pomoFase)*60;
+  const offset=364.4*(1-(pomoSeg/total));
+  const arc=document.getElementById('pomo-arc');
+  if(arc){arc.style.strokeDashoffset=364.4-offset;arc.style.stroke=pomoFase==='foco'?'var(--pur)':'var(--grn)';}
+}
+
+function resetPomodoro(){
+  clearInterval(pomoTimer);pomoRodando=false;pomoFase='foco';
+  pomoSeg=getPomoMinutos('foco')*60;
+  const el=document.getElementById('pomo-display');
+  if(el) el.textContent=`${String(getPomoMinutos('foco')).padStart(2,'0')}:00`;
+  const start=document.getElementById('pomo-start');
+  if(start){start.textContent='▶ Iniciar';start.className='pomo-btn start';}
+  const lbl=document.getElementById('pomo-label');
+  if(lbl) lbl.textContent='Pronto para começar';
+  const arc=document.getElementById('pomo-arc');
+  if(arc){arc.style.strokeDashoffset=0;arc.style.stroke='var(--pur)';}
+}
+
+function atualizarPomoCiclos(){
+  const el=document.getElementById('pomo-ciclos');
+  if(el) el.textContent=`🍅 ${pomoCiclosHoje} pomodoro${pomoCiclosHoje!==1?'s':''} hoje`;
+}
+
+/* ═══════ FLASHCARDS ═══════ */
+let fcAtual=0,fcVirado=false,fcFiltrado=[];
+
+function renderFlashcards(){
+  popularSelects();
+  const filtro=document.getElementById('fc-filtro')?.value||'';
+  fcFiltrado=filtro?S.flashcards.filter(f=>f.curso_id===filtro):S.flashcards;
+  fcAtual=0;fcVirado=false;
+  mostrarFlashcard();
+  const stats=S.fc_resultados.slice(-50);
+  const faceis=stats.filter(r=>r==='facil').length;
+  const dificeis=stats.filter(r=>r==='dificil').length;
+  const el=document.getElementById('fc-stats');
+  if(el&&stats.length) el.textContent=`Últimas ${stats.length} revisões: 🟢 ${faceis} fáceis · 🔴 ${dificeis} difíceis`;
+}
+
+function mostrarFlashcard(){
+  const wrap=document.getElementById('flashcard-wrap');if(!wrap)return;
+  if(fcFiltrado.length===0){
+    wrap.innerHTML=`<div style="text-align:center;padding:24px;color:var(--sub);font-size:.84rem">
+      Nenhum flashcard ainda.<br>Crie manualmente ou use a IA para gerar.
+    </div>`;return;
+  }
+  const fc=fcFiltrado[fcAtual];
+  const curso=S.cursos.find(c=>c.id===fc.curso_id);
+  wrap.innerHTML=`
+    <div style="font-size:.72rem;color:var(--sub);text-align:center;margin-bottom:8px">${fcAtual+1} de ${fcFiltrado.length} · ${curso?.nome||'Geral'}</div>
+    <div class="flashcard" onclick="virarCard()">
+      <div class="flashcard-inner ${fcVirado?'flipped':''}">
+        <div class="flashcard-face flashcard-front">
+          <div class="flashcard-hint">❓ Pergunta</div>
+          <div class="flashcard-pergunta">${fc.pergunta}</div>
+          <div class="flashcard-tap">Toque para ver a resposta</div>
+        </div>
+        <div class="flashcard-face flashcard-back">
+          <div class="flashcard-hint">✅ Resposta</div>
+          <div class="flashcard-resposta">${fc.resposta}</div>
+        </div>
+      </div>
+    </div>
+    ${fcVirado?`<div class="fc-actions">
+      <button class="fc-btn dificil" onclick="avaliarCard('dificil')">😓 Difícil</button>
+      <button class="fc-btn medio" onclick="avaliarCard('medio')">😐 Médio</button>
+      <button class="fc-btn facil" onclick="avaliarCard('facil')">😊 Fácil</button>
+    </div>`:`<div style="text-align:center"><button onclick="virarCard()" style="background:none;border:none;color:var(--sub);font-size:.78rem;cursor:pointer">↕ Virar card</button></div>`}
+    <div style="display:flex;justify-content:center;gap:12px;margin-top:10px">
+      <button onclick="navCard(-1)" style="background:var(--card2);border:1px solid var(--bdr);border-radius:8px;padding:6px 14px;color:var(--txt);cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:.78rem">← Anterior</button>
+      <button onclick="deletarFlashcard('${fc.id}')" style="background:none;border:none;color:var(--pink);cursor:pointer;font-size:.85rem">🗑</button>
+      <button onclick="navCard(1)" style="background:var(--card2);border:1px solid var(--bdr);border-radius:8px;padding:6px 14px;color:var(--txt);cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:.78rem">Próximo →</button>
+    </div>`;
+}
+
+function virarCard(){fcVirado=!fcVirado;mostrarFlashcard();}
+function navCard(dir){
+  fcAtual=(fcAtual+dir+fcFiltrado.length)%fcFiltrado.length;
+  fcVirado=false;mostrarFlashcard();
+}
+function avaliarCard(resultado){
+  S.fc_resultados.push(resultado);
+  if(S.fc_resultados.length>100) S.fc_resultados=S.fc_resultados.slice(-100);
+  saveS();navCard(1);
+}
+function deletarFlashcard(id){
+  S.flashcards=S.flashcards.filter(f=>f.id!==id);
+  saveS();renderFlashcards();toast('🗑 Flashcard removido');
+}
+
+function abrirAddFlashcard(){
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">🃏 Novo Flashcard</div>
+    <div class="fg"><label class="fl">Curso</label>
+      <select class="fi" id="af-curso">
+        <option value="">Geral</option>
+        ${S.cursos.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('')}
+      </select></div>
+    <div class="fg"><label class="fl">Pergunta</label>
+      <textarea class="fi" id="af-perg" rows="3" placeholder="Ex: O que é ergonomia cognitiva?"></textarea></div>
+    <div class="fg"><label class="fl">Resposta</label>
+      <textarea class="fi" id="af-resp" rows="3" placeholder="Resposta clara e objetiva..."></textarea></div>
+    <button class="btn btn-primary" onclick="salvarFlashcard()">✓ Adicionar</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function salvarFlashcard(){
+  const p=document.getElementById('af-perg').value.trim();
+  const r=document.getElementById('af-resp').value.trim();
+  if(!p||!r){toast('⚠️ Preencha pergunta e resposta');return;}
+  S.flashcards.push({id:uid(),pergunta:p,resposta:r,
+    curso_id:document.getElementById('af-curso').value});
+  saveS();fecharSheet();renderFlashcards();toast('✓ Flashcard criado!');
+}
+
+async function gerarFlashcardsIA(){
+  const tema=document.getElementById('fc-ia-tema').value.trim();
+  if(!tema){toast('⚠️ Informe o tema');return;}
+  const qtd=document.getElementById('fc-ia-qtd').value;
+  const cid=document.getElementById('fc-ia-curso').value;
+  const curso=S.cursos.find(c=>c.id===cid);
+
+  document.getElementById('fc-ia-tema').value='';
+  toast('⏳ Gerando flashcards...');
+
+  const system=`Você é um especialista em medicina. Responda APENAS em JSON válido sem markdown.
+Formato: {"cards":[{"pergunta":"pergunta objetiva","resposta":"resposta clara e concisa"}]}`;
+
+  const res=await callClaude(
+    `Crie ${qtd} flashcards sobre "${tema}" para um médico estudando ${curso?.nome||'medicina'}.
+    Perguntas diretas, respostas objetivas. Foco em pontos-chave para provas e prática clínica.`,system);
+
+  if(!res){toast('⚠️ Sem conexão com IA');return;}
+  try{
+    const obj=JSON.parse(res.replace(/```json|```/g,'').trim());
+    obj.cards.forEach(c=>{
+      S.flashcards.push({id:uid(),pergunta:c.pergunta,resposta:c.resposta,curso_id:cid||''});
+    });
+    saveS();renderFlashcards();toast(`✅ ${obj.cards.length} flashcards criados!`);
+  }catch(e){toast('⚠️ Erro ao processar');console.log(res);}
+}
+
+/* ═══════ IDIOMAS ═══════ */
+function renderIdiomas(){
+  document.getElementById('idiomas-lista').innerHTML=S.idiomas.map(i=>`
+    <div class="lang-card" onclick="abrirEditIdioma('${i.id}')">
+      <div class="lang-top">
+        <div class="lang-flag">${i.bandeira}</div>
+        <div>
+          <div class="lang-nome">${i.nome}</div>
+          <div class="lang-nivel">${i.nivel}${i.meta?' · '+i.meta:''}</div>
+        </div>
+        ${i.dias>0?`<div class="lang-streak">🔥 ${i.dias}d</div>`:'<div style="font-size:.7rem;color:var(--sub);margin-left:auto">Não iniciado</div>'}
+      </div>
+      <div class="prog-wrap" style="margin-bottom:0">
+        <div class="prog-top">
+          <span class="prog-label" style="font-size:.75rem">${i.horas_mes}h de ${i.meta_horas}h este mês</span>
+          <span class="prog-val">${pct(i.horas_mes,i.meta_horas)}%</span>
+        </div>
+        <div class="prog-track">
+          <div class="prog-fill" style="width:${pct(i.horas_mes,i.meta_horas)}%;background:var(--g1)"></div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function abrirEditIdioma(id){
+  const i=S.idiomas.find(x=>x.id===id);if(!i)return;
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">${i.bandeira} ${i.nome}</div>
+    <div class="fg"><label class="fl">Nível atual</label>
+      <select class="fi" id="li-nivel">
+        ${['Não iniciado','Básico','Pré-intermediário','Intermediário','Avançado','Fluente']
+          .map(n=>`<option value="${n}" ${i.nivel===n?'selected':''}>${n}</option>`).join('')}
+      </select></div>
+    <div class="fg"><label class="fl">Objetivo / Meta</label>
+      <input class="fi" id="li-meta" value="${i.meta||''}" placeholder="Ex: Ler artigos médicos"></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Horas este mês</label>
+        <input class="fi" type="number" id="li-hmes" value="${i.horas_mes}" step="0.5"></div>
+      <div class="fg"><label class="fl">Meta horas/mês</label>
+        <input class="fi" type="number" id="li-hmeta" value="${i.meta_horas}" step="0.5"></div>
+    </div>
+    <div class="fg"><label class="fl">Dias consecutivos 🔥</label>
+      <input class="fi" type="number" id="li-dias" value="${i.dias||0}"></div>
+    <div class="fg"><label class="fl">Plataforma usada</label>
+      <input class="fi" id="li-plat" value="${i.plataforma||''}" placeholder="Ex: Duolingo, Anki, Babbel..."></div>
+    <button class="btn btn-primary" onclick="salvarIdioma('${id}')">💾 Salvar</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function salvarIdioma(id){
+  const i=S.idiomas.find(x=>x.id===id);if(!i)return;
+  i.nivel=document.getElementById('li-nivel').value;
+  i.meta=document.getElementById('li-meta').value;
+  i.horas_mes=parseFloat(document.getElementById('li-hmes').value)||0;
+  i.meta_horas=parseFloat(document.getElementById('li-hmeta').value)||10;
+  i.dias=parseInt(document.getElementById('li-dias').value)||0;
+  i.plataforma=document.getElementById('li-plat').value;
+  i.ativo=i.nivel!=='Não iniciado';
+  saveS();fecharSheet();renderIdiomas();toast(`✓ ${i.nome} atualizado!`);
+}
+
+function abrirAddIdioma(){
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">🌍 Novo Idioma</div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Bandeira</label>
+        <input class="fi" id="ai-flag" placeholder="🇫🇷"></div>
+      <div class="fg"><label class="fl">Nome</label>
+        <input class="fi" id="ai-nome" placeholder="Francês"></div>
+    </div>
+    <div class="fg"><label class="fl">Objetivo</label>
+      <input class="fi" id="ai-meta" placeholder="Ex: Conversar no dia a dia"></div>
+    <button class="btn btn-primary" onclick="salvarNovoIdioma()">+ Adicionar</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function salvarNovoIdioma(){
+  const nome=document.getElementById('ai-nome').value.trim();
+  if(!nome){toast('⚠️ Informe o nome');return;}
+  S.idiomas.push({id:uid(),nome,bandeira:document.getElementById('ai-flag').value||'🌐',
+    nivel:'Não iniciado',meta:document.getElementById('ai-meta').value,
+    horas_mes:0,meta_horas:5,dias:0,ativo:false});
+  saveS();fecharSheet();renderIdiomas();toast('✓ Idioma adicionado!');
+}
+
+/* ═══════ IA ═══════ */
+async function callClaude(prompt,system){
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,system,
+        messages:[{role:'user',content:prompt}]})});
+    const d=await r.json();
+    return d.content?.[0]?.text||'';
+  }catch(e){return null;}
+}
+
+function abrirIAEstudos(){
+  const ctx=S.cursos.map(c=>`${c.nome}: ${c.horas_mes}/${c.meta_horas}h (${c.progresso}%${c.prazo?', prazo '+diasAte(c.prazo)+'d':''})`)
+    .join('; ');
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">🤖 Jarvis — Estudos</div>
+    <div style="background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:12px;padding:12px;font-size:.75rem;color:var(--sub);margin-bottom:14px;line-height:1.6">${ctx||'Nenhum curso cadastrado'}</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+      ${['O que estudar hoje?','Crie um plano de estudos','Analise meu progresso','Quais assuntos revisar?'].map(s=>`
+        <button onclick="perguntarIAEst('${s}')" style="background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);color:var(--sub);padding:6px 12px;border-radius:8px;font-size:.72rem;font-weight:600;cursor:pointer;font-family:'Space Grotesk',sans-serif">${s}</button>`).join('')}
+    </div>
+    <div id="ia-resp-est" style="min-height:60px"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <input class="fi" id="ia-q-est" placeholder="Pergunte sobre seus estudos..." style="flex:1">
+      <button onclick="perguntarIAEst(document.getElementById('ia-q-est').value)" style="background:var(--g2);border:none;border-radius:12px;padding:0 16px;color:#fff;font-weight:700;cursor:pointer;flex-shrink:0">→</button>
+    </div>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+async function perguntarIAEst(q){
+  if(!q?.trim())return;
+  const el=document.getElementById('ia-resp-est');
+  if(el) el.innerHTML=`<div class="ia-bubble jarvis ia-loading">⏳ Analisando...</div>`;
+  const ctx=S.cursos.map(c=>`${c.nome}(${c.tipo}): ${c.horas_mes}/${c.meta_horas}h, ${c.progresso}%${c.prazo?', prazo em '+diasAte(c.prazo)+'d':''}`).join('; ');
+  const streak=calcularStreak();
+  const system=`Você é o Jarvis, assistente de estudos do Dr. Antonio Roberto, médico em SP.
+Cursos: ${ctx||'nenhum'}.
+Streak atual: ${streak} dias. Flashcards: ${S.flashcards.length}.
+Responda em português, de forma direta e útil. Máximo 3 parágrafos.`;
+  const res=await callClaude(q,system);
+  if(el) el.innerHTML=`<div class="ia-bubble jarvis">${res||'⚠️ Sem conexão com IA.'}</div>`;
+}
+
+/* ═══════ UTILS ═══════ */
+function popularSelects(){
+  const cursosOpts=S.cursos.map(c=>`<option value="${c.id}">${c.nome}</option>`).join('');
+  ['pomo-curso','fc-filtro','fc-ia-curso'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    const temVazio=id==='pomo-curso'?'<option value="">Selecione o curso...</option>':'<option value="">Todos os cursos</option>';
+    el.innerHTML=temVazio+cursosOpts;
+  });
+}
+
+function fecharSheet(){document.getElementById('overlay').classList.remove('open');}
+let toastT;
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),3000);}
+function updateDate(){document.getElementById('tbar-date').textContent=hojeStr();}
+
+/* ═══════ INIT ═══════ */
+updateDate();
+renderPainel();
+</script>
+</body>
+</html>
