@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Jarvis — Mais</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060612;--card:#0d0d1f;--card2:#131328;--bdr:#1e1e3f;
+  --cyan:#00f5d4;--pink:#ff2d78;--yel:#ffd60a;--pur:#7c3aed;
+  --blu:#3b82f6;--ora:#ff6b2b;--grn:#22c55e;--red:#ef4444;
+  --txt:#eeeeff;--sub:#6666aa;--r:16px;
+  --g1:linear-gradient(135deg,#00f5d4,#3b82f6);
+  --g2:linear-gradient(135deg,#ff2d78,#7c3aed);
+  --g3:linear-gradient(135deg,#ffd60a,#ff6b2b);
+  --g7:linear-gradient(135deg,#3b82f6,#7c3aed);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overscroll-behavior:none;}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--txt);
+  min-height:100%;display:flex;flex-direction:column;max-width:480px;margin:0 auto;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 100% 40% at 50% -5%,rgba(59,130,246,.07) 0%,transparent 65%),
+             radial-gradient(ellipse 50% 30% at 95% 85%,rgba(124,58,237,.05) 0%,transparent 60%);}
+
+#scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 0 90px;position:relative;z-index:1;}
+#scroll::-webkit-scrollbar{display:none;}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px 10px;background:rgba(6,6,18,.95);backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:50;}
+.tbar-logo{font-weight:800;font-size:1.05rem;background:var(--g7);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.tbar-date{font-size:.72rem;color:var(--sub);font-family:'JetBrains Mono',monospace;margin-top:1px;}
+.tbar-btn{width:34px;height:34px;border-radius:11px;border:1px solid var(--bdr);
+  background:var(--card2);color:var(--txt);font-size:.95rem;cursor:pointer;display:grid;place-items:center;}
+
+.bottomnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;background:rgba(6,6,18,.97);backdrop-filter:blur(24px);
+  border-top:1px solid var(--bdr);display:grid;grid-template-columns:repeat(6,1fr);
+  z-index:100;padding-bottom:env(safe-area-inset-bottom,0px);}
+.bnav{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:9px 2px 7px;cursor:pointer;border:none;background:transparent;
+  color:var(--sub);font-family:'Space Grotesk',sans-serif;font-size:.52rem;font-weight:600;
+  gap:3px;text-transform:uppercase;letter-spacing:.04em;}
+.bnav.act{color:var(--cyan);}
+.bnav-ic{font-size:1.1rem;}
+
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:14px 16px 0;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{padding:8px 16px;border-radius:20px;border:1px solid var(--bdr);background:var(--card2);
+  font-size:.76rem;font-weight:700;cursor:pointer;white-space:nowrap;color:var(--sub);
+  font-family:'Space Grotesk',sans-serif;transition:.15s;}
+.tab.act{background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.35);color:var(--blu);}
+
+.sec{padding:14px 16px 0;}
+.pg-tab{display:none;}.pg-tab.act{display:block;}
+.sec-title{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--sub);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--bdr);}
+
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;margin-bottom:12px;}
+.card-title{font-weight:700;font-size:.88rem;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+
+/* COMPRAS */
+.compra-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bdr);}
+.compra-item:last-child{border-bottom:none;}
+.compra-check{width:22px;height:22px;border-radius:7px;border:2px solid var(--bdr);
+  flex-shrink:0;display:grid;place-items:center;cursor:pointer;transition:.15s;}
+.compra-check.done{background:var(--grn);border-color:var(--grn);color:#fff;font-size:.85rem;}
+.compra-pri{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.compra-info{flex:1;min-width:0;}
+.compra-nome{font-weight:600;font-size:.85rem;}
+.compra-nome.done{text-decoration:line-through;color:var(--sub);}
+.compra-meta{font-size:.7rem;color:var(--sub);margin-top:2px;}
+.compra-val{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;
+  color:var(--yel);flex-shrink:0;}
+
+/* METAS */
+.meta-card{background:var(--card2);border:1px solid var(--bdr);border-radius:14px;
+  padding:14px;margin-bottom:10px;cursor:pointer;transition:.15s;}
+.meta-card:active{transform:scale(.98);}
+.meta-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;}
+.meta-ic{font-size:1.4rem;}
+.meta-info{flex:1;}
+.meta-nome{font-weight:700;font-size:.9rem;}
+.meta-area{font-size:.7rem;color:var(--sub);margin-top:2px;}
+.meta-pct{font-weight:800;font-size:.9rem;font-family:'JetBrains Mono',monospace;color:var(--cyan);}
+.prog-track{height:6px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:999px;transition:width .8s ease;}
+
+/* CASCATA */
+.cascata-nivel{margin-bottom:8px;}
+.cascata-header{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--sub);margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+.cascata-item{background:rgba(255,255,255,.03);border:1px solid var(--bdr);border-radius:10px;
+  padding:9px 12px;margin-bottom:4px;display:flex;align-items:center;gap:8px;cursor:pointer;}
+.cascata-item.done{opacity:.5;}
+.cascata-check{width:18px;height:18px;border-radius:5px;border:1px solid var(--bdr);
+  flex-shrink:0;display:grid;place-items:center;font-size:.7rem;}
+.cascata-check.done{background:var(--cyan);border-color:var(--cyan);color:#060612;}
+.cascata-txt{font-size:.82rem;flex:1;}
+.cascata-txt.done{text-decoration:line-through;color:var(--sub);}
+
+/* CHECK ITEM */
+.check-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;
+  border-bottom:1px solid var(--bdr);cursor:pointer;}
+.check-item:last-child{border-bottom:none;}
+.check-box{width:20px;height:20px;border-radius:6px;border:2px solid var(--bdr);
+  flex-shrink:0;display:grid;place-items:center;transition:.15s;margin-top:1px;}
+.check-box.done{background:var(--cyan);border-color:var(--cyan);color:#060612;font-size:.8rem;}
+.check-text{flex:1;font-size:.84rem;line-height:1.4;}
+.check-text.done{text-decoration:line-through;color:var(--sub);}
+.check-meta{font-size:.7rem;color:var(--sub);margin-top:2px;}
+
+/* LIST */
+.list-item{display:flex;align-items:center;gap:12px;padding:10px 0;
+  border-bottom:1px solid var(--bdr);cursor:pointer;}
+.list-item:last-child{border-bottom:none;}
+.list-ico{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;
+  font-size:1.1rem;flex-shrink:0;}
+.list-info{flex:1;min-width:0;}
+.list-title{font-weight:600;font-size:.86rem;}
+.list-sub{font-size:.71rem;color:var(--sub);margin-top:2px;}
+.list-right{font-weight:600;font-size:.85rem;color:var(--sub);flex-shrink:0;}
+
+/* DOCUMENTO */
+.doc-item{display:flex;align-items:center;gap:12px;padding:12px;
+  border-radius:12px;border:1px solid var(--bdr);margin-bottom:8px;cursor:pointer;transition:.15s;}
+.doc-item:active{transform:scale(.98);}
+.doc-item.ok{border-color:rgba(34,197,94,.25);background:rgba(34,197,94,.04);}
+.doc-item.warn{border-color:rgba(255,214,10,.25);background:rgba(255,214,10,.04);}
+.doc-item.crit{border-color:rgba(255,45,120,.3);background:rgba(255,45,120,.06);}
+.doc-ic{font-size:1.3rem;}
+.doc-info{flex:1;}
+.doc-nome{font-weight:700;font-size:.86rem;}
+.doc-venc{font-size:.7rem;margin-top:2px;}
+
+/* REVISAO */
+.revisao-card{background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(124,58,237,.06));
+  border:1px solid rgba(59,130,246,.25);border-radius:16px;padding:16px;
+  margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:.15s;}
+.revisao-card:active{transform:scale(.98);}
+.revisao-ic{font-size:1.8rem;}
+.revisao-info{flex:1;}
+.revisao-title{font-weight:700;font-size:.9rem;}
+.revisao-sub{font-size:.73rem;color:var(--sub);margin-top:3px;}
+.revisao-arrow{color:var(--sub);font-size:1.1rem;}
+
+/* SUMMARY */
+.sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.sum-card{background:var(--card);border:1px solid var(--bdr);border-radius:14px;
+  padding:14px 12px;position:relative;overflow:hidden;}
+.sum-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--c,var(--blu));}
+.sum-card.b{--c:var(--blu)}.sum-card.g{--c:var(--grn)}.sum-card.y{--c:var(--yel)}.sum-card.p{--c:var(--pur)}
+.sum-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--sub);margin-bottom:5px;}
+.sum-val{font-weight:800;font-size:1.3rem;letter-spacing:-.03em;font-family:'JetBrains Mono',monospace;}
+.sum-sub{font-size:.68rem;color:var(--sub);margin-top:2px;}
+
+/* FAB */
+.fab{position:fixed;bottom:76px;right:calc(50% - 230px);width:52px;height:52px;border-radius:50%;
+  border:none;background:var(--g7);color:#fff;font-size:1.35rem;cursor:pointer;
+  box-shadow:0 4px 24px rgba(59,130,246,.35);display:grid;place-items:center;z-index:99;transition:.15s;}
+.fab:active{transform:scale(.92);}
+@media(max-width:480px){.fab{right:14px;}}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(12px);
+  z-index:200;display:none;flex-direction:column;justify-content:flex-end;}
+.overlay.open{display:flex;}
+.sheet{background:var(--card);border-radius:24px 24px 0 0;border:1px solid var(--bdr);
+  border-bottom:none;padding:6px 20px calc(24px + env(safe-area-inset-bottom,0px));
+  max-height:92vh;overflow-y:auto;}
+.sheet::-webkit-scrollbar{display:none;}
+.sheet-handle{width:36px;height:4px;border-radius:2px;background:var(--bdr);margin:10px auto 16px;}
+.sheet-title{font-weight:800;font-size:1.05rem;margin-bottom:18px;text-align:center;}
+
+.fg{margin-bottom:14px;}
+.fl{display:block;font-size:.7rem;font-weight:700;color:var(--sub);margin-bottom:6px;
+  text-transform:uppercase;letter-spacing:.07em;}
+.fi{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:12px;
+  padding:12px 14px;color:var(--txt);font-family:'Space Grotesk',sans-serif;font-size:.9rem;outline:none;transition:.15s;}
+.fi:focus{border-color:var(--blu);}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+select.fi{appearance:none;cursor:pointer;}
+textarea.fi{resize:none;line-height:1.5;}
+
+.btn{width:100%;padding:13px;border-radius:13px;border:none;cursor:pointer;
+  font-family:'Space Grotesk',sans-serif;font-size:.9rem;font-weight:700;margin-bottom:8px;transition:.15s;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--g7);color:#fff;}
+.btn-ghost{background:transparent;border:1px solid var(--bdr);color:var(--txt);}
+.btn-danger{background:rgba(255,45,120,.1);border:1px solid rgba(255,45,120,.3);color:var(--pink);}
+.btn-grn{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:var(--grn);}
+
+.ia-bubble{padding:12px 14px;border-radius:14px;font-size:.84rem;line-height:1.7;margin-bottom:8px;}
+.ia-bubble.jarvis{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:14px 14px 14px 4px;}
+
+.toast{position:fixed;bottom:98px;left:50%;transform:translateX(-50%) translateY(10px);
+  background:var(--card2);border:1px solid var(--bdr);border-radius:12px;
+  padding:10px 18px;font-size:.82rem;font-weight:600;opacity:0;transition:.25s;
+  z-index:300;white-space:nowrap;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.divider{height:1px;background:var(--bdr);margin:14px 0;}
+.spacer{height:12px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="tbar-logo">☰ Mais</div>
+    <div class="tbar-date" id="tbar-date">—</div>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="tbar-btn" onclick="abrirIAMais()">🤖</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab act" onclick="mudarTab('compras')" id="tab-compras">🛒 Compras</button>
+  <button class="tab" onclick="mudarTab('metas')" id="tab-metas">🎯 Metas</button>
+  <button class="tab" onclick="mudarTab('casa')" id="tab-casa">🏠 Casa</button>
+  <button class="tab" onclick="mudarTab('docs')" id="tab-docs">📄 Docs</button>
+  <button class="tab" onclick="mudarTab('revisoes')" id="tab-revisoes">🔄 Revisões</button>
+</div>
+
+<div id="scroll">
+  <div class="sec">
+
+    <!-- ══ COMPRAS ══ -->
+    <div class="pg-tab act" id="pg-compras">
+      <div class="spacer"></div>
+      <div id="compras-summary"></div>
+      <div class="card">
+        <div class="card-title">🔴 Urgente
+          <button onclick="abrirAddCompra('urgente')" style="margin-left:auto;background:rgba(255,45,120,.08);border:1px solid rgba(255,45,120,.25);color:var(--pink);padding:4px 10px;border-radius:8px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif">+</button>
+        </div>
+        <div id="compras-urgente"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🟡 Esta Semana
+          <button onclick="abrirAddCompra('normal')" style="margin-left:auto;background:rgba(255,214,10,.08);border:1px solid rgba(255,214,10,.25);color:var(--yel);padding:4px 10px;border-radius:8px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif">+</button>
+        </div>
+        <div id="compras-normal"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🟢 Pode Esperar
+          <button onclick="abrirAddCompra('pode_esperar')" style="margin-left:auto;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);color:var(--grn);padding:4px 10px;border-radius:8px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif">+</button>
+        </div>
+        <div id="compras-pode_esperar"></div>
+      </div>
+      <div id="compras-comprados-wrap"></div>
+    </div>
+
+    <!-- ══ METAS ══ -->
+    <div class="pg-tab" id="pg-metas">
+      <div class="spacer"></div>
+      <div id="metas-summary"></div>
+      <div id="metas-lista"></div>
+      <button class="btn btn-ghost" onclick="abrirAddMeta()" style="margin-top:4px">+ Nova meta</button>
+      <div class="spacer"></div>
+    </div>
+
+    <!-- ══ CASA ══ -->
+    <div class="pg-tab" id="pg-casa">
+      <div class="spacer"></div>
+
+      <div class="sec-title">🐶 Cachorros</div>
+      <div class="card" id="pets-card">
+        <div id="pets-wrap"></div>
+        <button class="btn btn-ghost" onclick="abrirEditPets()" style="margin-bottom:0">✏️ Editar informações</button>
+      </div>
+
+      <div class="sec-title" style="margin-top:4px">🧹 Rotinas Domésticas</div>
+      <div class="card">
+        <div class="card-title">Diário
+          <button onclick="resetRotinas('diario')" style="margin-left:auto;font-size:.7rem;color:var(--sub);background:none;border:none;cursor:pointer">↺ Reset</button>
+        </div>
+        <div id="rotinas-diario"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Semanal
+          <button onclick="resetRotinas('semanal')" style="margin-left:auto;font-size:.7rem;color:var(--sub);background:none;border:none;cursor:pointer">↺ Reset</button>
+        </div>
+        <div id="rotinas-semanal"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Mensal</div>
+        <div id="rotinas-mensal"></div>
+      </div>
+
+      <div class="sec-title" style="margin-top:4px">🔧 Manutenção</div>
+      <div class="card">
+        <div id="manutencao-lista"></div>
+        <button class="btn btn-ghost" onclick="abrirAddManutencao()" style="margin-top:8px;margin-bottom:0">+ Adicionar item</button>
+      </div>
+    </div>
+
+    <!-- ══ DOCS ══ -->
+    <div class="pg-tab" id="pg-docs">
+      <div class="spacer"></div>
+      <div id="docs-alertas"></div>
+      <div class="card">
+        <div class="card-title">📄 Documentos Pessoais
+          <button onclick="abrirAddDoc()" style="margin-left:auto;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);color:var(--blu);padding:4px 10px;border-radius:8px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif">+</button>
+        </div>
+        <div id="docs-lista"></div>
+      </div>
+    </div>
+
+    <!-- ══ REVISOES ══ -->
+    <div class="pg-tab" id="pg-revisoes">
+      <div class="spacer"></div>
+      <div id="revisoes-historico-wrap"></div>
+      <div class="sec-title">Iniciar Revisão</div>
+      <div class="revisao-card" onclick="iniciarRevisao('diaria')">
+        <div class="revisao-ic">📋</div>
+        <div class="revisao-info">
+          <div class="revisao-title">Revisão Diária</div>
+          <div class="revisao-sub">5 min · 3 perguntas · Todo dia à noite</div>
+        </div>
+        <div class="revisao-arrow">→</div>
+      </div>
+      <div class="revisao-card" onclick="iniciarRevisao('semanal')">
+        <div class="revisao-ic">📊</div>
+        <div class="revisao-info">
+          <div class="revisao-title">Revisão Semanal</div>
+          <div class="revisao-sub">20 min · 6 perguntas · Domingo 20h</div>
+        </div>
+        <div class="revisao-arrow">→</div>
+      </div>
+      <div class="revisao-card" onclick="iniciarRevisao('mensal')">
+        <div class="revisao-ic">📅</div>
+        <div class="revisao-info">
+          <div class="revisao-title">Revisão Mensal</div>
+          <div class="revisao-sub">40 min · Último domingo do mês</div>
+        </div>
+        <div class="revisao-arrow">→</div>
+      </div>
+      <div class="revisao-card" onclick="iniciarRevisao('trimestral')">
+        <div class="revisao-ic">🗓️</div>
+        <div class="revisao-info">
+          <div class="revisao-title">Revisão Trimestral</div>
+          <div class="revisao-sub">90 min · A cada 3 meses</div>
+        </div>
+        <div class="revisao-arrow">→</div>
+      </div>
+      <div class="card" style="margin-top:4px">
+        <div class="card-title">📚 Histórico de Revisões</div>
+        <div id="revisoes-lista"></div>
+      </div>
+      <div class="spacer"></div>
+    </div>
+
+    <div class="spacer"></div>
+  </div>
+</div>
+
+<button class="fab" onclick="fabAction()">＋</button>
+
+<nav class="bottomnav">
+  <button class="bnav"><span class="bnav-ic">🏠</span><span>Hoje</span></button>
+  <button class="bnav"><span class="bnav-ic">💪</span><span>Saúde</span></button>
+  <button class="bnav"><span class="bnav-ic">📚</span><span>Estudos</span></button>
+  <button class="bnav"><span class="bnav-ic">💰</span><span>Finanças</span></button>
+  <button class="bnav"><span class="bnav-ic">🛍️</span><span>Desejos</span></button>
+  <button class="bnav act"><span class="bnav-ic">☰</span><span>Mais</span></button>
+</nav>
+
+<div class="overlay" id="overlay" onclick="fecharSheet()">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div id="sheet-content"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════ STATE ═══════ */
+const KEY='jarvis_mais_v1';
+let S={
+  compras:[],
+  metas:[],
+  pets:{nomes:'',racao:'',vacina:'',consulta:'',vermifugo:'',antipulgas:'',obs:''},
+  rotinas:{
+    diario:[
+      {id:'r1',txt:'Lavar louça',done:false},
+      {id:'r2',txt:'Organizar cama',done:false},
+      {id:'r3',txt:'Dar comida aos cachorros',done:false},
+      {id:'r4',txt:'10 min de idioma',done:false},
+    ],
+    semanal:[
+      {id:'r5',txt:'Lavar roupa',done:false},
+      {id:'r6',txt:'Limpar banheiro',done:false},
+      {id:'r7',txt:'Passar pano no chão',done:false},
+      {id:'r8',txt:'Compras do mercado',done:false},
+      {id:'r9',txt:'Organizar mochila/bolsa',done:false},
+    ],
+    mensal:[
+      {id:'r10',txt:'Limpeza geral da casa',done:false},
+      {id:'r11',txt:'Organizar documentos',done:false},
+      {id:'r12',txt:'Verificar vencimentos de documentos',done:false},
+      {id:'r13',txt:'Revisão mensal Jarvis',done:false},
+    ],
+  },
+  manutencao:[],
+  docs:[
+    {id:'d1',nome:'RG',vencimento:'',obs:''},
+    {id:'d2',nome:'CNH',vencimento:'',obs:''},
+    {id:'d3',nome:'CRM',vencimento:'',obs:''},
+    {id:'d4',nome:'Passaporte',vencimento:'',obs:''},
+    {id:'d5',nome:'IPVA',vencimento:'',obs:''},
+    {id:'d6',nome:'Seguro do carro',vencimento:'',obs:''},
+    {id:'d7',nome:'Plano de saúde',vencimento:'',obs:''},
+  ],
+  revisoes:[],
+};
+
+function loadS(){try{const d=localStorage.getItem(KEY);if(d)S={...S,...JSON.parse(d)};}catch(e){}}
+function saveS(){localStorage.setItem(KEY,JSON.stringify(S));}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function fm(v){return 'R$\u00a0'+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});}
+function pct(a,b){return b>0?Math.min(100,Math.round(a/b*100)):0;}
+loadS();
+
+const DIAS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const MESES=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+function hoje(){return new Date();}
+function hojeISO(){return hoje().toISOString().split('T')[0];}
+function hojeStr(){const d=hoje();return `${DIAS[d.getDay()]}, ${d.getDate()} ${MESES[d.getMonth()]} ${d.getFullYear()}`;}
+function diasAte(iso){if(!iso)return null;return Math.ceil((new Date(iso+'T12:00:00')-hoje())/864e5);}
+function dataFmt(iso){if(!iso)return '—';return new Date(iso+'T12:00:00').toLocaleDateString('pt-BR');}
+
+/* ═══════ TABS ═══════ */
+let tabAtual='compras';
+function mudarTab(t){
+  tabAtual=t;
+  document.querySelectorAll('.pg-tab').forEach(p=>p.classList.remove('act'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('act'));
+  document.getElementById('pg-'+t)?.classList.add('act');
+  document.getElementById('tab-'+t)?.classList.add('act');
+  ({compras:renderCompras,metas:renderMetas,casa:renderCasa,docs:renderDocs,revisoes:renderRevisoes})[t]?.();
+}
+function fabAction(){
+  ({compras:()=>abrirAddCompra('urgente'),metas:abrirAddMeta,
+    casa:abrirAddManutencao,docs:abrirAddDoc,revisoes:()=>iniciarRevisao('diaria')})[tabAtual]?.();
+}
+
+/* ═══════ COMPRAS ═══════ */
+function renderCompras(){
+  const pendentes=S.compras.filter(c=>!c.comprado);
+  const total=pendentes.reduce((a,c)=>a+(c.valor||0),0);
+  const urg=pendentes.filter(c=>c.prioridade==='urgente');
+  const norm=pendentes.filter(c=>c.prioridade==='normal');
+  const esp=pendentes.filter(c=>c.prioridade==='pode_esperar');
+  const comprados=S.compras.filter(c=>c.comprado);
+
+  document.getElementById('compras-summary').innerHTML=`
+    <div class="sum-grid" style="margin-bottom:12px">
+      <div class="sum-card b">
+        <div class="sum-label">Total estimado</div>
+        <div class="sum-val" style="font-size:1.1rem">${fm(total)}</div>
+        <div class="sum-sub">${pendentes.length} ite${pendentes.length!==1?'ns':'m'}</div>
+      </div>
+      <div class="sum-card ${urg.length>0?'p':'g'}">
+        <div class="sum-label">Urgentes</div>
+        <div class="sum-val">${urg.length}</div>
+        <div class="sum-sub">${urg.length>0?'necessitam atenção':'tudo em dia ✓'}</div>
+      </div>
+    </div>`;
+
+  ['urgente','normal','pode_esperar'].forEach(pri=>{
+    const itens=S.compras.filter(c=>!c.comprado&&c.prioridade===pri);
+    document.getElementById('compras-'+pri).innerHTML=itens.length===0
+      ?`<div style="font-size:.78rem;color:var(--sub);padding:8px 0;text-align:center">Nenhum item${pri==='urgente'?' urgente':''} 🎉</div>`
+      :itens.map(c=>buildCompraItem(c)).join('');
+  });
+
+  document.getElementById('compras-comprados-wrap').innerHTML=comprados.length===0?'':
+    `<div class="card">
+      <div class="card-title">✅ Comprados (${comprados.length})
+        <button onclick="limparComprados()" style="margin-left:auto;font-size:.7rem;color:var(--sub);background:none;border:none;cursor:pointer">Limpar</button>
+      </div>
+      ${comprados.slice(-5).reverse().map(c=>`
+        <div class="compra-item" style="opacity:.6">
+          <div class="compra-check done">✓</div>
+          <div class="compra-pri" style="background:var(--sub)"></div>
+          <div class="compra-info">
+            <div class="compra-nome done">${c.nome}</div>
+            ${c.local?`<div class="compra-meta">${c.local}</div>`:''}
+          </div>
+          ${c.valor?`<div class="compra-val">${fm(c.valor)}</div>`:''}
+        </div>`).join('')}
+    </div>`;
+}
+
+function buildCompraItem(c){
+  const corPri={urgente:'var(--pink)',normal:'var(--yel)',pode_esperar:'var(--grn)'}[c.prioridade]||'var(--sub)';
+  return `<div class="compra-item">
+    <div class="compra-check ${c.comprado?'done':''}" onclick="toggleCompra('${c.id}')">${c.comprado?'✓':''}</div>
+    <div class="compra-pri" style="background:${corPri}"></div>
+    <div class="compra-info" onclick="editarCompra('${c.id}')">
+      <div class="compra-nome ${c.comprado?'done':''}">${c.nome}</div>
+      <div class="compra-meta">${c.qtd?c.qtd+' ':''}${c.local?'· '+c.local:''}${c.categoria?'· '+c.categoria:''}</div>
+    </div>
+    ${c.valor?`<div class="compra-val">${fm(c.valor)}</div>`:''}
+  </div>`;
+}
+
+function toggleCompra(id){
+  const c=S.compras.find(x=>x.id===id);
+  if(c){c.comprado=!c.comprado;saveS();renderCompras();toast(c.comprado?'✓ Comprado!':'↩ Reaberto');}
+}
+
+function limparComprados(){
+  if(!confirm('Remover todos os itens comprados?'))return;
+  S.compras=S.compras.filter(c=>!c.comprado);
+  saveS();renderCompras();toast('✓ Lista limpa!');
+}
+
+function editarCompra(id){
+  const c=S.compras.find(x=>x.id===id);if(!c)return;
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">✏️ Editar Item</div>
+    <div class="fg"><label class="fl">Nome</label><input class="fi" id="ec-nome" value="${c.nome}"></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Qtd / Unidade</label><input class="fi" id="ec-qtd" value="${c.qtd||''}"></div>
+      <div class="fg"><label class="fl">Valor est. (R$)</label><input class="fi" type="number" id="ec-val" value="${c.valor||''}"></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Prioridade</label>
+        <select class="fi" id="ec-pri">
+          <option value="urgente" ${c.prioridade==='urgente'?'selected':''}>🔴 Urgente</option>
+          <option value="normal" ${c.prioridade==='normal'?'selected':''}>🟡 Normal</option>
+          <option value="pode_esperar" ${c.prioridade==='pode_esperar'?'selected':''}>🟢 Pode esperar</option>
+        </select></div>
+      <div class="fg"><label class="fl">Onde comprar</label><input class="fi" id="ec-local" value="${c.local||''}"></div>
+    </div>
+    <div class="fg"><label class="fl">Categoria</label>
+      <select class="fi" id="ec-cat">
+        ${['Alimentação','Limpeza','Higiene','Pet','Casa','Farmácia','Outros'].map(x=>`<option ${c.categoria===x?'selected':''}>${x}</option>`).join('')}
+      </select></div>
+    <button class="btn btn-primary" onclick="salvarEdicaoCompra('${id}')">💾 Salvar</button>
+    <button class="btn btn-danger" onclick="S.compras=S.compras.filter(x=>x.id!=='${id}');saveS();fecharSheet();renderCompras();toast('🗑 Removido')">🗑 Excluir</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function salvarEdicaoCompra(id){
+  const c=S.compras.find(x=>x.id===id);if(!c)return;
+  c.nome=document.getElementById('ec-nome').value.trim();
+  c.qtd=document.getElementById('ec-qtd').value;
+  c.valor=parseFloat(document.getElementById('ec-val').value)||null;
+  c.prioridade=document.getElementById('ec-pri').value;
+  c.local=document.getElementById('ec-local').value;
+  c.categoria=document.getElementById('ec-cat').value;
+  saveS();fecharSheet();renderCompras();toast('✓ Atualizado!');
+}
+
+function abrirAddCompra(pri='normal'){
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">🛒 Novo Item</div>
+    <div class="fg"><label class="fl">O que comprar?</label>
+      <input class="fi" id="nc-nome" placeholder="Ex: Ração Golden, Detergente..." autofocus></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Quantidade</label><input class="fi" id="nc-qtd" placeholder="Ex: 2kg, 3 un"></div>
+      <div class="fg"><label class="fl">Valor est. (R$)</label><input class="fi" type="number" id="nc-val" inputmode="decimal" placeholder="0"></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Prioridade</label>
+        <select class="fi" id="nc-pri">
+          <option value="urgente" ${pri==='urgente'?'selected':''}>🔴 Urgente</option>
+          <option value="normal" ${pri==='normal'?'selected':''}>🟡 Normal</option>
+          <option value="pode_esperar" ${pri==='pode_esperar'?'selected':''}>🟢 Pode esperar</option>
+        </select></div>
+      <div class="fg"><label class="fl">Onde comprar</label><input class="fi" id="nc-local" placeholder="Atacadão, PetShop..."></div>
+    </div>
+    <div class="fg"><label class="fl">Categoria</label>
+      <select class="fi" id="nc-cat">
+        ${['Alimentação','Limpeza','Higiene','Pet','Casa','Farmácia','Outros'].map(x=>`<option>${x}</option>`).join('')}
+      </select></div>
+    <button class="btn btn-primary" onclick="salvarCompra()">🛒 Adicionar</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('nc-nome')?.focus(),100);
+}
+
+function salvarCompra(){
+  const nome=document.getElementById('nc-nome').value.trim();
+  if(!nome){toast('⚠️ Informe o item');return;}
+  S.compras.push({id:uid(),nome,
+    qtd:document.getElementById('nc-qtd').value,
+    valor:parseFloat(document.getElementById('nc-val').value)||null,
+    prioridade:document.getElementById('nc-pri').value,
+    local:document.getElementById('nc-local').value,
+    categoria:document.getElementById('nc-cat').value,
+    comprado:false,data_iso:hojeISO()});
+  saveS();fecharSheet();renderCompras();toast(`✓ "${nome}" adicionado!`);
+}
+
+/* ═══════ METAS ═══════ */
+function renderMetas(){
+  const ativas=S.metas.filter(m=>m.status!=='concluida');
+  const concluidas=S.metas.filter(m=>m.status==='concluida');
+
+  document.getElementById('metas-summary').innerHTML=`
+    <div class="sum-grid" style="margin-bottom:12px">
+      <div class="sum-card b">
+        <div class="sum-label">Ativas</div>
+        <div class="sum-val">${ativas.length}</div>
+        <div class="sum-sub">em progresso</div>
+      </div>
+      <div class="sum-card g">
+        <div class="sum-label">Concluídas</div>
+        <div class="sum-val">${concluidas.length}</div>
+        <div class="sum-sub">realizadas ✓</div>
+      </div>
+    </div>`;
+
+  document.getElementById('metas-lista').innerHTML=S.metas.length===0
+    ?`<div style="text-align:center;padding:30px;color:var(--sub);font-size:.84rem">
+        <div style="font-size:2.5rem;margin-bottom:10px">🎯</div>
+        Nenhuma meta ainda.<br>Crie metas e a IA vai cascatear em ações diárias.
+      </div>`
+    :S.metas.map(m=>buildMetaCard(m)).join('');
+}
+
+function buildMetaCard(m){
+  const pctM=pct(m.progresso||0,100);
+  const diasR=m.prazo?diasAte(m.prazo):null;
+  return `<div class="meta-card" onclick="abrirDetalhesMeta('${m.id}')">
+    <div class="meta-top">
+      <div class="meta-ic">${m.ic||'🎯'}</div>
+      <div class="meta-info">
+        <div class="meta-nome">${m.nome}</div>
+        <div class="meta-area">${m.area||'—'} ${m.prazo?'· '+diasR+'d':''}</div>
+      </div>
+      <div class="meta-pct">${pctM}%</div>
+    </div>
+    <div class="prog-track">
+      <div class="prog-fill" style="width:${pctM}%;background:var(--g1)"></div>
+    </div>
+  </div>`;
+}
+
+function abrirDetalhesMeta(id){
+  const m=S.metas.find(x=>x.id===id);if(!m)return;
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">${m.ic||'🎯'} ${m.nome}</div>
+    <div style="font-size:.78rem;color:var(--sub);margin-bottom:14px;line-height:1.8">
+      <div>📋 Área: <strong style="color:var(--txt)">${m.area||'—'}</strong></div>
+      <div>📅 Prazo: <strong style="color:var(--txt)">${m.prazo?dataFmt(m.prazo):'Sem prazo'}</strong>${m.prazo?' ('+diasAte(m.prazo)+'d)':''}</div>
+      <div>📊 Indicador: <strong style="color:var(--txt)">${m.indicador||'—'}</strong></div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:.8rem;font-weight:600">Progresso</span>
+        <span style="font-size:.75rem;font-family:'JetBrains Mono',monospace;color:var(--sub)">${m.progresso||0}%</span>
+      </div>
+      <div class="prog-track" style="height:10px">
+        <div class="prog-fill" style="width:${m.progresso||0}%;background:var(--g1)"></div>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <input type="range" id="meta-prog-slider" min="0" max="100" value="${m.progresso||0}"
+          oninput="document.getElementById('meta-prog-val').textContent=this.value+'%'"
+          style="flex:1;accent-color:var(--cyan)">
+        <span id="meta-prog-val" style="font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;color:var(--cyan);width:36px">${m.progresso||0}%</span>
+      </div>
+    </div>
+    ${m.cascata?.length?`
+      <div style="font-weight:700;font-size:.88rem;margin-bottom:10px">🗓 Cascata de ações</div>
+      ${m.cascata.map((nivel,ni)=>`
+        <div class="cascata-nivel">
+          <div class="cascata-header">
+            ${{0:'Anual',1:'Trimestral',2:'Mensal',3:'Semanal',4:'Diária'}[ni]||'Nível '+ni}
+          </div>
+          ${nivel.map((item,ii)=>`
+            <div class="cascata-item ${item.done?'done':''}" onclick="toggleCascata('${id}',${ni},${ii})">
+              <div class="cascata-check ${item.done?'done':''}">${item.done?'✓':''}</div>
+              <div class="cascata-txt ${item.done?'done':''}">${item.txt}</div>
+            </div>`).join('')}
+        </div>`).join('')}`:''}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
+      <button class="btn btn-primary" style="margin-bottom:0" onclick="salvarProgressoMeta('${id}')">💾 Salvar progresso</button>
+      <button class="btn btn-ghost" style="margin-bottom:0" onclick="editarMeta('${id}')">✏️ Editar</button>
+    </div>
+    <button class="btn btn-ghost" onclick="fecharSheet()" style="margin-top:8px">Fechar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function toggleCascata(metaId,ni,ii){
+  const m=S.metas.find(x=>x.id===metaId);if(!m?.cascata)return;
+  m.cascata[ni][ii].done=!m.cascata[ni][ii].done;
+  saveS();abrirDetalhesMeta(metaId);
+}
+
+function salvarProgressoMeta(id){
+  const m=S.metas.find(x=>x.id===id);if(!m)return;
+  const val=parseInt(document.getElementById('meta-prog-slider')?.value)||0;
+  m.progresso=val;
+  if(val===100)m.status='concluida';
+  saveS();fecharSheet();renderMetas();toast(`✓ Progresso: ${val}%`);
+}
+
+function editarMeta(id){
+  const m=S.metas.find(x=>x.id===id)||{};
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">✏️ Editar Meta</div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Emoji</label><input class="fi" id="em-ic" value="${m.ic||'🎯'}"></div>
+      <div class="fg"><label class="fl">Nome</label><input class="fi" id="em-nome" value="${m.nome||''}"></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Área</label>
+        <select class="fi" id="em-area">
+          ${['Saúde','Estudos','Carreira','Finanças','Pessoal','Casa','Relacionamentos'].map(a=>`<option ${m.area===a?'selected':''}>${a}</option>`).join('')}
+        </select></div>
+      <div class="fg"><label class="fl">Prazo</label><input class="fi" type="date" id="em-prazo" value="${m.prazo||''}"></div>
+    </div>
+    <div class="fg"><label class="fl">Indicador de sucesso</label>
+      <input class="fi" id="em-ind" value="${m.indicador||''}" placeholder="Ex: Completar 5km correndo"></div>
+    <div class="fg"><label class="fl">Progresso atual (%)</label>
+      <input class="fi" type="number" id="em-prog" value="${m.progresso||0}" min="0" max="100"></div>
+    <button class="btn btn-primary" onclick="salvarMeta('${id||''}')">💾 Salvar</button>
+    ${id?`<button class="btn btn-danger" onclick="S.metas=S.metas.filter(x=>x.id!=='${id}');saveS();fecharSheet();renderMetas();toast('🗑 Meta removida')">🗑 Excluir</button>`:''}
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function abrirAddMeta(){editarMeta(null);}
+
+function salvarMeta(id){
+  const nome=document.getElementById('em-nome').value.trim();
+  if(!nome){toast('⚠️ Informe o nome');return;}
+  const dados={
+    ic:document.getElementById('em-ic').value||'🎯',
+    nome,area:document.getElementById('em-area').value,
+    prazo:document.getElementById('em-prazo').value,
+    indicador:document.getElementById('em-ind').value,
+    progresso:parseInt(document.getElementById('em-prog').value)||0,
+    status:'ativa',
+  };
+  if(id){
+    const m=S.metas.find(x=>x.id===id);
+    if(m) Object.assign(m,dados);
+  } else {
+    dados.id=uid();dados.cascata=[];
+    S.metas.push(dados);
+  }
+  saveS();fecharSheet();renderMetas();toast('✓ Meta salva!');
+}
+
+/* ═══════ CASA ═══════ */
+function renderCasa(){
+  // Pets
+  const p=S.pets;
+  document.getElementById('pets-wrap').innerHTML=`
+    <div style="font-size:.82rem;line-height:2;color:var(--sub)">
+      ${p.nomes?`<div>🐶 Nome(s): <strong style="color:var(--txt)">${p.nomes}</strong></div>`:'<div style="color:var(--sub)">Nenhum cachorro cadastrado ainda.</div>'}
+      ${p.racao?`<div>🥣 Ração: <strong style="color:var(--txt)">${p.racao}</strong></div>`:''}
+      ${p.vacina?`<div>💉 Próxima vacina: <strong style="color:${diasAte(p.vacina)!==null&&diasAte(p.vacina)<30?'var(--pink)':'var(--txt)'}">${dataFmt(p.vacina)}</strong></div>`:''}
+      ${p.consulta?`<div>🏥 Próxima consulta vet: <strong style="color:${diasAte(p.consulta)!==null&&diasAte(p.consulta)<14?'var(--yel)':'var(--txt)'}">${dataFmt(p.consulta)}</strong></div>`:''}
+      ${p.vermifugo?`<div>💊 Vermífugo: <strong style="color:var(--txt)">${p.vermifugo}</strong></div>`:''}
+      ${p.obs?`<div>📝 ${p.obs}</div>`:''}
+    </div>`;
+
+  // Rotinas
+  ['diario','semanal','mensal'].forEach(tipo=>{
+    document.getElementById('rotinas-'+tipo).innerHTML=(S.rotinas[tipo]||[]).map(r=>`
+      <div class="check-item" onclick="toggleRotina('${tipo}','${r.id}')">
+        <div class="check-box ${r.done?'done'}">${r.done?'✓':''}</div>
+        <div class="check-text ${r.done?'done':''}">${r.txt}</div>
+      </div>`).join('');
+  });
+
+  // Manutenção
+  document.getElementById('manutencao-lista').innerHTML=S.manutencao.length===0
+    ?`<div style="font-size:.8rem;color:var(--sub)">Nenhum item de manutenção.</div>`
+    :S.manutencao.map(m=>`
+      <div class="list-item" onclick="editarManutencao('${m.id}')">
+        <div class="list-ico" style="background:rgba(255,107,43,.1)">🔧</div>
+        <div class="list-info">
+          <div class="list-title">${m.nome}</div>
+          <div class="list-sub">${m.prazo?'Previsto: '+dataFmt(m.prazo):'Sem prazo'} ${m.custo?'· '+fm(m.custo):''}</div>
+        </div>
+        <div class="list-right">${m.status==='feito'?'✅':'⏳'}</div>
+      </div>`).join('');
+}
+
+function toggleRotina(tipo,id){
+  const r=(S.rotinas[tipo]||[]).find(x=>x.id===id);
+  if(r){r.done=!r.done;saveS();renderCasa();}
+}
+
+function resetRotinas(tipo){
+  (S.rotinas[tipo]||[]).forEach(r=>r.done=false);
+  saveS();renderCasa();toast('↺ Rotinas resetadas');
+}
+
+function abrirEditPets(){
+  const p=S.pets;
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">🐶 Cachorros</div>
+    <div class="fg"><label class="fl">Nome(s)</label><input class="fi" id="pt-nomes" value="${p.nomes||''}" placeholder="Ex: Rex, Mel"></div>
+    <div class="fg"><label class="fl">Ração (marca / qtd por dia)</label><input class="fi" id="pt-racao" value="${p.racao||''}" placeholder="Ex: Golden Adult 300g 2x/dia"></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Próxima vacina</label><input class="fi" type="date" id="pt-vacina" value="${p.vacina||''}"></div>
+      <div class="fg"><label class="fl">Próxima consulta</label><input class="fi" type="date" id="pt-consulta" value="${p.consulta||''}"></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Vermífugo</label><input class="fi" id="pt-verm" value="${p.vermifugo||''}" placeholder="Ex: Drontal, 3 meses"></div>
+      <div class="fg"><label class="fl">Antipulgas</label><input class="fi" id="pt-anti" value="${p.antipulgas||''}" placeholder="Ex: Bravecto, 3 meses"></div>
+    </div>
+    <div class="fg"><label class="fl">Observações</label><textarea class="fi" id="pt-obs" rows="2">${p.obs||''}</textarea></div>
+    <button class="btn btn-primary" onclick="salvarPets()">💾 Salvar</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function salvarPets(){
+  S.pets={
+    nomes:document.getElementById('pt-nomes').value,
+    racao:document.getElementById('pt-racao').value,
+    vacina:document.getElementById('pt-vacina').value,
+    consulta:document.getElementById('pt-consulta').value,
+    vermifugo:document.getElementById('pt-verm').value,
+    antipulgas:document.getElementById('pt-anti').value,
+    obs:document.getElementById('pt-obs').value,
+  };
+  saveS();fecharSheet();renderCasa();toast('✓ Dados dos cachorros salvos!');
+}
+
+function abrirAddManutencao(){
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">🔧 Nova Manutenção</div>
+    <div class="fg"><label class="fl">Descrição</label><input class="fi" id="nm-nome" placeholder="Ex: Trocar lâmpada, Reparar vazamento..."></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Prazo</label><input class="fi" type="date" id="nm-prazo"></div>
+      <div class="fg"><label class="fl">Custo est. (R$)</label><input class="fi" type="number" id="nm-custo" placeholder="0"></div>
+    </div>
+    <button class="btn btn-primary" onclick="salvarManutencao()">🔧 Adicionar</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function salvarManutencao(){
+  const nome=document.getElementById('nm-nome').value.trim();
+  if(!nome){toast('⚠️ Informe a descrição');return;}
+  S.manutencao.push({id:uid(),nome,prazo:document.getElementById('nm-prazo').value,
+    custo:parseFloat(document.getElementById('nm-custo').value)||null,status:'pendente'});
+  saveS();fecharSheet();renderCasa();toast('✓ Adicionado!');
+}
+
+function editarManutencao(id){
+  const m=S.manutencao.find(x=>x.id===id);if(!m)return;
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">✏️ ${m.nome}</div>
+    <div class="fg"><label class="fl">Status</label>
+      <select class="fi" id="em-status">
+        <option value="pendente" ${m.status==='pendente'?'selected':''}>⏳ Pendente</option>
+        <option value="feito" ${m.status==='feito'?'selected':''}>✅ Feito</option>
+      </select></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Prazo</label><input class="fi" type="date" id="em-prazo" value="${m.prazo||''}"></div>
+      <div class="fg"><label class="fl">Custo (R$)</label><input class="fi" type="number" id="em-custo" value="${m.custo||''}"></div>
+    </div>
+    <button class="btn btn-primary" onclick="salvarEditManu('${id}')">💾 Salvar</button>
+    <button class="btn btn-danger" onclick="S.manutencao=S.manutencao.filter(x=>x.id!=='${id}');saveS();fecharSheet();renderCasa()">🗑 Excluir</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function salvarEditManu(id){
+  const m=S.manutencao.find(x=>x.id===id);if(!m)return;
+  m.status=document.getElementById('em-status').value;
+  m.prazo=document.getElementById('em-prazo').value;
+  m.custo=parseFloat(document.getElementById('em-custo').value)||null;
+  saveS();fecharSheet();renderCasa();toast('✓ Atualizado!');
+}
+
+/* ═══════ DOCUMENTOS ═══════ */
+function renderDocs(){
+  const alertas=S.docs.filter(d=>{
+    if(!d.vencimento)return false;
+    const dias=diasAte(d.vencimento);
+    return dias!==null&&dias<=30&&dias>=0;
+  });
+
+  document.getElementById('docs-alertas').innerHTML=alertas.length?`
+    <div class="card" style="margin-bottom:12px;border-color:rgba(255,45,120,.3);background:rgba(255,45,120,.04)">
+      <div class="card-title" style="color:var(--pink)">⚠️ Vencendo em breve</div>
+      ${alertas.map(d=>`
+        <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bdr);font-size:.84rem">
+          <span>${d.nome}</span>
+          <span style="font-weight:700;color:${diasAte(d.vencimento)<=7?'var(--pink)':'var(--yel)'}">${diasAte(d.vencimento)}d</span>
+        </div>`).join('')}
+    </div>`:'';
+
+  document.getElementById('docs-lista').innerHTML=S.docs.map(d=>{
+    const dias=d.vencimento?diasAte(d.vencimento):null;
+    const cls=dias===null?'':dias<0?'ok':dias<=7?'crit':dias<=30?'warn':'ok';
+    return `<div class="doc-item ${cls}" onclick="editarDoc('${d.id}')">
+      <div class="doc-ic">${docIc(d.nome)}</div>
+      <div class="doc-info">
+        <div class="doc-nome">${d.nome}</div>
+        <div class="doc-venc" style="color:${dias===null?'var(--sub)':dias<0?'var(--grn)':dias<=7?'var(--pink)':dias<=30?'var(--yel)':'var(--sub)'}">
+          ${d.vencimento?`${dias!==null&&dias<0?'✓ Ok':'Vence'} ${dataFmt(d.vencimento)} (${dias!==null?dias<0?'em dia':dias+'d':'—'})`:d.obs||'Sem data cadastrada'}
+        </div>
+      </div>
+      <div style="font-size:.9rem">${dias===null?'➕':dias<0?'✅':dias<=7?'🔴':dias<=30?'🟡':'🟢'}</div>
+    </div>`;
+  }).join('');
+}
+
+function docIc(nome){
+  const map={RG:'🪪',CNH:'🚗',CRM:'🏥',Passaporte:'🛂',IPVA:'🚙','Seguro do carro':'🛡️','Plano de saúde':'💊'};
+  return map[nome]||'📄';
+}
+
+function editarDoc(id){
+  const d=S.docs.find(x=>x.id===id);if(!d)return;
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">${docIc(d.nome)} ${d.nome}</div>
+    <div class="fg"><label class="fl">Vencimento / Validade</label>
+      <input class="fi" type="date" id="ed-venc" value="${d.vencimento||''}"></div>
+    <div class="fg"><label class="fl">Observações</label>
+      <textarea class="fi" id="ed-obs" rows="2" placeholder="Número, protocolo, informações extras...">${d.obs||''}</textarea></div>
+    <button class="btn btn-primary" onclick="salvarDoc('${id}')">💾 Salvar</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function salvarDoc(id){
+  const d=S.docs.find(x=>x.id===id);if(!d)return;
+  d.vencimento=document.getElementById('ed-venc').value;
+  d.obs=document.getElementById('ed-obs').value;
+  saveS();fecharSheet();renderDocs();toast('✓ Documento atualizado!');
+}
+
+function abrirAddDoc(){
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">📄 Novo Documento</div>
+    <div class="fg"><label class="fl">Nome do documento</label>
+      <input class="fi" id="nd-nome" placeholder="Ex: Título de eleitor, Carteirinha UFMG..."></div>
+    <div class="fg"><label class="fl">Vencimento</label><input class="fi" type="date" id="nd-venc"></div>
+    <div class="fg"><label class="fl">Observações</label>
+      <textarea class="fi" id="nd-obs" rows="2" placeholder="Número, local de guarda..."></textarea></div>
+    <button class="btn btn-primary" onclick="salvarNovoDoc()">📄 Adicionar</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function salvarNovoDoc(){
+  const nome=document.getElementById('nd-nome').value.trim();
+  if(!nome){toast('⚠️ Informe o nome');return;}
+  S.docs.push({id:uid(),nome,vencimento:document.getElementById('nd-venc').value,
+    obs:document.getElementById('nd-obs').value});
+  saveS();fecharSheet();renderDocs();toast('✓ Documento adicionado!');
+}
+
+/* ═══════ REVISÕES ═══════ */
+const PERGUNTAS={
+  diaria:[
+    {emoji:'🏆',p:'O que você realizou hoje?',placeholder:'Conquistas do dia...'},
+    {emoji:'🚧',p:'O que não conseguiu fazer e por quê?',placeholder:'Pendências e motivos...'},
+    {emoji:'🎯',p:'Top 3 prioridades para amanhã',placeholder:'1.\n2.\n3.'},
+  ],
+  semanal:[
+    {emoji:'🏆',p:'O que avancei esta semana?',placeholder:'Conquistas...'},
+    {emoji:'🚧',p:'O que atrasou ou não consegui?',placeholder:'Pendências...'},
+    {emoji:'⚡',p:'Onde fiquei sobrecarregado?',placeholder:'Pontos de pressão...'},
+    {emoji:'🔄',p:'O que posso eliminar ou delegar?',placeholder:'Simplificações...'},
+    {emoji:'🎯',p:'Qual é o foco da próxima semana?',placeholder:'3 prioridades...'},
+    {emoji:'💰',p:'Finanças e saúde estão no ritmo?',placeholder:'Observações...'},
+  ],
+  mensal:[
+    {emoji:'📊',p:'Metas do mês: o que realizei?',placeholder:'% de cada meta...'},
+    {emoji:'📚',p:'Estudos: horas realizadas vs meta',placeholder:'Análise...'},
+    {emoji:'💰',p:'Finanças: receitas, gastos, investimentos',placeholder:'Resumo...'},
+    {emoji:'💪',p:'Saúde: peso, treinos, sono — tendências',placeholder:'Avaliação...'},
+    {emoji:'🔄',p:'O que precisa mudar no próximo mês?',placeholder:'Ajustes...'},
+    {emoji:'🌟',p:'Maior conquista e maior aprendizado',placeholder:'Celebre...'},
+  ],
+  trimestral:[
+    {emoji:'🎯',p:'Metas anuais: estou no ritmo?',placeholder:'Avaliação...'},
+    {emoji:'🔄',p:'O que precisa ser ajustado?',placeholder:'Mudanças necessárias...'},
+    {emoji:'⚡',p:'O que posso acelerar?',placeholder:'Oportunidades...'},
+    {emoji:'🗑',p:'O que devo abandonar?',placeholder:'O que não está funcionando...'},
+  ],
+};
+
+function renderRevisoes(){
+  document.getElementById('revisoes-lista').innerHTML=S.revisoes.length===0
+    ?`<div style="font-size:.82rem;color:var(--sub);padding:10px 0">Nenhuma revisão registrada ainda.</div>`
+    :S.revisoes.slice(-10).reverse().map(r=>`
+      <div class="list-item" onclick="verRevisao('${r.id}')">
+        <div class="list-ico" style="background:rgba(59,130,246,.1)">
+          ${{diaria:'📋',semanal:'📊',mensal:'📅',trimestral:'🗓️'}[r.tipo]||'📋'}
+        </div>
+        <div class="list-info">
+          <div class="list-title">${{diaria:'Revisão Diária',semanal:'Revisão Semanal',mensal:'Revisão Mensal',trimestral:'Revisão Trimestral'}[r.tipo]||r.tipo}</div>
+          <div class="list-sub">${r.data}</div>
+        </div>
+        <div class="list-right">→</div>
+      </div>`).join('');
+}
+
+function verRevisao(id){
+  const r=S.revisoes.find(x=>x.id===id);if(!r)return;
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">${r.data}</div>
+    ${(r.respostas||[]).map(q=>`
+      <div style="margin-bottom:14px">
+        <div style="font-weight:700;font-size:.84rem;margin-bottom:6px">${q.p}</div>
+        <div style="font-size:.82rem;color:var(--sub);background:var(--card2);border-radius:10px;
+          padding:10px;line-height:1.6;white-space:pre-line">${q.r||'—'}</div>
+      </div>`).join('')}
+    <button class="btn btn-ghost" onclick="fecharSheet()">Fechar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function iniciarRevisao(tipo){
+  const perguntas=PERGUNTAS[tipo]||PERGUNTAS.diaria;
+  let idx=0;const respostas=[];
+  function mostrar(){
+    if(idx>=perguntas.length){
+      const rev={id:uid(),tipo,data:new Date().toLocaleDateString('pt-BR'),respostas};
+      S.revisoes.push(rev);saveS();fecharSheet();renderRevisoes();
+      toast(`✅ Revisão ${tipo} concluída!`);return;
+    }
+    const q=perguntas[idx];
+    document.getElementById('sheet-content').innerHTML=`
+      <div class="sheet-title">${q.emoji} Revisão ${tipo.charAt(0).toUpperCase()+tipo.slice(1)}</div>
+      <div style="text-align:center;margin-bottom:16px">
+        ${perguntas.map((_,i)=>`<span style="display:inline-block;width:8px;height:8px;border-radius:50%;
+          margin:0 3px;background:${i===idx?'var(--cyan)':'var(--bdr)'};transition:.2s"></span>`).join('')}
+        <span style="font-size:.72rem;color:var(--sub);margin-left:8px">${idx+1}/${perguntas.length}</span>
+      </div>
+      <div style="font-size:1rem;font-weight:700;margin-bottom:14px;line-height:1.4">${q.p}</div>
+      <textarea class="fi" id="rev-r" rows="4" placeholder="${q.placeholder}" style="resize:none"></textarea>
+      <div style="display:grid;grid-template-columns:${idx>0?'1fr 1fr':'1fr'};gap:8px;margin-top:10px">
+        ${idx>0?`<button class="btn btn-ghost" style="margin-bottom:0" onclick="idx--;mostrar()">← Voltar</button>`:''}
+        <button class="btn btn-primary" style="margin-bottom:0" onclick="
+          const v=document.getElementById('rev-r').value;
+          respostas[${idx}]={p:'${q.p}',r:v};idx++;mostrar()">
+          ${idx===perguntas.length-1?'✅ Concluir':'Próximo →'}
+        </button>
+      </div>
+      <button class="btn btn-ghost" onclick="fecharSheet()" style="margin-top:8px">Cancelar</button>`;
+  }
+  document.getElementById('overlay').classList.add('open');
+  mostrar();
+}
+
+/* ═══════ IA ═══════ */
+async function callClaude(prompt,system){
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,system,
+        messages:[{role:'user',content:prompt}]})});
+    const d=await r.json();
+    return d.content?.[0]?.text||'';
+  }catch(e){return null;}
+}
+
+function abrirIAMais(){
+  const comprasUrg=S.compras.filter(c=>!c.comprado&&c.prioridade==='urgente').length;
+  const docsVenc=S.docs.filter(d=>d.vencimento&&diasAte(d.vencimento)!==null&&diasAte(d.vencimento)>=0&&diasAte(d.vencimento)<=30).length;
+  const metasAtivas=S.metas.filter(m=>m.status!=='concluida').length;
+
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">🤖 Jarvis — Assistente</div>
+    <div style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:12px;
+      padding:12px;font-size:.75rem;color:var(--sub);margin-bottom:14px;line-height:1.8">
+      🛒 ${comprasUrg} compra${comprasUrg!==1?'s':''} urgente${comprasUrg!==1?'s':''} ·
+      📄 ${docsVenc} doc${docsVenc!==1?'s':''} vencendo ·
+      🎯 ${metasAtivas} meta${metasAtivas!==1?'s':''} ativa${metasAtivas!==1?'s':''}
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+      ${['O que é mais urgente agora?','Resumo da minha semana','Analise minhas metas','O que preciso comprar?'].map(s=>`
+        <button onclick="perguntarIAMais('${s}')" style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);color:var(--sub);padding:6px 12px;border-radius:8px;font-size:.72rem;font-weight:600;cursor:pointer;font-family:'Space Grotesk',sans-serif">${s}</button>`).join('')}
+    </div>
+    <div id="ia-mais-resp" style="min-height:60px"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <input class="fi" id="ia-mais-q" placeholder="Pergunte qualquer coisa..." style="flex:1">
+      <button onclick="perguntarIAMais(document.getElementById('ia-mais-q').value)" style="background:var(--g7);border:none;border-radius:12px;padding:0 16px;color:#fff;font-weight:700;cursor:pointer;flex-shrink:0">→</button>
+    </div>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+async function perguntarIAMais(q){
+  if(!q?.trim())return;
+  const el=document.getElementById('ia-mais-resp');
+  if(el)el.innerHTML=`<div class="ia-bubble jarvis" style="color:var(--sub)">⏳ Pensando...</div>`;
+
+  const comprasUrg=S.compras.filter(c=>!c.comprado&&c.prioridade==='urgente').map(c=>c.nome).join(', ');
+  const docsVenc=S.docs.filter(d=>d.vencimento&&diasAte(d.vencimento)>=0&&diasAte(d.vencimento)<=30).map(d=>d.nome+'('+diasAte(d.vencimento)+'d)').join(', ');
+  const metas=S.metas.filter(m=>m.status!=='concluida').map(m=>m.nome+'('+m.progresso+'%)').join(', ');
+  const ultima=S.revisoes.length?S.revisoes[S.revisoes.length-1]:null;
+
+  const system=`Você é o Jarvis, assistente pessoal do Dr. Antonio Roberto, médico em SP.
+Situação atual:
+- Compras urgentes: ${comprasUrg||'nenhuma'}
+- Documentos vencendo: ${docsVenc||'nenhum'}
+- Metas ativas: ${metas||'nenhuma'}
+- Última revisão: ${ultima?ultima.tipo+' em '+ultima.data:'nenhuma'}
+Responda em português, direto e útil. Máximo 3 parágrafos.`;
+
+  const res=await callClaude(q,system);
+  if(el)el.innerHTML=`<div class="ia-bubble jarvis">${res||'⚠️ Sem conexão.'}</div>`;
+}
+
+/* ═══════ UTILS ═══════ */
+function fecharSheet(){document.getElementById('overlay').classList.remove('open');}
+let toastT;
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),3000);}
+function updateDate(){document.getElementById('tbar-date').textContent=hojeStr();}
+
+/* ═══════ INIT ═══════ */
+updateDate();
+renderCompras();
+</script>
+</body>
+</html>
