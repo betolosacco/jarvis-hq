@@ -1,0 +1,1676 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Jarvis HQ — Hoje</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060612;--card:#0d0d1f;--card2:#131328;--bdr:#1e1e3f;
+  --cyan:#00f5d4;--pink:#ff2d78;--yel:#ffd60a;--pur:#7c3aed;
+  --blu:#3b82f6;--ora:#ff6b2b;--grn:#22c55e;--red:#ef4444;
+  --txt:#eeeeff;--sub:#6666aa;--mut:#2a2a55;--r:16px;
+  --g1:linear-gradient(135deg,#00f5d4,#3b82f6);
+  --g2:linear-gradient(135deg,#ff2d78,#7c3aed);
+  --g3:linear-gradient(135deg,#ffd60a,#ff6b2b);
+  --gcyan:linear-gradient(135deg,rgba(0,245,212,.15),rgba(59,130,246,.1));
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overscroll-behavior:none;}
+body{
+  font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--txt);
+  min-height:100%;display:flex;flex-direction:column;max-width:480px;margin:0 auto;
+  position:relative;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 100% 40% at 50% -5%,rgba(0,245,212,.09) 0%,transparent 65%),
+    radial-gradient(ellipse 50% 30% at 95% 85%,rgba(123,58,237,.07) 0%,transparent 60%);
+}
+
+/* SCROLL */
+#scroll-main{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 0 90px;position:relative;z-index:1;}
+#scroll-main::-webkit-scrollbar{display:none;}
+
+/* TOPBAR */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px 10px;
+  background:rgba(6,6,18,.95);backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:50;
+}
+.topbar-left{}
+.tbar-logo{font-weight:800;font-size:1.05rem;letter-spacing:-.02em;
+  background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.tbar-date{font-size:.72rem;color:var(--sub);font-family:'JetBrains Mono',monospace;margin-top:1px;}
+.topbar-right{display:flex;gap:8px;}
+.tbar-btn{
+  width:34px;height:34px;border-radius:11px;border:1px solid var(--bdr);
+  background:var(--card2);color:var(--txt);font-size:.95rem;
+  cursor:pointer;display:grid;place-items:center;transition:.15s;
+}
+.tbar-btn:active{transform:scale(.92);}
+
+/* BOTTOM NAV */
+.bottomnav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;
+  background:rgba(6,6,18,.97);backdrop-filter:blur(24px);
+  border-top:1px solid var(--bdr);
+  display:grid;grid-template-columns:repeat(5,1fr);
+  z-index:100;padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.bnav{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:9px 4px 7px;cursor:pointer;border:none;background:transparent;
+  color:var(--sub);font-family:'Space Grotesk',sans-serif;
+  font-size:.58rem;font-weight:600;gap:3px;
+  text-transform:uppercase;letter-spacing:.05em;transition:.15s;
+}
+.bnav.act{color:var(--cyan);}
+.bnav-ic{font-size:1.2rem;line-height:1;}
+
+/* SECOES */
+.sec{padding:14px 16px 0;}
+.sec-title{
+  font-size:.68rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--sub);margin-bottom:10px;
+  display:flex;align-items:center;gap:6px;
+}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--bdr);}
+
+/* CARD BASE */
+.card{
+  background:var(--card);border:1px solid var(--bdr);
+  border-radius:var(--r);padding:16px;margin-bottom:12px;
+}
+
+/* ─── ALERTAS ─── */
+.alert-wrap{margin-bottom:12px;}
+.alert-item{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:11px 14px;border-radius:13px;margin-bottom:6px;
+  border:1px solid;cursor:pointer;transition:.15s;
+  animation:slideIn .3s ease;
+}
+.alert-item:active{transform:scale(.98);}
+@keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.alert-item.crit{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.3);}
+.alert-item.warn{background:rgba(255,107,43,.07);border-color:rgba(255,107,43,.25);}
+.alert-item.info{background:rgba(255,214,10,.06);border-color:rgba(255,214,10,.2);}
+.alert-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.alert-dot.crit{background:var(--red);}
+.alert-dot.warn{background:var(--ora);}
+.alert-dot.info{background:var(--yel);}
+.alert-txt{font-size:.82rem;font-weight:600;flex:1;line-height:1.4;}
+.alert-sub{font-size:.7rem;color:var(--sub);margin-top:2px;}
+.alert-dismiss{font-size:.75rem;color:var(--sub);flex-shrink:0;padding:2px 4px;}
+
+/* ─── AGORA ─── */
+.agora-card{
+  background:linear-gradient(135deg,rgba(0,245,212,.1),rgba(59,130,246,.08));
+  border:1px solid rgba(0,245,212,.25);border-radius:18px;
+  padding:18px;margin-bottom:12px;position:relative;overflow:hidden;
+}
+.agora-card::before{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:120px;height:120px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,245,212,.12),transparent 70%);
+  pointer-events:none;
+}
+.agora-label{
+  font-size:.65rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--cyan);margin-bottom:8px;
+  display:flex;align-items:center;gap:6px;
+}
+.agora-pulse{
+  width:7px;height:7px;border-radius:50%;background:var(--cyan);
+  animation:pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.agora-titulo{font-weight:800;font-size:1.2rem;letter-spacing:-.02em;margin-bottom:4px;}
+.agora-meta{font-size:.78rem;color:var(--sub);margin-bottom:12px;}
+.agora-progress{height:4px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin-bottom:12px;}
+.agora-progress-fill{height:100%;background:var(--g1);border-radius:999px;transition:width 60s linear;}
+.agora-next{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(0,0,0,.2);border-radius:10px;padding:8px 12px;
+}
+.agora-next-label{font-size:.68rem;color:var(--sub);text-transform:uppercase;letter-spacing:.06em;}
+.agora-next-val{font-size:.82rem;font-weight:700;font-family:'JetBrains Mono',monospace;}
+
+/* ─── ENERGIA ─── */
+.energia-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.energia-btn{
+  padding:11px 6px;border-radius:13px;border:2px solid var(--bdr);
+  background:var(--card2);cursor:pointer;text-align:center;
+  font-family:'Space Grotesk',sans-serif;font-size:.78rem;font-weight:700;
+  color:var(--sub);transition:.2s;
+}
+.energia-btn:active{transform:scale(.95);}
+.energia-btn.sel-alta{border-color:var(--grn);background:rgba(34,197,94,.12);color:var(--grn);}
+.energia-btn.sel-media{border-color:var(--yel);background:rgba(255,214,10,.1);color:var(--yel);}
+.energia-btn.sel-baixa{border-color:var(--pink);background:rgba(255,45,120,.1);color:var(--pink);}
+.energia-aviso{
+  font-size:.78rem;color:var(--pink);
+  background:rgba(255,45,120,.08);border:1px solid rgba(255,45,120,.2);
+  border-radius:10px;padding:10px 12px;margin-bottom:12px;line-height:1.5;
+}
+
+/* ─── AGENDA / TIMELINE ─── */
+.timeline{position:relative;padding-left:16px;}
+.tl-line{
+  position:absolute;left:5px;top:8px;bottom:8px;
+  width:2px;background:var(--bdr);border-radius:999px;
+}
+.tl-item{position:relative;padding:0 0 16px 20px;}
+.tl-item:last-child{padding-bottom:0;}
+.tl-dot{
+  position:absolute;left:-11px;top:6px;
+  width:10px;height:10px;border-radius:50%;border:2px solid var(--bg);
+}
+.tl-time{
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;
+  color:var(--sub);margin-bottom:3px;
+}
+.tl-card{
+  border-radius:12px;padding:12px 14px;border:1px solid;
+  position:relative;overflow:hidden;
+}
+.tl-card.tipo-trabalho{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.25);}
+.tl-card.tipo-pos{background:rgba(124,58,237,.08);border-color:rgba(124,58,237,.25);}
+.tl-card.tipo-treino{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.25);}
+.tl-card.tipo-pessoal{background:rgba(255,107,43,.08);border-color:rgba(255,107,43,.25);}
+.tl-card.tipo-protegido{background:rgba(102,102,170,.06);border-color:rgba(102,102,170,.2);}
+.tl-card.tipo-tarefa{background:rgba(255,214,10,.07);border-color:rgba(255,214,10,.22);}
+.tl-card.tipo-livre{background:rgba(0,245,212,.04);border-color:rgba(0,245,212,.12);border-style:dashed;}
+.tl-nome{font-weight:700;font-size:.86rem;}
+.tl-detalhe{font-size:.73rem;color:var(--sub);margin-top:3px;line-height:1.5;}
+.tl-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:2px 8px;border-radius:999px;font-size:.65rem;font-weight:700;
+  margin-top:6px;
+}
+.tl-actions{display:flex;gap:6px;margin-top:8px;}
+.tl-btn{
+  padding:5px 10px;border-radius:8px;border:1px solid var(--bdr);
+  background:rgba(255,255,255,.04);font-size:.72rem;font-weight:600;
+  color:var(--txt);cursor:pointer;font-family:'Space Grotesk',sans-serif;
+  transition:.15s;display:flex;align-items:center;gap:4px;
+}
+.tl-btn:active{transform:scale(.95);}
+.tl-btn.waze{background:rgba(0,245,212,.08);border-color:rgba(0,245,212,.3);color:var(--cyan);}
+.tl-btn.concluir{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.3);color:var(--grn);}
+.tl-btn.editar{background:rgba(255,214,10,.06);border-color:rgba(255,214,10,.2);color:var(--yel);}
+
+/* ─── INDICADORES ─── */
+.ind-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px;}
+.ind-card{
+  background:var(--card);border:1px solid var(--bdr);border-radius:14px;
+  padding:14px 12px;position:relative;overflow:hidden;cursor:pointer;transition:.15s;
+}
+.ind-card:active{transform:scale(.97);}
+.ind-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--c,var(--cyan));}
+.ind-card.c{--c:var(--cyan)}.ind-card.g{--c:var(--grn)}.ind-card.y{--c:var(--yel)}.ind-card.p{--c:var(--pur)}
+.ind-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--sub);margin-bottom:5px;}
+.ind-val{font-weight:800;font-size:1.4rem;letter-spacing:-.03em;font-family:'JetBrains Mono',monospace;}
+.ind-sub{font-size:.68rem;color:var(--sub);margin-top:2px;}
+.ind-trend{position:absolute;top:12px;right:12px;font-size:.8rem;}
+
+/* ─── FAB VOICE ─── */
+.fab-area{
+  position:fixed;bottom:76px;right:calc(50% - 230px);
+  display:flex;flex-direction:column;align-items:flex-end;gap:8px;
+  z-index:99;
+}
+@media(max-width:480px){.fab-area{right:14px;}}
+.fab-menu-item{
+  display:flex;align-items:center;gap:8px;
+  background:var(--card2);border:1px solid var(--bdr);border-radius:12px;
+  padding:9px 14px;font-size:.8rem;font-weight:600;cursor:pointer;
+  opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none;
+  white-space:nowrap;
+}
+.fab-menu-item.show{opacity:1;transform:translateY(0);pointer-events:all;}
+.fab{
+  width:54px;height:54px;border-radius:50%;border:none;
+  background:var(--g1);color:#060612;font-size:1.4rem;font-weight:800;
+  cursor:pointer;box-shadow:0 4px 24px rgba(0,245,212,.35);
+  display:grid;place-items:center;transition:.2s;
+}
+.fab:active{transform:scale(.92);}
+.fab.recording{background:var(--g2);box-shadow:0 4px 24px rgba(255,45,120,.4);animation:fabPulse 1s ease-in-out infinite;}
+@keyframes fabPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+
+/* ─── OVERLAY / SHEET ─── */
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.82);
+  backdrop-filter:blur(12px);z-index:200;
+  display:none;flex-direction:column;justify-content:flex-end;
+}
+.overlay.open{display:flex;}
+.sheet{
+  background:var(--card);border-radius:24px 24px 0 0;
+  border:1px solid var(--bdr);border-bottom:none;
+  padding:6px 20px calc(24px + env(safe-area-inset-bottom,0px));
+  max-height:92vh;overflow-y:auto;
+}
+.sheet::-webkit-scrollbar{display:none;}
+.sheet-handle{width:36px;height:4px;border-radius:2px;background:var(--bdr);margin:10px auto 16px;}
+.sheet-title{font-weight:800;font-size:1.05rem;margin-bottom:18px;text-align:center;letter-spacing:-.02em;}
+
+/* ─── FORM ─── */
+.fg{margin-bottom:14px;}
+.fl{display:block;font-size:.7rem;font-weight:700;color:var(--sub);
+  margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em;}
+.fi{
+  width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:12px;
+  padding:12px 14px;color:var(--txt);font-family:'Space Grotesk',sans-serif;
+  font-size:.9rem;outline:none;transition:.15s;
+}
+.fi:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,245,212,.1);}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+select.fi{appearance:none;cursor:pointer;}
+textarea.fi{resize:none;line-height:1.5;}
+
+/* BOTOES */
+.btn{
+  width:100%;padding:13px;border-radius:13px;border:none;cursor:pointer;
+  font-family:'Space Grotesk',sans-serif;font-size:.9rem;font-weight:700;
+  margin-bottom:8px;transition:.15s;
+}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--g1);color:#060612;}
+.btn-ghost{background:transparent;border:1px solid var(--bdr);color:var(--txt);}
+.btn-danger{background:rgba(255,45,120,.1);border:1px solid rgba(255,45,120,.3);color:var(--pink);}
+.btn-warn{background:rgba(255,107,43,.1);border:1px solid rgba(255,107,43,.3);color:var(--ora);}
+
+/* ─── IA CHAT ─── */
+.ia-wrap{
+  background:var(--card2);border:1px solid var(--bdr);border-radius:14px;
+  padding:14px;margin-bottom:12px;
+}
+.ia-msg{margin-bottom:12px;}
+.ia-bubble{
+  padding:10px 14px;border-radius:14px;font-size:.84rem;line-height:1.6;
+  max-width:88%;
+}
+.ia-bubble.user{
+  background:rgba(0,245,212,.12);border:1px solid rgba(0,245,212,.2);
+  margin-left:auto;text-align:right;border-radius:14px 14px 4px 14px;
+}
+.ia-bubble.jarvis{
+  background:rgba(123,58,237,.1);border:1px solid rgba(123,58,237,.2);
+  border-radius:14px 14px 14px 4px;
+}
+.ia-bubble.loading{color:var(--sub);}
+.ia-input-row{display:flex;gap:8px;align-items:flex-end;}
+.ia-input{
+  flex:1;background:rgba(255,255,255,.04);border:1px solid var(--bdr);border-radius:12px;
+  padding:10px 12px;color:var(--txt);font-family:'Space Grotesk',sans-serif;
+  font-size:.86rem;outline:none;resize:none;max-height:100px;line-height:1.4;
+}
+.ia-input:focus{border-color:var(--cyan);}
+.ia-send{
+  width:38px;height:38px;border-radius:11px;border:none;
+  background:var(--g1);color:#060612;font-size:1rem;
+  cursor:pointer;display:grid;place-items:center;flex-shrink:0;transition:.15s;
+}
+.ia-send:active{transform:scale(.92);}
+.ia-mic{
+  width:38px;height:38px;border-radius:11px;border:1px solid var(--bdr);
+  background:var(--card2);color:var(--txt);font-size:1rem;
+  cursor:pointer;display:grid;place-items:center;flex-shrink:0;transition:.15s;
+}
+.ia-mic.rec{background:rgba(255,45,120,.15);border-color:rgba(255,45,120,.4);color:var(--pink);animation:fabPulse 1s infinite;}
+
+/* ─── SUGESTAO IA ─── */
+.sugestao-card{
+  background:linear-gradient(135deg,rgba(123,58,237,.1),rgba(0,245,212,.06));
+  border:1px solid rgba(123,58,237,.25);border-radius:14px;
+  padding:14px;margin-bottom:8px;
+}
+.sugestao-label{font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--pur);margin-bottom:8px;}
+.sugestao-content{font-size:.84rem;line-height:1.6;margin-bottom:10px;}
+.sugestao-actions{display:flex;gap:8px;}
+.sug-btn{
+  flex:1;padding:9px;border-radius:10px;border:none;cursor:pointer;
+  font-family:'Space Grotesk',sans-serif;font-size:.8rem;font-weight:700;
+  transition:.15s;
+}
+.sug-btn:active{transform:scale(.95);}
+.sug-btn.ok{background:var(--g1);color:#060612;}
+.sug-btn.edit{background:rgba(255,214,10,.1);border:1px solid rgba(255,214,10,.3);color:var(--yel);}
+.sug-btn.cancel{background:rgba(255,45,120,.08);border:1px solid rgba(255,45,120,.2);color:var(--pink);}
+
+/* ─── REVISAO ─── */
+.revisao-card{
+  background:rgba(255,214,10,.05);border:1px solid rgba(255,214,10,.15);
+  border-radius:14px;padding:14px;margin-bottom:12px;cursor:pointer;
+  display:flex;align-items:center;gap:12px;transition:.15s;
+}
+.revisao-card:active{transform:scale(.98);}
+.revisao-ic{font-size:1.8rem;}
+.revisao-info{flex:1;}
+.revisao-title{font-weight:700;font-size:.9rem;}
+.revisao-sub{font-size:.73rem;color:var(--sub);margin-top:2px;}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:98px;left:50%;
+  transform:translateX(-50%) translateY(10px);
+  background:var(--card2);border:1px solid var(--bdr);border-radius:12px;
+  padding:10px 18px;font-size:.82rem;font-weight:600;
+  opacity:0;transition:.25s;z-index:300;white-space:nowrap;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);pointer-events:none;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* DIVIDER */
+.divider{height:1px;background:var(--bdr);margin:14px 0;}
+.spacer{height:12px;}
+
+/* VOICE INDICATOR */
+.voice-indicator{
+  position:fixed;bottom:140px;left:50%;transform:translateX(-50%);
+  background:var(--card2);border:1px solid rgba(255,45,120,.4);border-radius:16px;
+  padding:14px 24px;text-align:center;z-index:150;
+  display:none;animation:slideIn .2s ease;
+}
+.voice-indicator.show{display:block;}
+.voice-waves{display:flex;gap:4px;align-items:center;justify-content:center;margin-bottom:8px;}
+.voice-wave{width:4px;border-radius:2px;background:var(--pink);animation:wave 1s ease-in-out infinite;}
+.voice-wave:nth-child(1){height:8px;animation-delay:0s}
+.voice-wave:nth-child(2){height:16px;animation-delay:.1s}
+.voice-wave:nth-child(3){height:24px;animation-delay:.2s}
+.voice-wave:nth-child(4){height:16px;animation-delay:.3s}
+.voice-wave:nth-child(5){height:8px;animation-delay:.4s}
+@keyframes wave{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.4)}}
+.voice-txt{font-size:.78rem;color:var(--sub);}
+.voice-result{font-size:.86rem;font-weight:600;color:var(--txt);margin-top:4px;}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="tbar-logo">🧠 JARVIS HQ</div>
+    <div class="tbar-date" id="tbar-date">—</div>
+  </div>
+  <div class="topbar-right">
+    <button class="tbar-btn" onclick="abrirIA()" title="Perguntar ao Jarvis">🤖</button>
+    <button class="tbar-btn" onclick="abrirConfig()">⚙️</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="scroll-main">
+  <div class="sec" style="padding-top:16px">
+
+    <!-- ALERTAS -->
+    <div id="alertas-wrap"></div>
+
+    <!-- AGORA -->
+    <div id="agora-wrap"></div>
+
+    <!-- ENERGIA -->
+    <div class="card" id="energia-card">
+      <div class="sec-title">⚡ Energia de Hoje</div>
+      <div class="energia-row" id="energia-row">
+        <button class="energia-btn" id="ebtn-alta" onclick="setEnergia('alta')">🟢 Alta</button>
+        <button class="energia-btn" id="ebtn-media" onclick="setEnergia('media')">🟡 Média</button>
+        <button class="energia-btn" id="ebtn-baixa" onclick="setEnergia('baixa')">🔴 Baixa</button>
+      </div>
+      <div id="energia-aviso"></div>
+    </div>
+
+    <!-- AGENDA -->
+    <div class="card">
+      <div class="sec-title" style="margin-bottom:14px">
+        📅 Agenda de Hoje
+        <button onclick="abrirAddEvento()" style="margin-left:auto;background:rgba(0,245,212,.08);border:1px solid rgba(0,245,212,.2);color:var(--cyan);padding:4px 10px;border-radius:8px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif">+ Adicionar</button>
+      </div>
+      <div class="timeline" id="timeline">
+        <div class="tl-line"></div>
+      </div>
+    </div>
+
+    <!-- INDICADORES -->
+    <div class="sec-title" style="margin:4px 0 10px">📊 Indicadores</div>
+    <div class="ind-grid" id="ind-grid"></div>
+
+    <!-- REVISAO -->
+    <div class="revisao-card" onclick="iniciarRevisao()">
+      <div class="revisao-ic">🔄</div>
+      <div class="revisao-info">
+        <div class="revisao-title">Revisão do Dia</div>
+        <div class="revisao-sub">5 minutos · Responda 3 perguntas</div>
+      </div>
+      <div style="color:var(--sub);font-size:1.1rem">→</div>
+    </div>
+
+    <div class="spacer"></div>
+  </div>
+</div>
+
+<!-- FAB -->
+<div class="fab-area" id="fab-area">
+  <div class="fab-menu-item" id="fm-texto" onclick="abrirAddTarefa()">✏️ Adicionar por texto</div>
+  <div class="fab-menu-item" id="fm-voz" onclick="iniciarVoz()">🎤 Adicionar por voz</div>
+  <button class="fab" id="fab-btn" onclick="toggleFab()">＋</button>
+</div>
+
+<!-- VOICE INDICATOR -->
+<div class="voice-indicator" id="voice-indicator">
+  <div class="voice-waves">
+    <div class="voice-wave"></div><div class="voice-wave"></div>
+    <div class="voice-wave"></div><div class="voice-wave"></div>
+    <div class="voice-wave"></div>
+  </div>
+  <div class="voice-txt">Ouvindo... fale sua tarefa</div>
+  <div class="voice-result" id="voice-result"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottomnav">
+  <button class="bnav act" id="bn-hoje">
+    <span class="bnav-ic">🏠</span><span>Hoje</span>
+  </button>
+  <button class="bnav" id="bn-saude">
+    <span class="bnav-ic">💪</span><span>Saúde</span>
+  </button>
+  <button class="bnav" id="bn-estudos">
+    <span class="bnav-ic">📚</span><span>Estudos</span>
+  </button>
+  <button class="bnav" id="bn-financeiro">
+    <span class="bnav-ic">💰</span><span>Finanças</span>
+  </button>
+  <button class="bnav" id="bn-mais">
+    <span class="bnav-ic">☰</span><span>Mais</span>
+  </button>
+</nav>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="fecharSheet()">
+  <div class="sheet" id="sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div id="sheet-content"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════
+   ESTADO GLOBAL
+═══════════════════════════════════════════ */
+const KEY = 'jarvis_hoje_v2';
+
+const AGENDA_FIXA = [
+  {id:'f1', titulo:'BRMed', tipo:'trabalho', hora_ini:'07:00', hora_fim:'12:00', local:'BRMed', dias:[1,2,3,4,5], cor:'var(--blu)'},
+  {id:'f2', titulo:'Almoço', tipo:'protegido', hora_ini:'12:00', hora_fim:'13:00', local:'', dias:[1,2,3,4,5], cor:'var(--sub)'},
+  {id:'f3', titulo:'Sambaíba', tipo:'trabalho', hora_ini:'13:00', hora_fim:'17:00', local:'Sambaíba', dias:[1,2,3,4,5], cor:'var(--blu)'},
+  {id:'f4', titulo:'Transição + Descanso', tipo:'protegido', hora_ini:'17:00', hora_fim:'18:50', local:'', dias:[1,2,3,4,5], cor:'var(--sub)'},
+  {id:'f5', titulo:'Pós — Santa Casa (presencial)', tipo:'pos', hora_ini:'18:50', hora_fim:'22:10', local:'Santa Casa', dias:[1,2], cor:'var(--pur)'},
+  {id:'f6', titulo:'Pós — Santa Casa (online)', tipo:'pos', hora_ini:'18:50', hora_fim:'21:00', local:'Online', dias:[3], cor:'var(--pur)'},
+  {id:'f7', titulo:'Descompressão noturna', tipo:'protegido', hora_ini:'22:10', hora_fim:'23:00', local:'', dias:[1,2], cor:'var(--sub)'},
+  {id:'f8', titulo:'Treino', tipo:'treino', hora_ini:'18:00', hora_fim:'19:30', local:'Academia', dias:[4,5], cor:'var(--grn)'},
+  {id:'f9', titulo:'Treino — Academia (principal)', tipo:'treino', hora_ini:'08:00', hora_fim:'09:30', local:'Academia', dias:[6], cor:'var(--grn)'},
+  {id:'f10', titulo:'Bloco de Estudo', tipo:'tarefa', hora_ini:'10:00', hora_fim:'12:00', local:'', dias:[6], cor:'var(--yel)'},
+  {id:'f11', titulo:'Treino — Natação ou Corrida', tipo:'treino', hora_ini:'09:00', hora_fim:'10:30', local:'', dias:[0], cor:'var(--grn)'},
+  {id:'f12', titulo:'Revisão Semanal', tipo:'protegido', hora_ini:'20:00', hora_fim:'20:30', local:'', dias:[0], cor:'var(--sub)'},
+];
+
+let S = {
+  config: {nome:'Dr. Antonio', peso_meta:75},
+  energia: '',
+  eventos_extras: [],
+  tarefas: [],
+  peso: [],
+  sono: [],
+  treinos: [],
+  estudos_horas: 0,
+  ia_historico: [],
+  alertas_dismissed: [],
+};
+
+function loadS(){
+  try{
+    const d = localStorage.getItem(KEY);
+    if(d) S = {...S, ...JSON.parse(d)};
+  } catch(e){}
+}
+function saveS(){ localStorage.setItem(KEY, JSON.stringify(S)); }
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function fm(v){ return 'R$\u00a0'+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+loadS();
+
+/* ═══════════════════════════════════════════
+   DATA E HORA
+═══════════════════════════════════════════ */
+const DIAS_PT = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+const DIAS_PT_SHORT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const MESES_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const MESES_PT_SHORT = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+function agora(){ return new Date(); }
+function hojeStr(){ const d=agora(); return `${DIAS_PT[d.getDay()]}, ${d.getDate()} de ${MESES_PT[d.getMonth()]} de ${d.getFullYear()}`; }
+function horaAtual(){ const d=agora(); return d.getHours()*60+d.getMinutes(); }
+function horaStr(min){ return `${String(Math.floor(min/60)).padStart(2,'0')}:${String(min%60).padStart(2,'0')}`; }
+function parseHora(str){ const [h,m]=str.split(':').map(Number); return h*60+(m||0); }
+function diaAtual(){ return agora().getDay(); }
+
+function updateDate(){
+  document.getElementById('tbar-date').textContent = hojeStr();
+}
+
+/* ═══════════════════════════════════════════
+   AGENDA DO DIA
+═══════════════════════════════════════════ */
+function getEventosHoje(){
+  const dia = diaAtual();
+  const fixos = AGENDA_FIXA.filter(e => e.dias.includes(dia)).map(e => ({
+    ...e, fixo: true,
+    ini: parseHora(e.hora_ini),
+    fim: parseHora(e.hora_fim),
+  }));
+
+  const extras = (S.eventos_extras || []).filter(e => {
+    if(e.data_especifica){
+      const hoje = agora().toISOString().split('T')[0];
+      return e.data_especifica === hoje;
+    }
+    return (e.dias || []).includes(dia) || e.hoje === true;
+  }).map(e => ({
+    ...e, fixo: false,
+    ini: parseHora(e.hora_ini || e.hora || '12:00'),
+    fim: parseHora(e.hora_fim || (e.hora ? horaStr(parseHora(e.hora)+(e.duracao||60)) : '13:00')),
+  }));
+
+  const tarefasAgendadas = (S.tarefas || []).filter(t => t.horario_sugerido && !t.done).map(t => ({
+    id: t.id,
+    titulo: t.titulo,
+    tipo: 'tarefa',
+    cor: 'var(--yel)',
+    ini: parseHora(t.horario_sugerido),
+    fim: parseHora(t.horario_sugerido) + (t.duracao_total || 60),
+    local: t.local || '',
+    tarefa_ref: t,
+    fixo: false,
+  }));
+
+  const todos = [...fixos, ...extras, ...tarefasAgendadas];
+  todos.sort((a,b) => a.ini - b.ini);
+
+  // detectar blocos livres
+  const resultado = [];
+  for(let i=0; i<todos.length; i++){
+    resultado.push(todos[i]);
+    if(i < todos.length-1){
+      const gap = todos[i+1].ini - todos[i].fim;
+      if(gap >= 15){
+        resultado.push({
+          id:'livre-'+i, titulo:`${gap} min livres`,
+          tipo:'livre', cor:'var(--cyan)',
+          ini: todos[i].fim, fim: todos[i+1].ini,
+          fixo:true, livre:true,
+        });
+      }
+    }
+  }
+  return resultado;
+}
+
+/* ═══════════════════════════════════════════
+   RENDER AGORA
+═══════════════════════════════════════════ */
+function renderAgora(){
+  const agr = horaAtual();
+  const eventos = getEventosHoje();
+  const atual = eventos.find(e => !e.livre && agr >= e.ini && agr < e.fim);
+  const proximo = eventos.find(e => !e.livre && e.ini > agr);
+
+  let html = '';
+  if(atual){
+    const progresso = Math.round(((agr - atual.ini) / (atual.fim - atual.ini)) * 100);
+    const restam = atual.fim - agr;
+    const restamStr = restam >= 60 ? `${Math.floor(restam/60)}h${restam%60>0?restam%60+'min':''}` : `${restam}min`;
+    html = `
+      <div class="agora-card">
+        <div class="agora-label">
+          <div class="agora-pulse"></div>
+          Agora · ${horaStr(agr)}
+        </div>
+        <div class="agora-titulo">${atual.titulo}</div>
+        <div class="agora-meta">
+          ${atual.local ? `📍 ${atual.local} · ` : ''}Termina em ${restamStr}
+        </div>
+        <div class="agora-progress">
+          <div class="agora-progress-fill" style="width:${progresso}%"></div>
+        </div>
+        ${proximo ? `<div class="agora-next">
+          <div>
+            <div class="agora-next-label">Próximo</div>
+            <div class="agora-next-val">${horaStr(proximo.ini)} → ${proximo.titulo}</div>
+          </div>
+        </div>` : ''}
+      </div>
+    `;
+  } else if(proximo){
+    const falta = proximo.ini - agr;
+    const faltaStr = falta >= 60 ? `${Math.floor(falta/60)}h${falta%60>0?falta%60+'min':''}` : `${falta}min`;
+    html = `
+      <div class="agora-card">
+        <div class="agora-label">
+          <div class="agora-pulse"></div>
+          Agora · ${horaStr(agr)}
+        </div>
+        <div class="agora-titulo">Bloco Livre ✨</div>
+        <div class="agora-meta">Próximo compromisso em ${faltaStr}</div>
+        <div class="agora-next">
+          <div>
+            <div class="agora-next-label">Próximo</div>
+            <div class="agora-next-val">${horaStr(proximo.ini)} → ${proximo.titulo}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  } else {
+    html = `
+      <div class="agora-card">
+        <div class="agora-label"><div class="agora-pulse"></div>Encerrado</div>
+        <div class="agora-titulo">Dia encerrado 🌙</div>
+        <div class="agora-meta">Boa noite, ${S.config.nome||'Dr. Antonio'}. Como foi o dia?</div>
+        <button onclick="iniciarRevisao()" class="btn btn-primary" style="margin-top:8px;margin-bottom:0;padding:10px">📋 Fazer revisão do dia</button>
+      </div>
+    `;
+  }
+  document.getElementById('agora-wrap').innerHTML = html;
+}
+
+/* ═══════════════════════════════════════════
+   RENDER ALERTAS
+═══════════════════════════════════════════ */
+function renderAlertas(){
+  const alertas = [];
+  const hoje = agora();
+
+  // Peso não registrado hoje
+  const ultimoPeso = S.peso && S.peso.length ? S.peso[S.peso.length-1] : null;
+  if(!ultimoPeso || ultimoPeso.data !== hoje.toLocaleDateString('pt-BR')){
+    alertas.push({id:'peso-hoje', tipo:'info', ic:'⚖️', txt:'Peso não registrado hoje', sub:'Registre em jejum para dados precisos', acao:()=>abrirRegistroPeso()});
+  }
+
+  // Tarefas urgentes não concluídas
+  const urgentes = (S.tarefas||[]).filter(t=>t.prioridade==='alta'&&!t.done);
+  if(urgentes.length > 0){
+    alertas.push({id:'tarefas-urg', tipo:'warn', ic:'🔴', txt:`${urgentes.length} tarefa${urgentes.length>1?'s':''} urgente${urgentes.length>1?'s':''} pendente${urgentes.length>1?'s':''}`, sub:urgentes.map(t=>t.titulo).slice(0,2).join(', '), acao:()=>scrollToAgenda()});
+  }
+
+  // Compras urgentes
+  const comprasUrg = (S.compras||[]).filter(c=>c.prioridade==='urgente'&&!c.comprado);
+  if(comprasUrg.length > 0){
+    alertas.push({id:'compras-urg', tipo:'warn', ic:'🛒', txt:`${comprasUrg.length} item${comprasUrg.length>1?'s':''} urgente${comprasUrg.length>1?'s':''} na lista de compras`, sub:comprasUrg.map(c=>c.nome).slice(0,2).join(', '), acao:()=>{}});
+  }
+
+  // Filtrar dismissed
+  const visiveis = alertas.filter(a => !(S.alertas_dismissed||[]).includes(a.id));
+
+  if(visiveis.length === 0){
+    document.getElementById('alertas-wrap').innerHTML = '';
+    return;
+  }
+
+  const corMap = {crit:'crit', warn:'warn', info:'info'};
+  document.getElementById('alertas-wrap').innerHTML = `
+    <div class="alert-wrap">
+      <div class="sec-title">🚨 Alertas</div>
+      ${visiveis.map(a=>`
+        <div class="alert-item ${a.tipo}" onclick="(${a.acao.toString()})()">
+          <div class="alert-dot ${a.tipo}"></div>
+          <div style="flex:1">
+            <div class="alert-txt">${a.ic} ${a.txt}</div>
+            ${a.sub?`<div class="alert-sub">${a.sub}</div>`:''}
+          </div>
+          <div class="alert-dismiss" onclick="event.stopPropagation();dismissAlerta('${a.id}')">✕</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function dismissAlerta(id){
+  if(!S.alertas_dismissed) S.alertas_dismissed = [];
+  S.alertas_dismissed.push(id);
+  saveS();
+  renderAlertas();
+}
+
+/* ═══════════════════════════════════════════
+   RENDER TIMELINE
+═══════════════════════════════════════════ */
+function renderTimeline(){
+  const eventos = getEventosHoje();
+  const agr = horaAtual();
+
+  const tiposConfig = {
+    trabalho: {cor:'var(--blu)', css:'tipo-trabalho'},
+    pos: {cor:'var(--pur)', css:'tipo-pos'},
+    treino: {cor:'var(--grn)', css:'tipo-treino'},
+    pessoal: {cor:'var(--ora)', css:'tipo-pessoal'},
+    protegido: {cor:'var(--sub)', css:'tipo-protegido'},
+    tarefa: {cor:'var(--yel)', css:'tipo-tarefa'},
+    livre: {cor:'var(--cyan)', css:'tipo-livre'},
+  };
+
+  const html = eventos.map(ev => {
+    const cfg = tiposConfig[ev.tipo] || tiposConfig.pessoal;
+    const passado = agr > ev.fim;
+    const atual = agr >= ev.ini && agr < ev.fim;
+
+    let acoes = '';
+    if(ev.local && !ev.livre && !['protegido'].includes(ev.tipo)){
+      acoes += `<button class="tl-btn waze" onclick="abrirWaze('${ev.local}')">🗺 Waze</button>`;
+    }
+    if(ev.tarefa_ref){
+      acoes += `<button class="tl-btn concluir" onclick="concluirTarefa('${ev.tarefa_ref.id}')">✓ Concluir</button>`;
+      acoes += `<button class="tl-btn editar" onclick="editarTarefa('${ev.tarefa_ref.id}')">✏️</button>`;
+    }
+    if(!ev.fixo){
+      acoes += `<button class="tl-btn" onclick="removerEvento('${ev.id}')" style="color:var(--pink)">🗑</button>`;
+    }
+    if(ev.fixo && !ev.livre){
+      acoes += `<button class="tl-btn editar" onclick="editarEventoFixo('${ev.id}')">✏️</button>`;
+    }
+
+    return `
+      <div class="tl-item" style="opacity:${passado&&!atual?'.55':'1'}">
+        <div class="tl-dot" style="background:${cfg.cor}${atual?';box-shadow:0 0 0 3px rgba(0,245,212,.2)':''}"></div>
+        <div class="tl-time">${ev.hora_ini||horaStr(ev.ini)}${ev.hora_fim||ev.fim ? ' → '+(ev.hora_fim||horaStr(ev.fim)) : ''}</div>
+        <div class="tl-card ${cfg.css}${atual?' '+'ring':''}">
+          ${atual?'<div style="position:absolute;top:0;left:0;bottom:0;width:3px;background:var(--cyan);border-radius:2px 0 0 2px"></div>':''}
+          <div class="tl-nome" style="${passado&&!atual?'text-decoration:line-through;':''}">${ev.livre?'<span style="color:var(--cyan)">⊕</span> ':''} ${ev.titulo}</div>
+          ${ev.local&&!ev.livre?`<div class="tl-detalhe">📍 ${ev.local}</div>`:''}
+          ${ev.tarefa_ref?.distancia?`<div class="tl-detalhe">🗺 ~${ev.tarefa_ref.distancia} · ⏱ saia às ${ev.tarefa_ref.hora_saida}</div>`:''}
+          ${acoes?`<div class="tl-actions">${acoes}</div>`:''}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  document.getElementById('timeline').innerHTML = `<div class="tl-line"></div>${html}`;
+}
+
+/* ═══════════════════════════════════════════
+   RENDER INDICADORES
+═══════════════════════════════════════════ */
+function renderIndicadores(){
+  const ultimoPeso = S.peso&&S.peso.length ? S.peso[S.peso.length-1] : null;
+  const ultimoSono = S.sono&&S.sono.length ? S.sono[S.sono.length-1] : null;
+  const treinosSemanais = (S.treinos||[]).filter(t=>{
+    const d = new Date(t.data_iso||t.data); const n = agora();
+    return (n-d)/864e5 < 7;
+  }).length;
+
+  document.getElementById('ind-grid').innerHTML = `
+    <div class="ind-card c" onclick="abrirRegistroPeso()">
+      <div class="ind-label">Peso Atual</div>
+      <div class="ind-val">${ultimoPeso?ultimoPeso.valor:'--'}<span style="font-size:.75rem;font-weight:500"> kg</span></div>
+      <div class="ind-sub">Meta: ${S.config.peso_meta||75} kg</div>
+      ${ultimoPeso&&S.peso.length>1?`<div class="ind-trend">${ultimoPeso.valor<S.peso[S.peso.length-2]?.valor?'↓':'↑'}</div>`:''}
+    </div>
+    <div class="ind-card g" onclick="toast('💪 Vá para Saúde → Treinos')">
+      <div class="ind-label">Treinos/Sem</div>
+      <div class="ind-val">${treinosSemanais}<span style="font-size:.75rem;font-weight:500">/4</span></div>
+      <div class="ind-sub">Meta: 4–5 sessões</div>
+    </div>
+    <div class="ind-card p" onclick="toast('😴 Vá para Saúde → Sono')">
+      <div class="ind-label">Sono</div>
+      <div class="ind-val">${ultimoSono?ultimoSono.horas+'h':'--'}</div>
+      <div class="ind-sub">${ultimoSono?`qualidade: ${ultimoSono.qualidade}`:'Meta: 7h30'}</div>
+    </div>
+    <div class="ind-card y" onclick="toast('📚 Vá para Estudos')">
+      <div class="ind-label">Estudo/Mês</div>
+      <div class="ind-val">${S.estudos_horas||0}<span style="font-size:.75rem;font-weight:500">h</span></div>
+      <div class="ind-sub">Meta: 40h</div>
+    </div>
+  `;
+}
+
+/* ═══════════════════════════════════════════
+   ENERGIA
+═══════════════════════════════════════════ */
+function setEnergia(v){
+  S.energia = v;
+  saveS();
+  renderEnergia();
+  toast({alta:'🟢 Alta! Bom dia para tarefas difíceis.', media:'🟡 Energia média. Foque no essencial.', baixa:'🔴 Energia baixa. Simplificando o dia...'}[v]);
+  if(v==='baixa') simplificarDia();
+}
+
+function renderEnergia(){
+  ['alta','media','baixa'].forEach(v=>{
+    const btn = document.getElementById('ebtn-'+v);
+    btn.className = 'energia-btn' + (S.energia===v?' sel-'+v:'');
+  });
+  const aviso = document.getElementById('energia-aviso');
+  if(S.energia==='baixa'){
+    aviso.innerHTML = `<div class="energia-aviso">⚠️ Energia baixa detectada. Tarefas não urgentes foram marcadas para amanhã. Preserve seu descanso.</div>`;
+  } else aviso.innerHTML = '';
+}
+
+function simplificarDia(){
+  (S.tarefas||[]).forEach(t=>{ if(t.prioridade!=='alta') t.adiado=true; });
+  saveS();
+  renderTimeline();
+}
+
+/* ═══════════════════════════════════════════
+   FAB / MENU
+═══════════════════════════════════════════ */
+let fabOpen = false;
+function toggleFab(){
+  fabOpen = !fabOpen;
+  const btn = document.getElementById('fab-btn');
+  const m1 = document.getElementById('fm-texto');
+  const m2 = document.getElementById('fm-voz');
+  btn.textContent = fabOpen ? '✕' : '＋';
+  btn.style.transform = fabOpen ? 'rotate(45deg)' : '';
+  m1.classList.toggle('show', fabOpen);
+  m2.classList.toggle('show', fabOpen);
+}
+
+function fecharFab(){
+  fabOpen = false;
+  document.getElementById('fab-btn').textContent = '＋';
+  document.getElementById('fab-btn').style.transform = '';
+  document.getElementById('fm-texto').classList.remove('show');
+  document.getElementById('fm-voz').classList.remove('show');
+}
+
+/* ═══════════════════════════════════════════
+   VOZ
+═══════════════════════════════════════════ */
+let recognition = null;
+let gravando = false;
+
+function iniciarVoz(){
+  fecharFab();
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition){
+    toast('⚠️ Seu navegador não suporta voz. Use o Safari.');
+    abrirAddTarefa();
+    return;
+  }
+  recognition = new SpeechRecognition();
+  recognition.lang = 'pt-BR';
+  recognition.continuous = false;
+  recognition.interimResults = true;
+
+  const vi = document.getElementById('voice-indicator');
+  const vr = document.getElementById('voice-result');
+  vi.classList.add('show');
+  document.getElementById('fab-btn').classList.add('recording');
+  gravando = true;
+
+  recognition.onresult = (e) => {
+    const transcript = Array.from(e.results).map(r=>r[0].transcript).join('');
+    vr.textContent = transcript;
+  };
+
+  recognition.onend = () => {
+    gravando = false;
+    document.getElementById('fab-btn').classList.remove('recording');
+    const texto = vr.textContent;
+    vi.classList.remove('show');
+    if(texto.length > 2) processarComIA(texto, 'tarefa');
+    else toast('⚠️ Não entendi. Tente novamente.');
+  };
+
+  recognition.onerror = () => {
+    gravando = false;
+    vi.classList.remove('show');
+    document.getElementById('fab-btn').classList.remove('recording');
+    toast('⚠️ Erro no microfone. Tente pelo texto.');
+  };
+
+  recognition.start();
+}
+
+/* ═══════════════════════════════════════════
+   IA — CLAUDE INTEGRADO
+═══════════════════════════════════════════ */
+async function callClaude(prompt, systemPrompt){
+  try{
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system: systemPrompt,
+        messages:[{role:'user', content: prompt}]
+      })
+    });
+    const data = await resp.json();
+    return data.content?.[0]?.text || '';
+  } catch(e){
+    return null;
+  }
+}
+
+async function processarComIA(texto, modo){
+  const horaAgora = horaStr(horaAtual());
+  const eventosHoje = getEventosHoje().filter(e=>!e.livre).map(e=>`${e.hora_ini||horaStr(e.ini)}: ${e.titulo}`).join(', ');
+  const diaAtualStr = DIAS_PT[diaAtual()];
+
+  const system = `Você é o assistente Jarvis de um médico (Dr. Antonio Roberto) que mora na Vila Andrade, São Paulo.
+Hoje é ${diaAtualStr}, ${hojeStr()}. Hora atual: ${horaAgora}.
+Agenda de hoje: ${eventosHoje || 'sem compromissos registrados'}.
+Responda SEMPRE em JSON válido, sem markdown, sem explicações fora do JSON.
+
+Para modo "tarefa", responda:
+{
+  "titulo": "título claro e objetivo da tarefa",
+  "categoria": "trabalho|estudos|casa|saude|financas|pessoal|compras",
+  "prioridade": "alta|media|baixa",
+  "duracao_min": número em minutos estimado para a tarefa em si,
+  "tem_deslocamento": true|false,
+  "local": "nome do local se tiver deslocamento, senão null",
+  "duracao_deslocamento": número em minutos estimado para ir ao local (ida somente), ou null,
+  "horario_sugerido": "HH:MM melhor horário considerando a agenda",
+  "hora_saida": "HH:MM horário para sair de casa/trabalho considerando deslocamento, ou null",
+  "duracao_total": número total em minutos (tarefa + deslocamento ida e volta),
+  "lembrete": "HH:MM para notificar antes",
+  "observacao": "dica ou observação útil"
+}
+
+Para modo "pergunta", responda:
+{
+  "resposta": "resposta clara e útil em português"
+}`;
+
+  const modoPrompt = modo === 'tarefa'
+    ? `Interprete e estruture esta tarefa/compromisso: "${texto}"`
+    : `Responda: "${texto}"`;
+
+  // Mostrar loading
+  abrirSugestaoIA(null, texto, true);
+
+  const resultado = await callClaude(modoPrompt, system);
+
+  if(!resultado){
+    // Fallback se API não disponível
+    const fallback = {
+      titulo: texto,
+      categoria: 'pessoal',
+      prioridade: 'media',
+      duracao_min: 30,
+      tem_deslocamento: false,
+      local: null,
+      duracao_deslocamento: null,
+      horario_sugerido: horaStr(horaAtual() + 60),
+      hora_saida: null,
+      duracao_total: 30,
+      lembrete: horaStr(horaAtual() + 50),
+      observacao: 'Sem conexão com IA. Dados preenchidos manualmente.'
+    };
+    abrirSugestaoIA(fallback, texto, false);
+    return;
+  }
+
+  try{
+    let json = resultado;
+    // limpar possível markdown
+    json = json.replace(/```json|```/g,'').trim();
+    const obj = JSON.parse(json);
+
+    if(modo === 'pergunta'){
+      abrirRespostaIA(obj.resposta, texto);
+    } else {
+      abrirSugestaoIA(obj, texto, false);
+    }
+  } catch(e){
+    toast('⚠️ Erro ao interpretar. Abrindo formulário manual.');
+    abrirAddTarefa(texto);
+  }
+}
+
+function abrirSugestaoIA(sugestao, original, loading){
+  document.getElementById('sheet-content').innerHTML = `
+    <div class="sheet-title">🤖 Jarvis entendeu</div>
+    ${loading ? `
+      <div class="sugestao-card">
+        <div class="sugestao-label">Interpretando...</div>
+        <div class="ia-bubble jarvis loading">⏳ Analisando sua tarefa e agenda...</div>
+      </div>
+    ` : sugestao ? `
+      <div class="sugestao-card">
+        <div class="sugestao-label">🤖 Sugestão do Jarvis</div>
+        <div class="ia-bubble user">"${original}"</div>
+        <div style="height:8px"></div>
+        <div style="font-size:.82rem;line-height:1.8">
+          <div>📌 <strong>${sugestao.titulo}</strong></div>
+          <div>🏷 ${sugestao.categoria} · ${{'alta':'🔴 Urgente','media':'🟡 Normal','baixa':'🟢 Quando puder'}[sugestao.prioridade]}</div>
+          <div>⏰ Horário sugerido: <strong>${sugestao.horario_sugerido}</strong></div>
+          ${sugestao.tem_deslocamento ? `
+          <div>📍 Local: ${sugestao.local}</div>
+          <div>🚗 Saída: <strong>${sugestao.hora_saida}</strong> (~${sugestao.duracao_deslocamento} min)</div>
+          <div>⏱ Tempo total: ${sugestao.duracao_total} min</div>
+          ` : `<div>⏱ Duração: ~${sugestao.duracao_min} min</div>`}
+          ${sugestao.observacao ? `<div style="margin-top:6px;color:var(--sub)">💡 ${sugestao.observacao}</div>` : ''}
+        </div>
+        <div class="sugestao-actions" style="margin-top:12px">
+          <button class="sug-btn ok" onclick="confirmarTarefa(${JSON.stringify(JSON.stringify(sugestao))}, ${JSON.stringify(original)})">✅ Confirmar</button>
+          <button class="sug-btn edit" onclick="fecharSheet();abrirAddTarefa(${JSON.stringify(original)})">✏️ Ajustar</button>
+          <button class="sug-btn cancel" onclick="fecharSheet()">✕</button>
+        </div>
+      </div>
+    ` : `<div class="ia-bubble jarvis loading">⚠️ Não consegui processar. Abrindo formulário.</div>`}
+  `;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function confirmarTarefa(sugestaoStr, original){
+  const s = JSON.parse(sugestaoStr);
+  const tarefa = {
+    id: uid(),
+    titulo: s.titulo,
+    original: original,
+    categoria: s.categoria,
+    prioridade: s.prioridade,
+    duracao_min: s.duracao_min,
+    tem_deslocamento: s.tem_deslocamento,
+    local: s.local,
+    duracao_deslocamento: s.duracao_deslocamento,
+    horario_sugerido: s.horario_sugerido,
+    hora_saida: s.hora_saida,
+    duracao_total: s.duracao_total,
+    lembrete: s.lembrete,
+    observacao: s.observacao,
+    done: false,
+    data_criacao: agora().toLocaleDateString('pt-BR'),
+    data_iso: agora().toISOString().split('T')[0],
+  };
+  if(!S.tarefas) S.tarefas = [];
+  S.tarefas.push(tarefa);
+  saveS();
+  fecharSheet();
+  renderTudo();
+  agendarLembrete(tarefa);
+  toast(`✅ "${s.titulo}" adicionado às ${s.horario_sugerido}`);
+}
+
+function agendarLembrete(tarefa){
+  if(!tarefa.lembrete || !('Notification' in window)) return;
+  if(Notification.permission === 'granted'){
+    const [h,m] = tarefa.lembrete.split(':').map(Number);
+    const now = agora();
+    const target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m);
+    const diff = target - now;
+    if(diff > 0 && diff < 86400000){
+      setTimeout(()=>{
+        new Notification('⏰ Jarvis HQ', {
+          body: tarefa.tem_deslocamento
+            ? `Hora de sair para: ${tarefa.titulo} (${tarefa.local})`
+            : `Lembrete: ${tarefa.titulo}`,
+          icon: '🧠'
+        });
+      }, diff);
+    }
+  } else if(Notification.permission !== 'denied'){
+    Notification.requestPermission();
+  }
+}
+
+/* ═══════════════════════════════════════════
+   IA — CHAT GERAL
+═══════════════════════════════════════════ */
+function abrirIA(){
+  document.getElementById('sheet-content').innerHTML = buildIASheet();
+  document.getElementById('overlay').classList.add('open');
+}
+
+function buildIASheet(){
+  const msgs = S.ia_historico || [];
+  return `
+    <div class="sheet-title">🤖 Jarvis IA</div>
+    <div class="ia-wrap" id="ia-msgs" style="min-height:120px;max-height:45vh;overflow-y:auto">
+      ${msgs.length===0 ? `<div class="ia-bubble jarvis">Olá, ${S.config.nome||'Dr. Antonio'}! Posso analisar sua agenda, responder perguntas ou ajudar a organizar seu dia. O que deseja?</div>` : ''}
+      ${msgs.map(m=>`<div class="ia-msg"><div class="ia-bubble ${m.role}">${m.content}</div></div>`).join('')}
+      <div id="ia-loading" style="display:none"><div class="ia-bubble jarvis loading">⏳ Pensando...</div></div>
+    </div>
+    <div style="height:10px"></div>
+    <div class="ia-input-row">
+      <button class="ia-mic" id="ia-mic-btn" onclick="iaVoz()" title="Falar">🎤</button>
+      <textarea class="ia-input" id="ia-input" placeholder="Pergunte algo ou dê um comando..." rows="1"
+        oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarIA();}"></textarea>
+      <button class="ia-send" onclick="enviarIA()">➤</button>
+    </div>
+    <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+      ${['Como está minha semana?','Organiza meu dia','Estou sem energia','Resumo das tarefas'].map(s=>`
+        <button onclick="document.getElementById('ia-input').value='${s}';enviarIA()" style="background:rgba(0,245,212,.06);border:1px solid rgba(0,245,212,.15);color:var(--sub);padding:5px 10px;border-radius:8px;font-size:.72rem;font-weight:600;cursor:pointer;font-family:'Space Grotesk',sans-serif">${s}</button>
+      `).join('')}
+    </div>
+  `;
+}
+
+async function enviarIA(){
+  const input = document.getElementById('ia-input');
+  const texto = input?.value?.trim();
+  if(!texto) return;
+  input.value = '';
+  input.style.height = 'auto';
+
+  if(!S.ia_historico) S.ia_historico = [];
+  S.ia_historico.push({role:'user', content: texto});
+  saveS();
+
+  const msgs = document.getElementById('ia-msgs');
+  if(msgs){
+    msgs.innerHTML += `<div class="ia-msg"><div class="ia-bubble user">${texto}</div></div>`;
+    document.getElementById('ia-loading').style.display='block';
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  const eventosHoje = getEventosHoje().filter(e=>!e.livre).map(e=>`${e.hora_ini||horaStr(e.ini)}: ${e.titulo}`).join(', ');
+  const ultimoPeso = S.peso&&S.peso.length ? S.peso[S.peso.length-1] : null;
+  const treinosSemanais = (S.treinos||[]).filter(t=>(agora()-new Date(t.data_iso||t.data))/864e5<7).length;
+
+  const system = `Você é o Jarvis, assistente pessoal inteligente do Dr. Antonio Roberto, médico em São Paulo (Vila Andrade).
+Hoje: ${DIAS_PT[diaAtual()]}, ${hojeStr()}. Hora: ${horaStr(horaAtual())}.
+Agenda hoje: ${eventosHoje||'sem compromissos'}.
+Energia declarada: ${S.energia||'não informada'}.
+Peso atual: ${ultimoPeso?ultimoPeso.valor+' kg':'não registrado'}.
+Treinos esta semana: ${treinosSemanais}/4.
+Tarefas pendentes hoje: ${(S.tarefas||[]).filter(t=>!t.done).length}.
+
+Responda de forma direta, útil e pessoal. Português brasileiro. Máximo 3 parágrafos curtos.
+Se o usuário pedir para adicionar tarefa, responda com JSON: {"acao":"add_tarefa","texto":"descrição da tarefa"}.
+Se pedir para reorganizar o dia, responda com JSON: {"acao":"reorganizar","motivo":"motivo"}.
+Caso contrário, responda em texto normal.`;
+
+  const resposta = await callClaude(texto, system);
+  document.getElementById('ia-loading').style.display='none';
+
+  let conteudo = resposta || 'Desculpe, não consegui conectar. Verifique sua conexão.';
+
+  // tentar detectar ação JSON
+  try{
+    const obj = JSON.parse(conteudo.replace(/```json|```/g,'').trim());
+    if(obj.acao === 'add_tarefa'){
+      fecharSheet();
+      processarComIA(obj.texto, 'tarefa');
+      return;
+    }
+    if(obj.acao === 'reorganizar'){
+      simplificarDia();
+      conteudo = `✅ Dia reorganizado! Tarefas não urgentes foram adiadas. Foque no essencial: ${(S.tarefas||[]).filter(t=>!t.done&&t.prioridade==='alta').map(t=>t.titulo).join(', ')||'sem tarefas urgentes'}.`;
+    }
+  } catch(e){}
+
+  S.ia_historico.push({role:'jarvis', content: conteudo});
+  if(S.ia_historico.length > 20) S.ia_historico = S.ia_historico.slice(-20);
+  saveS();
+
+  if(document.getElementById('ia-msgs')){
+    document.getElementById('ia-msgs').innerHTML += `<div class="ia-msg"><div class="ia-bubble jarvis">${conteudo}</div></div>`;
+    document.getElementById('ia-msgs').scrollTop = document.getElementById('ia-msgs').scrollHeight;
+  }
+}
+
+function iaVoz(){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition){ toast('⚠️ Voz não suportada. Use o Safari.'); return; }
+  const r = new SpeechRecognition();
+  r.lang='pt-BR'; r.continuous=false; r.interimResults=false;
+  const btn = document.getElementById('ia-mic-btn');
+  if(btn) btn.classList.add('rec');
+  r.onresult = e => {
+    const txt = e.results[0][0].transcript;
+    const inp = document.getElementById('ia-input');
+    if(inp) inp.value = txt;
+  };
+  r.onend = () => { if(btn) btn.classList.remove('rec'); enviarIA(); };
+  r.onerror = () => { if(btn) btn.classList.remove('rec'); };
+  r.start();
+}
+
+function abrirRespostaIA(resposta, pergunta){
+  S.ia_historico = S.ia_historico || [];
+  S.ia_historico.push({role:'user', content: pergunta});
+  S.ia_historico.push({role:'jarvis', content: resposta});
+  saveS();
+  document.getElementById('sheet-content').innerHTML = `
+    <div class="sheet-title">🤖 Jarvis responde</div>
+    <div class="ia-wrap">
+      <div class="ia-msg"><div class="ia-bubble user">"${pergunta}"</div></div>
+      <div class="ia-msg"><div class="ia-bubble jarvis">${resposta}</div></div>
+    </div>
+    <button class="btn btn-ghost" onclick="fecharSheet()" style="margin-top:8px">Fechar</button>
+  `;
+}
+
+/* ═══════════════════════════════════════════
+   ADD EVENTO / TAREFA MANUAL
+═══════════════════════════════════════════ */
+function abrirAddTarefa(textoInicial=''){
+  document.getElementById('sheet-content').innerHTML = `
+    <div class="sheet-title">✅ Nova Tarefa</div>
+    <div class="fg">
+      <label class="fl">O que precisa fazer?</label>
+      <div style="display:flex;gap:8px">
+        <input class="fi" id="nt-titulo" placeholder="Ex: Comprar presente Mariana" value="${textoInicial}" style="flex:1">
+        <button onclick="processarComIA(document.getElementById('nt-titulo').value,'tarefa')" style="background:var(--g1);border:none;border-radius:12px;padding:0 12px;color:#060612;font-size:.85rem;font-weight:700;cursor:pointer;flex-shrink:0">🤖 IA</button>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">Tem deslocamento?</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button class="btn btn-ghost" id="btn-casa" onclick="toggleDeslocamento(false)" style="padding:10px;margin-bottom:0">🏠 Em casa</button>
+        <button class="btn btn-ghost" id="btn-fora" onclick="toggleDeslocamento(true)" style="padding:10px;margin-bottom:0;border-color:var(--cyan);color:var(--cyan)">📍 Fora de casa</button>
+      </div>
+    </div>
+    <div id="local-wrap" style="display:none">
+      <div class="fg">
+        <label class="fl">Onde?</label>
+        <input class="fi" id="nt-local" placeholder="Ex: Shopping Jardim Sul, Clínica...">
+      </div>
+    </div>
+    <div class="fr2">
+      <div class="fg">
+        <label class="fl">Duração estimada</label>
+        <select class="fi" id="nt-dur">
+          <option value="15">⚡ Rápido ~15min</option>
+          <option value="30">⏱ Médio ~30min</option>
+          <option value="60" selected>🕐 1 hora</option>
+          <option value="120">🕑 2 horas</option>
+          <option value="180">🕒 3+ horas</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label class="fl">Prioridade</label>
+        <select class="fi" id="nt-pri">
+          <option value="alta">🔴 Hoje urgente</option>
+          <option value="media" selected>🟡 Esta semana</option>
+          <option value="baixa">🟢 Quando puder</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">Horário preferido (opcional)</label>
+      <input class="fi" type="time" id="nt-hora" placeholder="Deixe em branco para calcular automaticamente">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button class="btn btn-ghost" style="margin-bottom:0" onclick="salvarTarefaManual()">✅ Salvar</button>
+      <button class="btn btn-primary" style="margin-bottom:0" onclick="salvarECalcular()">🤖 Calcular horário</button>
+    </div>
+    <button class="btn btn-ghost" onclick="fecharSheet()" style="margin-top:8px">Cancelar</button>
+  `;
+  let temDesloc = false;
+  window.toggleDeslocamento = (v) => {
+    temDesloc = v;
+    document.getElementById('local-wrap').style.display = v?'block':'none';
+    document.getElementById('btn-casa').style.borderColor = v?'var(--bdr)':'var(--cyan)';
+    document.getElementById('btn-casa').style.color = v?'var(--txt)':'var(--cyan)';
+    document.getElementById('btn-fora').style.borderColor = v?'var(--cyan)':'var(--bdr)';
+    document.getElementById('btn-fora').style.color = v?'var(--cyan)':'var(--txt)';
+  };
+  window.salvarECalcular = () => {
+    const titulo = document.getElementById('nt-titulo').value.trim();
+    const local = document.getElementById('nt-local')?.value?.trim()||'';
+    if(!titulo){ toast('⚠️ Informe o título'); return; }
+    const texto = titulo + (local?' no '+local:'');
+    fecharSheet();
+    processarComIA(texto, 'tarefa');
+  };
+  window.salvarTarefaManual = () => {
+    const titulo = document.getElementById('nt-titulo').value.trim();
+    if(!titulo){ toast('⚠️ Informe o título'); return; }
+    const hora = document.getElementById('nt-hora').value || horaStr(horaAtual()+60);
+    const dur = parseInt(document.getElementById('nt-dur').value)||60;
+    const tarefa = {
+      id: uid(), titulo,
+      prioridade: document.getElementById('nt-pri').value,
+      tem_deslocamento: temDesloc,
+      local: document.getElementById('nt-local')?.value||'',
+      horario_sugerido: hora,
+      duracao_min: dur, duracao_total: dur,
+      done: false,
+      data_iso: agora().toISOString().split('T')[0],
+    };
+    if(!S.tarefas) S.tarefas=[];
+    S.tarefas.push(tarefa); saveS(); fecharSheet(); renderTudo();
+    toast(`✅ "${titulo}" adicionado às ${hora}`);
+  };
+  document.getElementById('overlay').classList.add('open');
+}
+
+function abrirAddEvento(){
+  document.getElementById('sheet-content').innerHTML = `
+    <div class="sheet-title">📅 Novo Evento</div>
+    <div class="fg"><label class="fl">Título</label>
+      <input class="fi" id="ne-titulo" placeholder="Ex: Reunião, Consulta..."></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Início</label><input class="fi" type="time" id="ne-ini" value="09:00"></div>
+      <div class="fg"><label class="fl">Fim</label><input class="fi" type="time" id="ne-fim" value="10:00"></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Tipo</label>
+        <select class="fi" id="ne-tipo">
+          <option value="trabalho">🔵 Trabalho</option>
+          <option value="pos">🟣 Pós-grad</option>
+          <option value="treino">🟢 Treino</option>
+          <option value="pessoal">🟠 Pessoal</option>
+          <option value="tarefa">🟡 Tarefa</option>
+          <option value="protegido">⬜ Protegido</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">Recorrência</label>
+        <select class="fi" id="ne-rec">
+          <option value="hoje">📅 Só hoje</option>
+          <option value="diario">🔁 Diário</option>
+          <option value="semana">📆 Semanal</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg"><label class="fl">Local (opcional)</label>
+      <input class="fi" id="ne-local" placeholder="Ex: Clínica, Online..."></div>
+    <button class="btn btn-primary" onclick="salvarEvento()">📅 Adicionar evento</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>
+  `;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function salvarEvento(){
+  const titulo = document.getElementById('ne-titulo').value.trim();
+  if(!titulo){ toast('⚠️ Informe o título'); return; }
+  const hoje_iso = agora().toISOString().split('T')[0];
+  const rec = document.getElementById('ne-rec').value;
+  const ev = {
+    id: uid(), titulo,
+    hora_ini: document.getElementById('ne-ini').value,
+    hora_fim: document.getElementById('ne-fim').value,
+    tipo: document.getElementById('ne-tipo').value,
+    local: document.getElementById('ne-local').value,
+    hoje: rec==='hoje',
+    data_especifica: rec==='hoje' ? hoje_iso : null,
+    dias: rec==='diario' ? [0,1,2,3,4,5,6] : rec==='semana' ? [diaAtual()] : null,
+  };
+  if(!S.eventos_extras) S.eventos_extras=[];
+  S.eventos_extras.push(ev); saveS(); fecharSheet(); renderTudo();
+  toast(`✅ ${titulo} adicionado!`);
+}
+
+function removerEvento(id){
+  S.eventos_extras = (S.eventos_extras||[]).filter(e=>e.id!==id);
+  S.tarefas = (S.tarefas||[]).filter(t=>t.id!==id);
+  saveS(); renderTudo(); toast('🗑 Removido');
+}
+
+function editarEventoFixo(id){
+  const ev = AGENDA_FIXA.find(e=>e.id===id);
+  if(!ev) return;
+  toast(`💡 "${ev.titulo}" é um evento fixo. Para editar, use Configurações → Agenda fixa.`);
+}
+
+/* ═══════════════════════════════════════════
+   TAREFAS
+═══════════════════════════════════════════ */
+function concluirTarefa(id){
+  const t = (S.tarefas||[]).find(x=>x.id===id);
+  if(t){ t.done=true; t.data_conclusao=agora().toLocaleDateString('pt-BR'); }
+  saveS(); renderTudo(); toast('✅ Tarefa concluída!');
+}
+
+function editarTarefa(id){
+  const t = (S.tarefas||[]).find(x=>x.id===id);
+  if(!t) return;
+  document.getElementById('sheet-content').innerHTML = `
+    <div class="sheet-title">✏️ Editar Tarefa</div>
+    <div class="fg"><label class="fl">Título</label>
+      <input class="fi" id="et-titulo" value="${t.titulo}"></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Horário</label>
+        <input class="fi" type="time" id="et-hora" value="${t.horario_sugerido||'12:00'}"></div>
+      <div class="fg"><label class="fl">Prioridade</label>
+        <select class="fi" id="et-pri">
+          <option value="alta" ${t.prioridade==='alta'?'selected':''}>🔴 Urgente</option>
+          <option value="media" ${t.prioridade==='media'?'selected':''}>🟡 Normal</option>
+          <option value="baixa" ${t.prioridade==='baixa'?'selected':''}>🟢 Baixa</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="salvarEdicaoTarefa('${id}')">💾 Salvar</button>
+    <button class="btn btn-danger" onclick="removerEvento('${id}');fecharSheet()">🗑 Excluir</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>
+  `;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function salvarEdicaoTarefa(id){
+  const t = (S.tarefas||[]).find(x=>x.id===id);
+  if(!t) return;
+  t.titulo = document.getElementById('et-titulo').value;
+  t.horario_sugerido = document.getElementById('et-hora').value;
+  t.prioridade = document.getElementById('et-pri').value;
+  saveS(); fecharSheet(); renderTudo(); toast('✓ Tarefa atualizada!');
+}
+
+/* ═══════════════════════════════════════════
+   WAZE
+═══════════════════════════════════════════ */
+function abrirWaze(local){
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(pos => {
+      const {latitude, longitude} = pos.coords;
+      const dest = encodeURIComponent(local + ', São Paulo, SP');
+      window.open(`https://waze.com/ul?q=${dest}&navigate=yes&from=${latitude},${longitude}`, '_blank');
+    }, () => {
+      const dest = encodeURIComponent(local + ', São Paulo, SP');
+      window.open(`https://waze.com/ul?q=${dest}&navigate=yes`, '_blank');
+    });
+  } else {
+    const dest = encodeURIComponent(local + ', São Paulo, SP');
+    window.open(`https://waze.com/ul?q=${dest}&navigate=yes`, '_blank');
+  }
+}
+
+/* ═══════════════════════════════════════════
+   REGISTRO RÁPIDO PESO
+═══════════════════════════════════════════ */
+function abrirRegistroPeso(){
+  document.getElementById('sheet-content').innerHTML = `
+    <div class="sheet-title">⚖️ Registrar Peso</div>
+    <div class="fg"><label class="fl">Peso (kg)</label>
+      <input class="fi" type="number" id="rp-val" inputmode="decimal" placeholder="78.5" step="0.1" autofocus></div>
+    <div class="fg"><label class="fl">Data</label>
+      <input class="fi" type="date" id="rp-data" value="${agora().toISOString().split('T')[0]}"></div>
+    <button class="btn btn-primary" onclick="salvarPeso()">⚖️ Registrar</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>
+  `;
+  document.getElementById('overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('rp-val')?.focus(), 100);
+}
+
+function salvarPeso(){
+  const val = parseFloat(document.getElementById('rp-val').value);
+  if(!val||val<20||val>300){ toast('⚠️ Peso inválido'); return; }
+  const data_iso = document.getElementById('rp-data').value;
+  const dataFmt = new Date(data_iso+'T12:00:00').toLocaleDateString('pt-BR');
+  if(!S.peso) S.peso=[];
+  S.peso.push({id:uid(), valor:val, data:dataFmt, data_iso});
+  saveS(); fecharSheet(); renderTudo();
+  const ant = S.peso.length>1 ? S.peso[S.peso.length-2].valor : val;
+  const diff = (val-ant).toFixed(1);
+  toast(`⚖️ ${val} kg · ${parseFloat(diff)===0?'→ igual':parseFloat(diff)<0?`↓ ${diff} kg`:` ↑ +${diff} kg`}`);
+}
+
+/* ═══════════════════════════════════════════
+   REVISÃO
+═══════════════════════════════════════════ */
+function iniciarRevisao(){
+  const perguntas = [
+    {emoji:'🏆', p:'O que você realizou hoje?', placeholder:'Minhas conquistas...'},
+    {emoji:'🚧', p:'O que não conseguiu fazer e por quê?', placeholder:'Pendências e motivos...'},
+    {emoji:'🎯', p:'Quais são as 3 prioridades para amanhã?', placeholder:'1. ...\n2. ...\n3. ...'},
+  ];
+  let idx = 0;
+  const respostas = [];
+
+  function mostrar(){
+    if(idx >= perguntas.length){
+      const rev = {id:uid(), data:agora().toLocaleDateString('pt-BR'), tipo:'diaria', respostas};
+      if(!S.revisoes) S.revisoes=[];
+      S.revisoes.push(rev); saveS(); fecharSheet();
+      toast('✅ Revisão do dia concluída! Boa noite.');
+      return;
+    }
+    const q = perguntas[idx];
+    document.getElementById('sheet-content').innerHTML = `
+      <div class="sheet-title">${q.emoji} Revisão do Dia</div>
+      <div style="text-align:center;margin-bottom:16px">
+        ${perguntas.map((_,i)=>`<span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 3px;background:${i===idx?'var(--cyan)':'var(--bdr)'};transition:.2s"></span>`).join('')}
+      </div>
+      <div style="font-size:1rem;font-weight:700;margin-bottom:14px;line-height:1.4">${q.p}</div>
+      <textarea class="fi" id="rev-r" rows="4" placeholder="${q.placeholder}" style="resize:none"></textarea>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+        ${idx>0?`<button class="btn btn-ghost" style="margin-bottom:0" onclick="idx--;mostrar()">← Voltar</button>`:'<div></div>'}
+        <button class="btn btn-primary" style="margin-bottom:0" onclick="const v=document.getElementById('rev-r').value;respostas[${idx}]={p:'${q.p}',r:v};idx++;mostrar()">${idx===perguntas.length-1?'✅ Concluir':'Próximo →'}</button>
+      </div>
+    `;
+  }
+  document.getElementById('overlay').classList.add('open');
+  mostrar();
+}
+
+/* ═══════════════════════════════════════════
+   CONFIG
+═══════════════════════════════════════════ */
+function abrirConfig(){
+  document.getElementById('sheet-content').innerHTML = `
+    <div class="sheet-title">⚙️ Configurações</div>
+    <div class="fg"><label class="fl">Seu nome</label>
+      <input class="fi" id="cfg-nome" value="${S.config?.nome||''}" placeholder="Dr. Antonio"></div>
+    <div class="fg"><label class="fl">Meta de peso (kg)</label>
+      <input class="fi" type="number" id="cfg-peso" value="${S.config?.peso_meta||75}" step="0.5"></div>
+    <button class="btn btn-primary" onclick="salvarConfig()">💾 Salvar</button>
+    <div class="divider"></div>
+    <div style="font-weight:700;font-size:.88rem;margin-bottom:10px">📱 Instalar no iPhone</div>
+    <div style="background:rgba(0,245,212,.06);border:1px solid rgba(0,245,212,.18);border-radius:12px;padding:14px;font-size:.8rem;line-height:1.8;color:var(--sub)">
+      1. Abra no <strong style="color:var(--txt)">Safari</strong><br>
+      2. Toque em <strong style="color:var(--txt)">Compartilhar ⬆️</strong><br>
+      3. Toque <strong style="color:var(--txt)">"Adicionar à Tela de Início"</strong><br>
+      4. Confirme → ícone na tela inicial ✅
+    </div>
+    <div class="divider"></div>
+    <div style="font-weight:700;font-size:.88rem;margin-bottom:10px">💾 Dados</div>
+    <button class="btn btn-ghost" onclick="exportarDados()" style="margin-bottom:8px">📤 Exportar backup</button>
+    <button class="btn btn-ghost" onclick="document.getElementById('imp').click()" style="margin-bottom:8px">📥 Importar backup</button>
+    <input type="file" id="imp" accept=".json" style="display:none" onchange="importarDados(event)">
+    <button class="btn btn-danger" onclick="resetar()">🗑 Apagar todos os dados</button>
+  `;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function salvarConfig(){
+  S.config = S.config || {};
+  S.config.nome = document.getElementById('cfg-nome').value || 'Dr. Antonio';
+  S.config.peso_meta = parseFloat(document.getElementById('cfg-peso').value) || 75;
+  saveS(); fecharSheet(); renderTudo(); toast('✓ Configurações salvas!');
+}
+
+function exportarDados(){
+  const blob = new Blob([JSON.stringify(S,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'jarvis_backup_'+agora().toISOString().split('T')[0]+'.json';
+  a.click(); toast('📤 Backup exportado!');
+}
+
+function importarDados(e){
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try{
+      Object.assign(S, JSON.parse(ev.target.result));
+      saveS(); fecharSheet(); renderTudo(); toast('📥 Dados importados!');
+    } catch(ex){ toast('⚠️ Arquivo inválido'); }
+  };
+  r.readAsText(f);
+}
+
+function resetar(){
+  if(!confirm('Apagar TODOS os dados? Não pode ser desfeito.')) return;
+  localStorage.removeItem(KEY); location.reload();
+}
+
+/* ═══════════════════════════════════════════
+   SHEET / OVERLAY
+═══════════════════════════════════════════ */
+function fecharSheet(){
+  document.getElementById('overlay').classList.remove('open');
+  fecharFab();
+}
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+let toastT;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastT);
+  toastT = setTimeout(()=>t.classList.remove('show'), 3000);
+}
+
+/* ═══════════════════════════════════════════
+   RENDER TUDO
+═══════════════════════════════════════════ */
+function renderTudo(){
+  renderEnergia();
+  renderAgora();
+  renderAlertas();
+  renderTimeline();
+  renderIndicadores();
+}
+
+function scrollToAgenda(){
+  document.querySelector('.card').scrollIntoView({behavior:'smooth'});
+}
+
+/* ═══════════════════════════════════════════
+   NOTIFICAÇÕES
+═══════════════════════════════════════════ */
+function pedirPermissaoNotificacao(){
+  if('Notification' in window && Notification.permission === 'default'){
+    Notification.requestPermission();
+  }
+}
+
+/* ═══════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════ */
+updateDate();
+renderTudo();
+pedirPermissaoNotificacao();
+
+// Atualiza bloco "Agora" a cada minuto
+setInterval(()=>{ renderAgora(); }, 60000);
+
+// Limpar alertas dismissed do dia anterior
+const hojeClear = agora().toLocaleDateString('pt-BR');
+if(S._ultima_limpeza !== hojeClear){
+  S.alertas_dismissed = [];
+  S._ultima_limpeza = hojeClear;
+  saveS();
+}
+</script>
+</body>
+</html>
