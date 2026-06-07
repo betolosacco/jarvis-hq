@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Jarvis — Aprendizado</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060612;--card:#0d0d1f;--card2:#131328;--bdr:#1e1e3f;
+  --cyan:#00f5d4;--pink:#ff2d78;--yel:#ffd60a;--pur:#7c3aed;
+  --blu:#3b82f6;--ora:#ff6b2b;--grn:#22c55e;--txt:#eeeeff;--sub:#6666aa;--r:16px;
+  --g1:linear-gradient(135deg,#00f5d4,#3b82f6);
+  --g2:linear-gradient(135deg,#ff2d78,#7c3aed);
+  --g6:linear-gradient(135deg,#7c3aed,#00f5d4);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overscroll-behavior:none;}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--txt);
+  min-height:100%;display:flex;flex-direction:column;max-width:480px;margin:0 auto;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 100% 40% at 50% -5%,rgba(124,58,237,.08) 0%,transparent 65%),
+             radial-gradient(ellipse 50% 30% at 5% 85%,rgba(0,245,212,.05) 0%,transparent 60%);}
+
+#scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 0 90px;position:relative;z-index:1;}
+#scroll::-webkit-scrollbar{display:none;}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px 10px;background:rgba(6,6,18,.95);backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:50;}
+.tbar-logo{font-weight:800;font-size:1.05rem;background:var(--g6);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.tbar-date{font-size:.72rem;color:var(--sub);font-family:'JetBrains Mono',monospace;margin-top:1px;}
+.tbar-btn{width:34px;height:34px;border-radius:11px;border:1px solid var(--bdr);
+  background:var(--card2);color:var(--txt);font-size:.95rem;cursor:pointer;
+  display:grid;place-items:center;transition:.15s;}
+.tbar-btn:active{transform:scale(.92);}
+
+.bottomnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;background:rgba(6,6,18,.97);backdrop-filter:blur(24px);
+  border-top:1px solid var(--bdr);display:grid;grid-template-columns:repeat(6,1fr);
+  z-index:100;padding-bottom:env(safe-area-inset-bottom,0px);}
+.bnav{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:9px 2px 7px;cursor:pointer;border:none;background:transparent;
+  color:var(--sub);font-family:'Space Grotesk',sans-serif;font-size:.52rem;font-weight:600;
+  gap:3px;text-transform:uppercase;letter-spacing:.04em;}
+.bnav.act{color:var(--pur);}
+.bnav-ic{font-size:1.1rem;}
+
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:14px 16px 0;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{padding:8px 16px;border-radius:20px;border:1px solid var(--bdr);background:var(--card2);
+  font-size:.76rem;font-weight:700;cursor:pointer;white-space:nowrap;color:var(--sub);
+  font-family:'Space Grotesk',sans-serif;transition:.15s;}
+.tab.act{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.35);color:var(--pur);}
+
+.sec{padding:14px 16px 0;}
+.pg-tab{display:none;}.pg-tab.act{display:block;}
+.sec-title{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--sub);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--bdr);}
+
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;margin-bottom:12px;}
+.card-title{font-weight:700;font-size:.88rem;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+
+/* HERO */
+.hero-apr{background:linear-gradient(135deg,rgba(124,58,237,.12),rgba(0,245,212,.07));
+  border:1px solid rgba(124,58,237,.3);border-radius:20px;padding:18px;margin-bottom:12px;
+  position:relative;overflow:hidden;}
+.hero-apr::before{content:'';position:absolute;top:-30px;right:-30px;width:110px;height:110px;
+  border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,.2),transparent 70%);}
+.hero-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--pur);margin-bottom:6px;}
+.hero-count{font-size:2rem;font-weight:800;font-family:'JetBrains Mono',monospace;letter-spacing:-.04em;}
+.hero-sub{font-size:.75rem;color:var(--sub);margin-top:4px;}
+
+/* FILTROS */
+.filtros-row{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;scrollbar-width:none;}
+.filtros-row::-webkit-scrollbar{display:none;}
+.filtro-pill{padding:6px 12px;border-radius:999px;border:1px solid var(--bdr);background:var(--card2);
+  font-size:.73rem;font-weight:700;cursor:pointer;white-space:nowrap;color:var(--sub);
+  font-family:'Space Grotesk',sans-serif;transition:.15s;flex-shrink:0;}
+.filtro-pill.act{background:rgba(124,58,237,.1);border-color:rgba(124,58,237,.35);color:var(--pur);}
+
+/* APRENDIZADO CARD */
+.apr-card{background:var(--card2);border:1px solid var(--bdr);border-radius:16px;
+  margin-bottom:10px;overflow:hidden;cursor:pointer;transition:.15s;position:relative;}
+.apr-card:active{transform:scale(.98);}
+.apr-card.favorito{border-color:rgba(255,214,10,.3);}
+.apr-thumb{width:100%;height:120px;object-fit:cover;background:var(--card);}
+.apr-thumb-placeholder{width:100%;height:90px;display:flex;align-items:center;justify-content:center;
+  font-size:2.2rem;background:linear-gradient(135deg,var(--card),var(--card2));}
+.apr-body{padding:12px 14px;}
+.apr-cat-row{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+.apr-cat-badge{padding:2px 8px;border-radius:999px;font-size:.62rem;font-weight:700;border:1px solid;}
+.apr-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;}
+.apr-tag{padding:2px 7px;border-radius:999px;background:rgba(124,58,237,.08);
+  border:1px solid rgba(124,58,237,.2);font-size:.62rem;color:var(--pur);font-weight:600;}
+.apr-titulo{font-weight:700;font-size:.9rem;line-height:1.35;margin-bottom:6px;}
+.apr-resumo{font-size:.78rem;color:var(--sub);line-height:1.6;margin-bottom:8px;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.apr-meta{display:flex;align-items:center;gap:8px;font-size:.68rem;color:var(--sub);}
+.apr-fav{position:absolute;top:10px;right:10px;font-size:1.1rem;cursor:pointer;
+  background:rgba(6,6,18,.7);border-radius:50%;width:28px;height:28px;
+  display:grid;place-items:center;border:none;transition:.15s;}
+.apr-fav:active{transform:scale(.85);}
+
+/* DETALHE */
+.detalhe-img{width:100%;height:180px;object-fit:cover;border-radius:12px;margin-bottom:14px;}
+.detalhe-resumo{background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);
+  border-radius:12px;padding:14px;margin-bottom:12px;font-size:.84rem;line-height:1.7;}
+.detalhe-pontos{margin-bottom:12px;}
+.detalhe-ponto{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--bdr);}
+.detalhe-ponto:last-child{border-bottom:none;}
+.ponto-num{width:22px;height:22px;border-radius:6px;background:var(--pur);color:#fff;
+  font-size:.72rem;font-weight:800;display:grid;place-items:center;flex-shrink:0;margin-top:1px;}
+.ponto-txt{font-size:.82rem;line-height:1.5;}
+.aplicacao-card{background:rgba(0,245,212,.06);border:1px solid rgba(0,245,212,.15);
+  border-radius:12px;padding:12px;margin-bottom:12px;}
+.aplicacao-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--cyan);margin-bottom:6px;}
+.aplicacao-txt{font-size:.82rem;line-height:1.6;}
+
+/* BUSCA */
+.busca-wrap{position:relative;margin-bottom:12px;}
+.busca-input{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:14px;
+  padding:12px 14px 12px 40px;color:var(--txt);font-family:'Space Grotesk',sans-serif;
+  font-size:.88rem;outline:none;transition:.15s;}
+.busca-input:focus{border-color:var(--pur);}
+.busca-ic{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:.9rem;color:var(--sub);}
+
+/* SUMMARY */
+.sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.sum-card{background:var(--card);border:1px solid var(--bdr);border-radius:14px;
+  padding:14px 12px;position:relative;overflow:hidden;}
+.sum-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--c,var(--pur));}
+.sum-card.p{--c:var(--pur)}.sum-card.c{--c:var(--cyan)}.sum-card.y{--c:var(--yel)}.sum-card.g{--c:var(--grn)}
+.sum-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--sub);margin-bottom:5px;}
+.sum-val{font-weight:800;font-size:1.3rem;letter-spacing:-.03em;font-family:'JetBrains Mono',monospace;}
+.sum-sub{font-size:.68rem;color:var(--sub);margin-top:2px;}
+
+/* PROG */
+.prog-wrap{margin-bottom:8px;}
+.prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.prog-label{font-size:.78rem;font-weight:600;}
+.prog-val{font-size:.7rem;color:var(--sub);font-family:'JetBrains Mono',monospace;}
+.prog-track{height:6px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:999px;}
+
+/* UPLOAD AREA */
+.upload-area{border:2px dashed var(--bdr);border-radius:14px;padding:24px;text-align:center;
+  cursor:pointer;transition:.2s;margin-bottom:14px;position:relative;}
+.upload-area:hover{border-color:var(--pur);background:rgba(124,58,237,.04);}
+.upload-area input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+
+/* FAB */
+.fab-area{position:fixed;bottom:76px;right:calc(50% - 230px);
+  display:flex;flex-direction:column;align-items:flex-end;gap:8px;z-index:99;}
+@media(max-width:480px){.fab-area{right:14px;}}
+.fab-menu-item{display:flex;align-items:center;gap:8px;background:var(--card2);
+  border:1px solid var(--bdr);border-radius:12px;padding:9px 14px;font-size:.8rem;
+  font-weight:600;cursor:pointer;opacity:0;transform:translateY(8px);transition:.2s;
+  pointer-events:none;white-space:nowrap;font-family:'Space Grotesk',sans-serif;}
+.fab-menu-item.show{opacity:1;transform:translateY(0);pointer-events:all;}
+.fab{width:52px;height:52px;border-radius:50%;border:none;background:var(--g6);
+  color:#fff;font-size:1.4rem;cursor:pointer;box-shadow:0 4px 24px rgba(124,58,237,.4);
+  display:grid;place-items:center;transition:.2s;}
+.fab:active{transform:scale(.92);}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(12px);
+  z-index:200;display:none;flex-direction:column;justify-content:flex-end;}
+.overlay.open{display:flex;}
+.sheet{background:var(--card);border-radius:24px 24px 0 0;border:1px solid var(--bdr);
+  border-bottom:none;padding:6px 20px calc(24px + env(safe-area-inset-bottom,0px));
+  max-height:92vh;overflow-y:auto;}
+.sheet::-webkit-scrollbar{display:none;}
+.sheet-handle{width:36px;height:4px;border-radius:2px;background:var(--bdr);margin:10px auto 16px;}
+.sheet-title{font-weight:800;font-size:1.05rem;margin-bottom:18px;text-align:center;}
+
+.fg{margin-bottom:14px;}
+.fl{display:block;font-size:.7rem;font-weight:700;color:var(--sub);margin-bottom:6px;
+  text-transform:uppercase;letter-spacing:.07em;}
+.fi{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:12px;
+  padding:12px 14px;color:var(--txt);font-family:'Space Grotesk',sans-serif;font-size:.9rem;outline:none;transition:.15s;}
+.fi:focus{border-color:var(--pur);box-shadow:0 0 0 3px rgba(124,58,237,.1);}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+select.fi{appearance:none;cursor:pointer;}
+textarea.fi{resize:none;line-height:1.5;}
+
+.btn{width:100%;padding:13px;border-radius:13px;border:none;cursor:pointer;
+  font-family:'Space Grotesk',sans-serif;font-size:.9rem;font-weight:700;margin-bottom:8px;transition:.15s;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--g6);color:#fff;}
+.btn-ghost{background:transparent;border:1px solid var(--bdr);color:var(--txt);}
+.btn-danger{background:rgba(255,45,120,.1);border:1px solid rgba(255,45,120,.3);color:var(--pink);}
+
+.ia-bubble{padding:12px 14px;border-radius:14px;font-size:.84rem;line-height:1.7;margin-bottom:8px;}
+.ia-bubble.jarvis{background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:14px 14px 14px 4px;}
+
+.toast{position:fixed;bottom:98px;left:50%;transform:translateX(-50%) translateY(10px);
+  background:var(--card2);border:1px solid var(--bdr);border-radius:12px;
+  padding:10px 18px;font-size:.82rem;font-weight:600;opacity:0;transition:.25s;
+  z-index:300;white-space:nowrap;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+.divider{height:1px;background:var(--bdr);margin:14px 0;}
+.spacer{height:12px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="tbar-logo">🧠 Aprendizado</div>
+    <div class="tbar-date" id="tbar-date">—</div>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="tbar-btn" onclick="abrirIAApr()">🤖</button>
+    <button class="tbar-btn" onclick="abrirBusca()">🔍</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab act" onclick="mudarTab('feed')" id="tab-feed">📰 Feed</button>
+  <button class="tab" onclick="mudarTab('favoritos')" id="tab-favoritos">⭐ Favoritos</button>
+  <button class="tab" onclick="mudarTab('resumo')" id="tab-resumo">📊 Resumo</button>
+</div>
+
+<div id="scroll">
+  <div class="sec">
+
+    <!-- ══ FEED ══ -->
+    <div class="pg-tab act" id="pg-feed">
+      <div class="spacer"></div>
+      <div id="hero-apr-wrap"></div>
+      <div class="filtros-row" id="filtros-cats"></div>
+      <div class="busca-wrap" id="busca-wrap" style="display:none">
+        <span class="busca-ic">🔍</span>
+        <input class="busca-input" id="busca-input" placeholder="Buscar aprendizados..." oninput="renderFeed()">
+      </div>
+      <div id="feed-lista"></div>
+    </div>
+
+    <!-- ══ FAVORITOS ══ -->
+    <div class="pg-tab" id="pg-favoritos">
+      <div class="spacer"></div>
+      <div id="favoritos-lista"></div>
+    </div>
+
+    <!-- ══ RESUMO ══ -->
+    <div class="pg-tab" id="pg-resumo">
+      <div class="spacer"></div>
+      <div id="resumo-wrap"></div>
+    </div>
+
+    <div class="spacer"></div>
+  </div>
+</div>
+
+<!-- FAB -->
+<div class="fab-area">
+  <div class="fab-menu-item" id="fm-texto" onclick="abrirAddTexto()">✏️ Escrever / Colar texto</div>
+  <div class="fab-menu-item" id="fm-img" onclick="abrirAddImagem()">📸 Subir print / imagem</div>
+  <div class="fab-menu-item" id="fm-voz" onclick="abrirAddVoz()">🎤 Falar para registrar</div>
+  <button class="fab" id="fab-btn" onclick="toggleFab()">＋</button>
+</div>
+
+<nav class="bottomnav">
+  <button class="bnav"><span class="bnav-ic">🏠</span><span>Hoje</span></button>
+  <button class="bnav"><span class="bnav-ic">💪</span><span>Saúde</span></button>
+  <button class="bnav"><span class="bnav-ic">📚</span><span>Estudos</span></button>
+  <button class="bnav"><span class="bnav-ic">💰</span><span>Finanças</span></button>
+  <button class="bnav act"><span class="bnav-ic">🧠</span><span>Aprend.</span></button>
+  <button class="bnav"><span class="bnav-ic">☰</span><span>Mais</span></button>
+</nav>
+
+<div class="overlay" id="overlay" onclick="fecharSheet()">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div id="sheet-content"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════ STATE ═══════ */
+const KEY='jarvis_apr_v1';
+let S={aprendizados:[]};
+function loadS(){try{const d=localStorage.getItem(KEY);if(d)S={...S,...JSON.parse(d)};}catch(e){}}
+function saveS(){localStorage.setItem(KEY,JSON.stringify(S));}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+loadS();
+
+const DIAS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const MESES=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+function hoje(){return new Date();}
+function hojeISO(){return hoje().toISOString().split('T')[0];}
+function hojeStr(){const d=hoje();return `${DIAS[d.getDay()]}, ${d.getDate()} ${MESES[d.getMonth()]} ${d.getFullYear()}`;}
+function dataRelativa(iso){
+  const diff=Math.round((hoje()-new Date(iso+'T12:00:00'))/864e5);
+  if(diff===0)return 'hoje';if(diff===1)return 'ontem';if(diff<7)return `${diff} dias atrás`;
+  if(diff<30)return `${Math.round(diff/7)} sem. atrás`;return `${Math.round(diff/30)} meses atrás`;
+}
+
+const CATEGORIAS={
+  medicina:{ic:'🏥',label:'Medicina',cor:'var(--pink)'},
+  produtividade:{ic:'⚡',label:'Produtividade',cor:'var(--yel)'},
+  financas:{ic:'💰',label:'Finanças',cor:'var(--grn)'},
+  saude:{ic:'💪',label:'Saúde & Bem-estar',cor:'var(--cyan)'},
+  tecnologia:{ic:'💻',label:'Tecnologia',cor:'var(--blu)'},
+  comportamento:{ic:'🧠',label:'Comportamento',cor:'var(--pur)'},
+  lideranca:{ic:'🎯',label:'Liderança',cor:'var(--ora)'},
+  idiomas:{ic:'🌍',label:'Idiomas',cor:'var(--cyan)'},
+  outros:{ic:'📝',label:'Outros',cor:'var(--sub)'},
+};
+
+/* ═══════ TABS ═══════ */
+let tabAtual='feed';
+let catFiltro='todas';
+function mudarTab(t){
+  tabAtual=t;
+  document.querySelectorAll('.pg-tab').forEach(p=>p.classList.remove('act'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('act'));
+  document.getElementById('pg-'+t)?.classList.add('act');
+  document.getElementById('tab-'+t)?.classList.add('act');
+  ({feed:renderFeed,favoritos:renderFavoritos,resumo:renderResumo})[t]?.();
+}
+
+/* ═══════ FAB ═══════ */
+let fabOpen=false;
+function toggleFab(){
+  fabOpen=!fabOpen;
+  const btn=document.getElementById('fab-btn');
+  btn.textContent=fabOpen?'✕':'＋';
+  btn.style.transform=fabOpen?'rotate(45deg)':'';
+  ['fm-texto','fm-img','fm-voz'].forEach((id,i)=>{
+    setTimeout(()=>document.getElementById(id)?.classList.toggle('show',fabOpen),i*50);
+  });
+}
+function fecharFab(){
+  fabOpen=false;
+  const btn=document.getElementById('fab-btn');
+  if(btn){btn.textContent='＋';btn.style.transform='';}
+  ['fm-texto','fm-img','fm-voz'].forEach(id=>document.getElementById(id)?.classList.remove('show'));
+}
+
+/* ═══════ RENDER FEED ═══════ */
+function renderFeed(){
+  const total=S.aprendizados.length;
+  const favs=S.aprendizados.filter(a=>a.favorito).length;
+
+  document.getElementById('hero-apr-wrap').innerHTML=`
+    <div class="hero-apr">
+      <div class="hero-label">🧠 Banco de Aprendizado</div>
+      <div class="hero-count">${total}</div>
+      <div class="hero-sub">${total===0?'Nenhum registro ainda':'insight'+( total!==1?'s':'')+' registrado'+( total!==1?'s':'')} · ⭐ ${favs} favorito${favs!==1?'s':''}</div>
+    </div>`;
+
+  const cats=['todas',...[...new Set(S.aprendizados.map(a=>a.categoria))]];
+  document.getElementById('filtros-cats').innerHTML=cats.map(c=>`
+    <button class="filtro-pill ${catFiltro===c?'act':''}" onclick="filtrarCat('${c}')">
+      ${c==='todas'?'🧠 Todos':CATEGORIAS[c]?.ic+' '+(CATEGORIAS[c]?.label||c)}
+    </button>`).join('');
+
+  const busca=document.getElementById('busca-input')?.value?.toLowerCase()||'';
+  let lista=S.aprendizados.filter(a=>{
+    if(catFiltro!=='todas'&&a.categoria!==catFiltro)return false;
+    if(busca&&!a.titulo?.toLowerCase().includes(busca)&&!a.resumo?.toLowerCase().includes(busca)&&!(a.tags||[]).some(t=>t.toLowerCase().includes(busca)))return false;
+    return true;
+  }).sort((a,b)=>b.data_iso.localeCompare(a.data_iso));
+
+  if(lista.length===0){
+    document.getElementById('feed-lista').innerHTML=`
+      <div style="text-align:center;padding:40px 16px;color:var(--sub)">
+        <div style="font-size:3rem;margin-bottom:12px">🧠</div>
+        <div style="font-size:.9rem;font-weight:600;margin-bottom:6px">${busca||catFiltro!=='todas'?'Nenhum resultado':'Banco vazio'}</div>
+        <div style="font-size:.8rem;line-height:1.6">${busca||catFiltro!=='todas'?'Tente outro filtro ou busca.':'Registre prints do Instagram, textos ou insights de voz.<br>A IA resume e categoriza tudo.'}</div>
+      </div>`;
+    return;
+  }
+
+  // Agrupar por data relativa
+  const grupos={};
+  lista.forEach(a=>{
+    const dr=dataRelativa(a.data_iso);
+    if(!grupos[dr])grupos[dr]=[];
+    grupos[dr].push(a);
+  });
+
+  document.getElementById('feed-lista').innerHTML=Object.entries(grupos).map(([data,itens])=>`
+    <div class="sec-title">${data}</div>
+    ${itens.map(a=>buildCard(a)).join('')}
+  `).join('');
+}
+
+function buildCard(a){
+  const cat=CATEGORIAS[a.categoria]||{ic:'📝',label:'Outros',cor:'var(--sub)'};
+  return `
+    <div class="apr-card ${a.favorito?'favorito':''}" onclick="verDetalhe('${a.id}')">
+      <button class="apr-fav" onclick="event.stopPropagation();toggleFav('${a.id}')">${a.favorito?'⭐':'☆'}</button>
+      ${a.imagem?`<img class="apr-thumb" src="${a.imagem}" alt="">`
+        :`<div class="apr-thumb-placeholder">${cat.ic}</div>`}
+      <div class="apr-body">
+        <div class="apr-cat-row">
+          <div class="apr-cat-badge" style="color:${cat.cor};border-color:${cat.cor}44;background:${cat.cor}11">
+            ${cat.ic} ${cat.label}
+          </div>
+          <span style="font-size:.65rem;color:var(--sub);margin-left:auto">${dataRelativa(a.data_iso)}</span>
+        </div>
+        <div class="apr-titulo">${a.titulo}</div>
+        <div class="apr-resumo">${a.resumo}</div>
+        ${a.tags?.length?`<div class="apr-tags">${a.tags.slice(0,4).map(t=>`<span class="apr-tag">#${t}</span>`).join('')}</div>`:''}
+      </div>
+    </div>`;
+}
+
+function filtrarCat(c){catFiltro=c;renderFeed();}
+
+/* ═══════ RENDER FAVORITOS ═══════ */
+function renderFavoritos(){
+  const favs=S.aprendizados.filter(a=>a.favorito).sort((a,b)=>b.data_iso.localeCompare(a.data_iso));
+  if(favs.length===0){
+    document.getElementById('favoritos-lista').innerHTML=`
+      <div style="text-align:center;padding:40px 16px;color:var(--sub)">
+        <div style="font-size:3rem;margin-bottom:12px">⭐</div>
+        <div style="font-size:.88rem">Nenhum favorito ainda.<br>Toque em ☆ em qualquer card para favoritar.</div>
+      </div>`;
+    return;
+  }
+  document.getElementById('favoritos-lista').innerHTML=favs.map(a=>buildCard(a)).join('');
+}
+
+/* ═══════ RENDER RESUMO ═══════ */
+function renderResumo(){
+  const total=S.aprendizados.length;
+  const mes=S.aprendizados.filter(a=>{
+    const d=new Date(a.data_iso+'T12:00:00');
+    return d.getMonth()===hoje().getMonth()&&d.getFullYear()===hoje().getFullYear();
+  }).length;
+  const semana=S.aprendizados.filter(a=>(hoje()-new Date(a.data_iso+'T12:00:00'))/864e5<7).length;
+
+  const porCat={};
+  S.aprendizados.forEach(a=>{porCat[a.categoria]=(porCat[a.categoria]||0)+1;});
+  const catsSorted=Object.entries(porCat).sort((a,b)=>b[1]-a[1]);
+  const maxCat=catsSorted[0]?.[1]||1;
+
+  const todasTags={};
+  S.aprendizados.forEach(a=>(a.tags||[]).forEach(t=>{todasTags[t]=(todasTags[t]||0)+1;}));
+  const tagsSorted=Object.entries(todasTags).sort((a,b)=>b[1]-a[1]).slice(0,10);
+
+  document.getElementById('resumo-wrap').innerHTML=`
+    <div class="sum-grid">
+      <div class="sum-card p">
+        <div class="sum-label">Total</div>
+        <div class="sum-val">${total}</div>
+        <div class="sum-sub">insights salvos</div>
+      </div>
+      <div class="sum-card c">
+        <div class="sum-label">Este mês</div>
+        <div class="sum-val">${mes}</div>
+        <div class="sum-sub">${semana} esta semana</div>
+      </div>
+      <div class="sum-card y">
+        <div class="sum-label">Favoritos</div>
+        <div class="sum-val">${S.aprendizados.filter(a=>a.favorito).length}</div>
+        <div class="sum-sub">mais relevantes</div>
+      </div>
+      <div class="sum-card g">
+        <div class="sum-label">Categorias</div>
+        <div class="sum-val">${Object.keys(porCat).length}</div>
+        <div class="sum-sub">áreas</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 Por Categoria</div>
+      ${catsSorted.length===0?`<div style="color:var(--sub);font-size:.82rem">Nenhum registro ainda.</div>`:
+        catsSorted.map(([cat,cnt])=>{
+          const c=CATEGORIAS[cat]||{ic:'📝',label:cat,cor:'var(--sub)'};
+          return `<div class="prog-wrap">
+            <div class="prog-top">
+              <span class="prog-label">${c.ic} ${c.label}</span>
+              <span class="prog-val">${cnt}</span>
+            </div>
+            <div class="prog-track">
+              <div class="prog-fill" style="width:${Math.round(cnt/maxCat*100)}%;background:${c.cor}"></div>
+            </div>
+          </div>`;
+        }).join('')}
+    </div>
+
+    ${tagsSorted.length>0?`
+    <div class="card">
+      <div class="card-title">🏷 Tags mais usadas</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${tagsSorted.map(([t,cnt])=>`
+          <div style="background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.25);border-radius:999px;
+            padding:5px 12px;font-size:.73rem;font-weight:700;color:var(--pur);cursor:pointer"
+            onclick="filtrarTag('${t}')">#${t} <span style="color:var(--sub)">${cnt}</span></div>
+        `).join('')}
+      </div>
+    </div>`:''}
+
+    <div class="card">
+      <div class="card-title">🤖 Síntese da IA</div>
+      <div id="sintese-wrap">
+        <div style="font-size:.8rem;color:var(--sub);margin-bottom:10px">A IA pode gerar uma síntese dos seus principais aprendizados do mês.</div>
+        <button class="btn-ghost" onclick="gerarSintese()" style="width:100%;padding:11px;border-radius:12px;border:1px solid var(--bdr);color:var(--txt);font-family:'Space Grotesk',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;background:transparent">🤖 Gerar síntese do mês</button>
+      </div>
+    </div>`;
+}
+
+function filtrarTag(t){
+  catFiltro='todas';
+  mudarTab('feed');
+  setTimeout(()=>{
+    const inp=document.getElementById('busca-input');
+    if(inp){inp.value=t;document.getElementById('busca-wrap').style.display='block';}
+    renderFeed();
+  },100);
+}
+
+/* ═══════ VER DETALHE ═══════ */
+function verDetalhe(id){
+  const a=S.aprendizados.find(x=>x.id===id);if(!a)return;
+  const cat=CATEGORIAS[a.categoria]||{ic:'📝',label:'Outros',cor:'var(--sub)'};
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">${a.titulo}</div>
+    ${a.imagem?`<img src="${a.imagem}" class="detalhe-img">`:`<div style="text-align:center;font-size:3rem;margin-bottom:14px">${cat.ic}</div>`}
+
+    <div style="display:flex;gap:6px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+      <div class="apr-cat-badge" style="color:${cat.cor};border-color:${cat.cor}44;background:${cat.cor}11">
+        ${cat.ic} ${cat.label}
+      </div>
+      <span style="font-size:.68rem;color:var(--sub)">${dataRelativa(a.data_iso)}</span>
+      <button onclick="toggleFav('${id}')" style="margin-left:auto;background:none;border:none;font-size:1.1rem;cursor:pointer">${a.favorito?'⭐':'☆'}</button>
+    </div>
+
+    <div class="detalhe-resumo">
+      <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--pur);margin-bottom:8px">💡 Resumo</div>
+      ${a.resumo}
+    </div>
+
+    ${a.pontos_principais?.length?`
+    <div style="font-weight:700;font-size:.88rem;margin-bottom:10px">📌 Pontos principais</div>
+    <div class="detalhe-pontos">
+      ${a.pontos_principais.map((p,i)=>`
+        <div class="detalhe-ponto">
+          <div class="ponto-num">${i+1}</div>
+          <div class="ponto-txt">${p}</div>
+        </div>`).join('')}
+    </div>`:''}
+
+    ${a.aplicacao_pratica?`
+    <div class="aplicacao-card">
+      <div class="aplicacao-label">🔧 Como aplicar</div>
+      <div class="aplicacao-txt">${a.aplicacao_pratica}</div>
+    </div>`:''}
+
+    ${a.tags?.length?`
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px">
+      ${a.tags.map(t=>`<span class="apr-tag">#${t}</span>`).join('')}
+    </div>`:''}
+
+    ${a.fonte?`<div style="font-size:.72rem;color:var(--sub);margin-bottom:14px">📎 Fonte: ${a.fonte}</div>`:''}
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button class="btn btn-ghost" style="margin-bottom:0" onclick="editarAprendizado('${id}')">✏️ Editar</button>
+      <button class="btn btn-danger" style="margin-bottom:0" onclick="deletarAprendizado('${id}')">🗑 Excluir</button>
+    </div>
+    <button class="btn btn-ghost" onclick="fecharSheet()" style="margin-top:8px">Fechar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function toggleFav(id){
+  const a=S.aprendizados.find(x=>x.id===id);
+  if(a){a.favorito=!a.favorito;saveS();renderFeed();
+    if(tabAtual==='favoritos')renderFavoritos();
+    toast(a.favorito?'⭐ Favoritado!':'☆ Removido dos favoritos');
+  }
+}
+
+function deletarAprendizado(id){
+  if(!confirm('Excluir este aprendizado?'))return;
+  S.aprendizados=S.aprendizados.filter(x=>x.id!==id);
+  saveS();fecharSheet();renderFeed();toast('🗑 Excluído');
+}
+
+function editarAprendizado(id){
+  const a=S.aprendizados.find(x=>x.id===id);if(!a)return;
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">✏️ Editar</div>
+    <div class="fg"><label class="fl">Título</label><input class="fi" id="ea-titulo" value="${a.titulo}"></div>
+    <div class="fg"><label class="fl">Categoria</label>
+      <select class="fi" id="ea-cat">
+        ${Object.entries(CATEGORIAS).map(([k,v])=>`<option value="${k}" ${a.categoria===k?'selected':''}>${v.ic} ${v.label}</option>`).join('')}
+      </select></div>
+    <div class="fg"><label class="fl">Resumo</label>
+      <textarea class="fi" id="ea-resumo" rows="4">${a.resumo}</textarea></div>
+    <div class="fg"><label class="fl">Tags (separadas por vírgula)</label>
+      <input class="fi" id="ea-tags" value="${(a.tags||[]).join(', ')}"></div>
+    <div class="fg"><label class="fl">Como aplicar</label>
+      <textarea class="fi" id="ea-aplic" rows="2">${a.aplicacao_pratica||''}</textarea></div>
+    <div class="fg"><label class="fl">Fonte</label>
+      <input class="fi" id="ea-fonte" value="${a.fonte||''}" placeholder="Instagram, livro, podcast..."></div>
+    <button class="btn btn-primary" onclick="salvarEdicao('${id}')">💾 Salvar</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+}
+
+function salvarEdicao(id){
+  const a=S.aprendizados.find(x=>x.id===id);if(!a)return;
+  a.titulo=document.getElementById('ea-titulo').value.trim();
+  a.categoria=document.getElementById('ea-cat').value;
+  a.resumo=document.getElementById('ea-resumo').value.trim();
+  a.tags=document.getElementById('ea-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+  a.aplicacao_pratica=document.getElementById('ea-aplic').value.trim();
+  a.fonte=document.getElementById('ea-fonte').value.trim();
+  saveS();fecharSheet();renderFeed();toast('✓ Atualizado!');
+}
+
+/* ═══════ ADD POR TEXTO ═══════ */
+function abrirAddTexto(){
+  fecharFab();
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">✏️ Novo Aprendizado</div>
+    <div class="fg"><label class="fl">Cole o texto ou escreva o que aprendeu</label>
+      <textarea class="fi" id="at-texto" rows="5" placeholder="Cole aqui o post, artigo, trecho do livro ou escreva o que aprendeu..."></textarea></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Categoria</label>
+        <select class="fi" id="at-cat">
+          ${Object.entries(CATEGORIAS).map(([k,v])=>`<option value="${k}">${v.ic} ${v.label}</option>`).join('')}
+        </select></div>
+      <div class="fg"><label class="fl">Fonte</label>
+        <input class="fi" id="at-fonte" placeholder="Instagram, livro..."></div>
+    </div>
+    <button class="btn btn-primary" onclick="processarTextoIA()">🤖 Analisar com IA</button>
+    <button class="btn btn-ghost" onclick="salvarTextoManual()">💾 Salvar sem IA</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+async function processarTextoIA(){
+  const texto=document.getElementById('at-texto')?.value?.trim();
+  const cat=document.getElementById('at-cat')?.value;
+  const fonte=document.getElementById('at-fonte')?.value;
+  if(!texto){toast('⚠️ Escreva ou cole o texto');return;}
+
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">🤖 Analisando...</div>
+    <div class="ia-bubble jarvis">⏳ Resumindo e categorizando...</div>`;
+
+  const res=await processarConteudoIA(texto,'texto',cat);
+  if(res) mostrarConfirmacao(res,{texto,fonte,cat,tipo:'texto'});
+  else{
+    document.getElementById('sheet-content').innerHTML=`
+      <div class="sheet-title">⚠️ Sem conexão</div>
+      <div class="ia-bubble jarvis">Não consegui conectar à IA. Salvando sem análise.</div>
+      <button class="btn btn-ghost" onclick="fecharSheet();abrirAddTexto()">← Voltar</button>`;
+  }
+}
+
+function salvarTextoManual(){
+  const texto=document.getElementById('at-texto')?.value?.trim();
+  if(!texto){toast('⚠️ Escreva o texto');return;}
+  const a={id:uid(),titulo:texto.slice(0,60)+'...',resumo:texto,
+    categoria:document.getElementById('at-cat')?.value||'outros',
+    fonte:document.getElementById('at-fonte')?.value||'',
+    tags:[],pontos_principais:[],aplicacao_pratica:'',
+    imagem:'',favorito:false,data_iso:hojeISO()};
+  S.aprendizados.push(a);saveS();fecharSheet();renderFeed();toast('✓ Salvo!');
+}
+
+/* ═══════ ADD POR IMAGEM ═══════ */
+function abrirAddImagem(){
+  fecharFab();
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">📸 Subir Print / Imagem</div>
+    <div style="font-size:.82rem;color:var(--sub);margin-bottom:14px;line-height:1.6">
+      Suba um print do Instagram, Twitter, screenshot de artigo ou qualquer imagem com conteúdo. A IA vai ler e resumir.
+    </div>
+    <div class="upload-area">
+      <input type="file" accept="image/*" onchange="processarImagemAPR(event)">
+      <div style="font-size:2.5rem;margin-bottom:10px">📱</div>
+      <div style="font-weight:700;font-size:.9rem">Toque para escolher</div>
+      <div style="font-size:.73rem;color:var(--sub);margin-top:4px">Print do Instagram, screenshot, foto de livro...</div>
+    </div>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+async function processarImagemAPR(event){
+  const file=event.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=async(e)=>{
+    const base64=e.target.result;
+    const base64data=base64.split(',')[1];
+    const mediaType=file.type||'image/jpeg';
+
+    document.getElementById('sheet-content').innerHTML=`
+      <div class="sheet-title">🤖 Lendo imagem...</div>
+      <img src="${base64}" style="width:100%;height:160px;object-fit:cover;border-radius:12px;margin-bottom:14px">
+      <div class="ia-bubble jarvis">⏳ Extraindo e resumindo o conteúdo da imagem...</div>`;
+
+    try{
+      const resp=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,
+          system:`Você é um assistente de aprendizado. Analise a imagem e responda APENAS em JSON válido sem markdown.
+Formato:
+{
+  "titulo": "título curto e descritivo (máx 60 chars)",
+  "resumo": "resumo claro em 2-3 frases do que foi aprendido",
+  "pontos_principais": ["ponto 1","ponto 2","ponto 3"],
+  "aplicacao_pratica": "como isso pode ser aplicado na vida do usuário",
+  "categoria": "medicina|produtividade|financas|saude|tecnologia|comportamento|lideranca|idiomas|outros",
+  "tags": ["tag1","tag2","tag3"]
+}`,
+          messages:[{role:'user',content:[
+            {type:'image',source:{type:'base64',media_type:mediaType,data:base64data}},
+            {type:'text',text:'Analise o conteúdo desta imagem e extraia os aprendizados principais. Retorne em JSON.'}
+          ]}]})});
+      const data=await resp.json();
+      const txt=data.content?.[0]?.text||'';
+      const obj=JSON.parse(txt.replace(/```json|```/g,'').trim());
+      mostrarConfirmacao(obj,{imagem:base64,tipo:'imagem'});
+    }catch(err){
+      document.getElementById('sheet-content').innerHTML=`
+        <div class="sheet-title">⚠️ Não consegui ler</div>
+        <img src="${base64}" style="width:100%;height:120px;object-fit:cover;border-radius:12px;margin-bottom:14px">
+        <div class="ia-bubble jarvis">A imagem pode estar sem texto legível. Tente colar o texto manualmente.</div>
+        <button class="btn btn-ghost" onclick="fecharSheet();abrirAddTexto()">✏️ Adicionar texto</button>
+        <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ═══════ ADD POR VOZ ═══════ */
+function abrirAddVoz(){
+  fecharFab();
+  const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SpeechRecognition){
+    toast('⚠️ Voz não suportada. Use o Safari.');
+    abrirAddTexto();return;
+  }
+
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">🎤 Falar para registrar</div>
+    <div style="text-align:center;padding:20px 0">
+      <div style="font-size:3rem;margin-bottom:12px;animation:pulse 1.5s ease-in-out infinite">🎤</div>
+      <div style="font-weight:700;font-size:.9rem;margin-bottom:6px" id="voz-status">Ouvindo...</div>
+      <div style="font-size:.78rem;color:var(--sub)">Fale o que você aprendeu</div>
+      <div id="voz-transcript" style="margin-top:14px;font-size:.84rem;color:var(--txt);min-height:40px;line-height:1.6"></div>
+    </div>
+    <button class="btn btn-danger" id="voz-parar" onclick="pararVoz()">⏹ Parar</button>`;
+  document.getElementById('overlay').classList.add('open');
+
+  const r=new SpeechRecognition();
+  r.lang='pt-BR';r.continuous=true;r.interimResults=true;
+  window._recognitionAPR=r;
+
+  r.onresult=(e)=>{
+    const txt=Array.from(e.results).map(x=>x[0].transcript).join('');
+    const el=document.getElementById('voz-transcript');
+    if(el)el.textContent=txt;
+  };
+  r.onend=()=>{
+    const txt=document.getElementById('voz-transcript')?.textContent||'';
+    if(txt.length>5){
+      document.getElementById('voz-status').textContent='Analisando...';
+      processarVozIA(txt);
+    } else {
+      toast('⚠️ Não ouvi nada. Tente novamente.');fecharSheet();
+    }
+  };
+  r.onerror=()=>{fecharSheet();toast('⚠️ Erro no microfone.');};
+  r.start();
+}
+
+function pararVoz(){window._recognitionAPR?.stop();}
+
+async function processarVozIA(texto){
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">🤖 Processando...</div>
+    <div class="ia-bubble jarvis">⏳ Organizando o que você falou...</div>`;
+  const res=await processarConteudoIA(texto,'voz','outros');
+  if(res) mostrarConfirmacao(res,{texto,tipo:'voz'});
+  else{fecharSheet();toast('⚠️ Sem conexão com IA.');}
+}
+
+/* ═══════ IA CORE ═══════ */
+async function processarConteudoIA(conteudo,tipo,catSugerida){
+  const system=`Você é um assistente de aprendizado pessoal do Dr. Antonio Roberto, médico em SP.
+Analise o conteúdo e responda APENAS em JSON válido sem markdown.
+Formato:
+{
+  "titulo": "título curto e impactante (máx 60 chars)",
+  "resumo": "resumo claro em 2-3 frases do aprendizado principal",
+  "pontos_principais": ["ponto 1 objetivo","ponto 2 objetivo","ponto 3 objetivo"],
+  "aplicacao_pratica": "como isso se aplica à vida de um médico com rotina intensa",
+  "categoria": "${catSugerida||'outros'}",
+  "tags": ["tag1","tag2","tag3","tag4"]
+}`;
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system,
+        messages:[{role:'user',content:`Tipo de entrada: ${tipo}. Conteúdo:\n\n${conteudo}`}]})});
+    const d=await r.json();
+    const txt=d.content?.[0]?.text||'';
+    return JSON.parse(txt.replace(/```json|```/g,'').trim());
+  }catch(e){return null;}
+}
+
+function mostrarConfirmacao(obj,extra={}){
+  const cat=CATEGORIAS[obj.categoria]||{ic:'📝',label:'Outros'};
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">🤖 Aprendizado extraído</div>
+    <div class="ia-bubble jarvis" style="margin-bottom:14px">
+      <div style="font-weight:800;font-size:.92rem;margin-bottom:8px">${obj.titulo}</div>
+      <div style="font-size:.8rem;color:var(--sub);margin-bottom:10px">${obj.resumo}</div>
+      ${obj.pontos_principais?.length?`<div style="font-size:.78rem">
+        ${obj.pontos_principais.map((p,i)=>`<div style="display:flex;gap:8px;margin-bottom:5px">
+          <span style="color:var(--pur);font-weight:800">${i+1}.</span><span>${p}</span>
+        </div>`).join('')}
+      </div>`:''}
+      ${obj.aplicacao_pratica?`<div style="margin-top:10px;padding:8px;background:rgba(0,245,212,.06);border-radius:8px;font-size:.78px">
+        🔧 ${obj.aplicacao_pratica}</div>`:''}
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Categoria</label>
+        <select class="fi" id="conf-cat">
+          ${Object.entries(CATEGORIAS).map(([k,v])=>`<option value="${k}" ${obj.categoria===k?'selected':''}>${v.ic} ${v.label}</option>`).join('')}
+        </select></div>
+      <div class="fg"><label class="fl">Tags</label>
+        <input class="fi" id="conf-tags" value="${(obj.tags||[]).join(', ')}"></div>
+    </div>
+    <div class="fg"><label class="fl">Fonte</label>
+      <input class="fi" id="conf-fonte" value="${extra.fonte||''}" placeholder="Instagram, livro, podcast..."></div>
+    <button class="btn btn-primary" onclick="confirmarAprendizado(${JSON.stringify(JSON.stringify(obj))}, ${JSON.stringify(JSON.stringify(extra))})">✅ Salvar aprendizado</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+}
+
+function confirmarAprendizado(objStr,extraStr){
+  const obj=JSON.parse(objStr);
+  const extra=JSON.parse(extraStr);
+  const tags=document.getElementById('conf-tags')?.value?.split(',').map(t=>t.trim()).filter(Boolean)||obj.tags||[];
+  const a={
+    id:uid(),
+    titulo:obj.titulo,
+    resumo:obj.resumo,
+    pontos_principais:obj.pontos_principais||[],
+    aplicacao_pratica:obj.aplicacao_pratica||'',
+    categoria:document.getElementById('conf-cat')?.value||obj.categoria||'outros',
+    tags,fonte:document.getElementById('conf-fonte')?.value||extra.fonte||'',
+    imagem:extra.imagem||'',favorito:false,
+    data_iso:hojeISO(),tipo:extra.tipo||'texto',
+  };
+  S.aprendizados.push(a);saveS();fecharSheet();renderFeed();
+  toast(`✓ "${a.titulo.slice(0,30)}..." salvo!`);
+}
+
+/* ═══════ SÍNTESE IA ═══════ */
+async function gerarSintese(){
+  const el=document.getElementById('sintese-wrap');
+  if(el) el.innerHTML=`<div class="ia-bubble jarvis" style="color:var(--sub)">⏳ Gerando síntese...</div>`;
+  const mes=S.aprendizados.filter(a=>{
+    const d=new Date(a.data_iso+'T12:00:00');
+    return d.getMonth()===hoje().getMonth()&&d.getFullYear()===hoje().getFullYear();
+  });
+  if(mes.length===0){if(el)el.innerHTML=`<div style="color:var(--sub);font-size:.82rem">Nenhum aprendizado este mês ainda.</div>`;return;}
+  const lista=mes.map(a=>`- ${a.titulo}: ${a.resumo}`).join('\n');
+  const system=`Você é o Jarvis, assistente pessoal do Dr. Antonio Roberto. Responda em português, máximo 3 parágrafos.`;
+  const res=await callClaude(`Faça uma síntese dos aprendizados deste mês e destaque os mais importantes:\n${lista}`,system);
+  if(el) el.innerHTML=`<div class="ia-bubble jarvis">${res||'⚠️ Sem conexão.'}</div>`;
+}
+
+/* ═══════ BUSCA ═══════ */
+function abrirBusca(){
+  const wrap=document.getElementById('busca-wrap');
+  if(wrap){
+    const visivel=wrap.style.display!=='none';
+    wrap.style.display=visivel?'none':'block';
+    if(!visivel){
+      mudarTab('feed');
+      setTimeout(()=>document.getElementById('busca-input')?.focus(),100);
+    }
+  }
+}
+
+/* ═══════ IA CHAT ═══════ */
+async function callClaude(prompt,system){
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system,
+        messages:[{role:'user',content:prompt}]})});
+    const d=await r.json();
+    return d.content?.[0]?.text||'';
+  }catch(e){return null;}
+}
+
+function abrirIAApr(){
+  const total=S.aprendizados.length;
+  const cats=[...new Set(S.aprendizados.map(a=>a.categoria))].map(c=>CATEGORIAS[c]?.label||c).join(', ');
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">🤖 Jarvis — Aprendizado</div>
+    <div style="background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:12px;
+      padding:12px;font-size:.75rem;color:var(--sub);margin-bottom:14px;line-height:1.6">
+      ${total} insights salvos · Áreas: ${cats||'nenhuma'}
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+      ${['O que aprendi este mês?','Quais padrões você vê?','Resuma meus aprendizados de medicina','Como posso aplicar o que aprendi?'].map(s=>`
+        <button onclick="perguntarIAApr('${s}')" style="background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);color:var(--sub);padding:6px 12px;border-radius:8px;font-size:.72rem;font-weight:600;cursor:pointer;font-family:'Space Grotesk',sans-serif">${s}</button>`).join('')}
+    </div>
+    <div id="ia-apr-resp" style="min-height:60px"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <input class="fi" id="ia-apr-q" placeholder="Pergunte sobre seus aprendizados..." style="flex:1">
+      <button onclick="perguntarIAApr(document.getElementById('ia-apr-q').value)" style="background:var(--g6);border:none;border-radius:12px;padding:0 16px;color:#fff;font-weight:700;cursor:pointer;flex-shrink:0">→</button>
+    </div>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+async function perguntarIAApr(q){
+  if(!q?.trim())return;
+  const el=document.getElementById('ia-apr-resp');
+  if(el) el.innerHTML=`<div class="ia-bubble jarvis" style="color:var(--sub)">⏳ Analisando...</div>`;
+  const resumos=S.aprendizados.slice(-20).map(a=>`[${CATEGORIAS[a.categoria]?.label||a.categoria}] ${a.titulo}: ${a.resumo}`).join('\n');
+  const system=`Você é o Jarvis, assistente do Dr. Antonio Roberto, médico em SP.
+Banco de aprendizados (últimos 20): ${resumos||'vazio'}.
+Responda em português, direto e útil. Máximo 3 parágrafos.`;
+  const res=await callClaude(q,system);
+  if(el) el.innerHTML=`<div class="ia-bubble jarvis">${res||'⚠️ Sem conexão.'}</div>`;
+}
+
+/* ═══════ UTILS ═══════ */
+function fecharSheet(){document.getElementById('overlay').classList.remove('open');fecharFab();}
+let toastT;
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),3200);}
+function updateDate(){document.getElementById('tbar-date').textContent=hojeStr();}
+
+/* ═══════ INIT ═══════ */
+updateDate();
+renderFeed();
+</script>
+</body>
+</html>
