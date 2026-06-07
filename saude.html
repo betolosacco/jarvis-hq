@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Jarvis — Saúde</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060612;--card:#0d0d1f;--card2:#131328;--bdr:#1e1e3f;
+  --cyan:#00f5d4;--pink:#ff2d78;--yel:#ffd60a;--pur:#7c3aed;
+  --blu:#3b82f6;--ora:#ff6b2b;--grn:#22c55e;--red:#ef4444;
+  --txt:#eeeeff;--sub:#6666aa;--r:16px;
+  --g1:linear-gradient(135deg,#00f5d4,#3b82f6);
+  --g2:linear-gradient(135deg,#ff2d78,#7c3aed);
+  --g3:linear-gradient(135deg,#ffd60a,#ff6b2b);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overscroll-behavior:none;}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--txt);
+  min-height:100%;display:flex;flex-direction:column;max-width:480px;margin:0 auto;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 100% 40% at 50% -5%,rgba(34,197,94,.07) 0%,transparent 65%),
+             radial-gradient(ellipse 50% 30% at 95% 85%,rgba(0,245,212,.05) 0%,transparent 60%);}
+
+#scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 0 90px;position:relative;z-index:1;}
+#scroll::-webkit-scrollbar{display:none;}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px 10px;background:rgba(6,6,18,.95);backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:50;}
+.tbar-logo{font-weight:800;font-size:1.05rem;letter-spacing:-.02em;
+  background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.tbar-date{font-size:.72rem;color:var(--sub);font-family:'JetBrains Mono',monospace;margin-top:1px;}
+.tbar-btn{width:34px;height:34px;border-radius:11px;border:1px solid var(--bdr);
+  background:var(--card2);color:var(--txt);font-size:.95rem;cursor:pointer;display:grid;place-items:center;}
+
+/* BOTTOM NAV */
+.bottomnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;background:rgba(6,6,18,.97);backdrop-filter:blur(24px);
+  border-top:1px solid var(--bdr);display:grid;grid-template-columns:repeat(5,1fr);
+  z-index:100;padding-bottom:env(safe-area-inset-bottom,0px);}
+.bnav{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:9px 4px 7px;cursor:pointer;border:none;background:transparent;
+  color:var(--sub);font-family:'Space Grotesk',sans-serif;font-size:.58rem;font-weight:600;
+  gap:3px;text-transform:uppercase;letter-spacing:.05em;}
+.bnav.act{color:var(--cyan);}
+.bnav-ic{font-size:1.2rem;line-height:1;}
+
+/* TABS INTERNOS */
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:14px 16px 0;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{padding:8px 16px;border-radius:20px;border:1px solid var(--bdr);background:var(--card2);
+  font-size:.76rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:.15s;
+  color:var(--sub);font-family:'Space Grotesk',sans-serif;}
+.tab.act{background:rgba(0,245,212,.1);border-color:rgba(0,245,212,.35);color:var(--cyan);}
+
+/* SECTION */
+.sec{padding:14px 16px 0;}
+.pg-tab{display:none;}.pg-tab.act{display:block;}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;margin-bottom:12px;}
+.card-title{font-weight:700;font-size:.88rem;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+
+/* SUMMARY GRID */
+.sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.sum-card{background:var(--card);border:1px solid var(--bdr);border-radius:14px;
+  padding:14px 12px;position:relative;overflow:hidden;cursor:pointer;transition:.15s;}
+.sum-card:active{transform:scale(.97);}
+.sum-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--c,var(--cyan));}
+.sum-card.c{--c:var(--cyan)}.sum-card.g{--c:var(--grn)}.sum-card.y{--c:var(--yel)}.sum-card.p{--c:var(--pur)}.sum-card.o{--c:var(--ora)}
+.sum-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--sub);margin-bottom:5px;}
+.sum-val{font-weight:800;font-size:1.4rem;letter-spacing:-.03em;font-family:'JetBrains Mono',monospace;}
+.sum-sub{font-size:.68rem;color:var(--sub);margin-top:2px;}
+.sum-trend{position:absolute;top:10px;right:10px;font-size:.85rem;}
+
+/* PROGRESS */
+.prog-wrap{margin-bottom:12px;}
+.prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.prog-label{font-size:.8rem;font-weight:600;}
+.prog-val{font-size:.75rem;color:var(--sub);font-family:'JetBrains Mono',monospace;}
+.prog-track{height:8px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:999px;transition:width .8s ease;}
+
+/* CHART — peso */
+.chart-wrap{height:100px;position:relative;margin:8px 0 14px;}
+.chart-svg{width:100%;height:100%;}
+
+/* HEATMAP TREINOS */
+.heatmap{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:14px;}
+.hm-cell{aspect-ratio:1;border-radius:5px;background:var(--bdr);cursor:pointer;transition:.15s;position:relative;}
+.hm-cell.treino{background:var(--grn);}
+.hm-cell.treino-leve{background:rgba(34,197,94,.4);}
+.hm-cell:active{transform:scale(.9);}
+.hm-label{font-size:.6rem;color:var(--sub);text-align:center;margin-bottom:4px;
+  display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+
+/* TREINO CARDS */
+.treino-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.treino-card{background:var(--card2);border:1px solid var(--bdr);border-radius:13px;
+  padding:12px 8px;text-align:center;cursor:pointer;transition:.15s;}
+.treino-card.ativo{border-color:var(--grn);background:rgba(34,197,94,.08);}
+.treino-card:active{transform:scale(.95);}
+.treino-ic{font-size:1.5rem;margin-bottom:4px;}
+.treino-nome{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+.treino-cnt{font-size:.65rem;color:var(--sub);margin-top:3px;font-family:'JetBrains Mono',monospace;}
+
+/* SONO STRIP */
+.sono-strip{display:flex;gap:4px;margin-bottom:8px;overflow-x:auto;}
+.sono-strip::-webkit-scrollbar{display:none;}
+.sono-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;width:36px;}
+.sono-bar-bg{width:12px;height:60px;background:rgba(255,255,255,.06);border-radius:6px;
+  position:relative;overflow:hidden;}
+.sono-bar-fill{position:absolute;bottom:0;left:0;right:0;border-radius:6px;transition:.6s ease;}
+.sono-bar-label{font-size:.6rem;color:var(--sub);font-family:'JetBrains Mono',monospace;}
+.sono-bar-dia{font-size:.58rem;color:var(--sub);}
+
+/* REFEICAO */
+.refeicao-item{display:flex;align-items:flex-start;gap:10px;
+  padding:10px 0;border-bottom:1px solid var(--bdr);}
+.refeicao-item:last-child{border-bottom:none;}
+.ref-time{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--sub);
+  flex-shrink:0;width:48px;padding-top:2px;}
+.ref-content{flex:1;}
+.ref-nome{font-weight:600;font-size:.85rem;}
+.ref-macro{font-size:.7rem;color:var(--sub);margin-top:3px;}
+.ref-check{width:22px;height:22px;border-radius:7px;border:2px solid var(--bdr);
+  flex-shrink:0;display:grid;place-items:center;cursor:pointer;transition:.15s;}
+.ref-check.done{background:var(--grn);border-color:var(--grn);color:#fff;}
+
+/* LIST ITEMS */
+.list-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--bdr);}
+.list-item:last-child{border-bottom:none;}
+.list-ico{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:1.05rem;flex-shrink:0;}
+.list-info{flex:1;min-width:0;}
+.list-title{font-weight:600;font-size:.86rem;}
+.list-sub{font-size:.71rem;color:var(--sub);margin-top:2px;}
+.list-right{font-weight:700;font-size:.9rem;text-align:right;flex-shrink:0;font-family:'JetBrains Mono',monospace;}
+.pos{color:var(--grn)}.neg{color:var(--pink)}.neu{color:var(--sub)}
+
+/* FAB */
+.fab{position:fixed;bottom:76px;right:calc(50% - 230px);
+  width:52px;height:52px;border-radius:50%;border:none;
+  background:var(--g1);color:#060612;font-size:1.35rem;
+  cursor:pointer;box-shadow:0 4px 24px rgba(0,245,212,.35);
+  display:grid;place-items:center;z-index:99;transition:.15s;}
+.fab:active{transform:scale(.92);}
+@media(max-width:480px){.fab{right:14px;}}
+
+/* OVERLAY */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(12px);
+  z-index:200;display:none;flex-direction:column;justify-content:flex-end;}
+.overlay.open{display:flex;}
+.sheet{background:var(--card);border-radius:24px 24px 0 0;border:1px solid var(--bdr);
+  border-bottom:none;padding:6px 20px calc(24px + env(safe-area-inset-bottom,0px));
+  max-height:92vh;overflow-y:auto;}
+.sheet::-webkit-scrollbar{display:none;}
+.sheet-handle{width:36px;height:4px;border-radius:2px;background:var(--bdr);margin:10px auto 16px;}
+.sheet-title{font-weight:800;font-size:1.05rem;margin-bottom:18px;text-align:center;}
+
+/* FORM */
+.fg{margin-bottom:14px;}
+.fl{display:block;font-size:.7rem;font-weight:700;color:var(--sub);margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em;}
+.fi{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:12px;
+  padding:12px 14px;color:var(--txt);font-family:'Space Grotesk',sans-serif;font-size:.9rem;outline:none;transition:.15s;}
+.fi:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,245,212,.1);}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+select.fi{appearance:none;cursor:pointer;}
+textarea.fi{resize:none;line-height:1.5;}
+
+/* BOTOES */
+.btn{width:100%;padding:13px;border-radius:13px;border:none;cursor:pointer;
+  font-family:'Space Grotesk',sans-serif;font-size:.9rem;font-weight:700;margin-bottom:8px;transition:.15s;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--g1);color:#060612;}
+.btn-ghost{background:transparent;border:1px solid var(--bdr);color:var(--txt);}
+.btn-danger{background:rgba(255,45,120,.1);border:1px solid rgba(255,45,120,.3);color:var(--pink);}
+.btn-grn{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:var(--grn);}
+
+/* IA BUBBLE */
+.ia-bubble{padding:10px 14px;border-radius:14px;font-size:.84rem;line-height:1.6;margin-bottom:8px;}
+.ia-bubble.jarvis{background:rgba(123,58,237,.1);border:1px solid rgba(123,58,237,.2);border-radius:14px 14px 14px 4px;}
+.ia-loading{color:var(--sub);font-style:italic;}
+
+/* TOAST */
+.toast{position:fixed;bottom:98px;left:50%;transform:translateX(-50%) translateY(10px);
+  background:var(--card2);border:1px solid var(--bdr);border-radius:12px;
+  padding:10px 18px;font-size:.82rem;font-weight:600;opacity:0;transition:.25s;
+  z-index:300;white-space:nowrap;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+.divider{height:1px;background:var(--bdr);margin:14px 0;}
+.sec-title{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--sub);
+  margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--bdr);}
+.spacer{height:12px;}
+
+/* MACROS BAR */
+.macro-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:10px 0;}
+.macro-box{background:var(--card2);border:1px solid var(--bdr);border-radius:11px;
+  padding:10px 8px;text-align:center;}
+.macro-val{font-weight:800;font-size:1rem;font-family:'JetBrains Mono',monospace;}
+.macro-label{font-size:.65rem;color:var(--sub);margin-top:2px;text-transform:uppercase;letter-spacing:.05em;}
+
+/* PESO META */
+.meta-card{background:linear-gradient(135deg,rgba(0,245,212,.08),rgba(59,130,246,.06));
+  border:1px solid rgba(0,245,212,.2);border-radius:14px;padding:16px;margin-bottom:12px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="tbar-logo">💪 Saúde</div>
+    <div class="tbar-date" id="tbar-date">—</div>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="tbar-btn" onclick="abrirIA()">🤖</button>
+  </div>
+</div>
+
+<!-- TABS INTERNOS -->
+<div class="tabs">
+  <button class="tab act" onclick="mudarTab('peso')" id="tab-peso">⚖️ Peso</button>
+  <button class="tab" onclick="mudarTab('treinos')" id="tab-treinos">💪 Treinos</button>
+  <button class="tab" onclick="mudarTab('sono')" id="tab-sono">😴 Sono</button>
+  <button class="tab" onclick="mudarTab('nutricao')" id="tab-nutricao">🥗 Nutrição</button>
+</div>
+
+<div id="scroll">
+  <div class="sec">
+
+    <!-- ══ PESO ══ -->
+    <div class="pg-tab act" id="pg-peso">
+      <div class="spacer"></div>
+      <div id="peso-summary"></div>
+      <div class="card">
+        <div class="card-title">📈 Evolução do Peso
+          <button onclick="abrirRegistroPeso()" style="margin-left:auto;background:rgba(0,245,212,.08);border:1px solid rgba(0,245,212,.2);color:var(--cyan);padding:4px 10px;border-radius:8px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif">+ Registrar</button>
+        </div>
+        <div class="chart-wrap"><canvas id="peso-chart" style="width:100%;height:100px"></canvas></div>
+        <div id="peso-historico"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">🎯 Meta de Peso</div>
+        <div id="peso-meta-wrap"></div>
+      </div>
+    </div>
+
+    <!-- ══ TREINOS ══ -->
+    <div class="pg-tab" id="pg-treinos">
+      <div class="spacer"></div>
+      <div id="treinos-summary"></div>
+      <div class="card">
+        <div class="card-title">📅 Últimas 4 semanas</div>
+        <div class="hm-label" id="hm-dias"></div>
+        <div class="heatmap" id="heatmap"></div>
+        <div style="display:flex;gap:12px;font-size:.7rem;color:var(--sub)">
+          <span>⬜ Sem treino</span>
+          <span style="color:rgba(34,197,94,.5)">▪ Leve</span>
+          <span style="color:var(--grn)">▪ Completo</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🏃 Modalidades
+          <button onclick="abrirRegistroTreino()" style="margin-left:auto;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);color:var(--grn);padding:4px 10px;border-radius:8px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif">+ Registrar</button>
+        </div>
+        <div class="treino-grid" id="treino-grid"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 Últimos Treinos</div>
+        <div id="treinos-lista"></div>
+      </div>
+      <div class="card" id="planos-treino-card">
+        <div class="card-title">📄 Planos de Treino</div>
+        <div id="planos-lista"></div>
+        <button class="btn btn-ghost" onclick="gerarPlanoTreino()" style="margin-bottom:0;margin-top:8px">🤖 Gerar plano com IA</button>
+      </div>
+    </div>
+
+    <!-- ══ SONO ══ -->
+    <div class="pg-tab" id="pg-sono">
+      <div class="spacer"></div>
+      <div id="sono-summary"></div>
+      <div class="card">
+        <div class="card-title">😴 Últimos 7 dias
+          <button onclick="abrirRegistroSono()" style="margin-left:auto;background:rgba(123,58,237,.08);border:1px solid rgba(123,58,237,.2);color:var(--pur);padding:4px 10px;border-radius:8px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif">+ Registrar</button>
+        </div>
+        <div class="sono-strip" id="sono-strip"></div>
+        <div id="sono-historico"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">💡 Análise do Sono</div>
+        <div id="sono-analise"></div>
+      </div>
+    </div>
+
+    <!-- ══ NUTRICAO ══ -->
+    <div class="pg-tab" id="pg-nutricao">
+      <div class="spacer"></div>
+      <div id="nutri-summary"></div>
+      <div class="card">
+        <div class="card-title">🥗 Plano Alimentar
+          <span id="nutri-status" style="margin-left:auto;font-size:.72rem;color:var(--sub)"></span>
+        </div>
+        <div id="plano-wrap"></div>
+      </div>
+      <div class="card" id="registro-dia-card">
+        <div class="card-title">✅ Execução de Hoje
+          <button onclick="abrirRegistroRefeicao()" style="margin-left:auto;background:rgba(255,214,10,.08);border:1px solid rgba(255,214,10,.2);color:var(--yel);padding:4px 10px;border-radius:8px;font-size:.7rem;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif">+ Refeição</button>
+        </div>
+        <div id="refeicoes-hoje"></div>
+        <div id="macros-hoje" style="margin-top:10px"></div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+  </div>
+</div>
+
+<!-- FAB -->
+<button class="fab" id="fab" onclick="fabAction()">＋</button>
+
+<!-- BOTTOM NAV -->
+<nav class="bottomnav">
+  <button class="bnav"><span class="bnav-ic">🏠</span><span>Hoje</span></button>
+  <button class="bnav act"><span class="bnav-ic">💪</span><span>Saúde</span></button>
+  <button class="bnav"><span class="bnav-ic">📚</span><span>Estudos</span></button>
+  <button class="bnav"><span class="bnav-ic">💰</span><span>Finanças</span></button>
+  <button class="bnav"><span class="bnav-ic">☰</span><span>Mais</span></button>
+</nav>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="fecharSheet()">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div id="sheet-content"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════ STATE ═══════════════════════ */
+const KEY = 'jarvis_saude_v1';
+let S = {
+  config:{nome:'Dr. Antonio', peso_meta:75, peso_inicial:null},
+  peso:[],
+  treinos:[],
+  sono:[],
+  plano_alimentar:null,
+  refeicoes:[],
+  planos_treino:[],
+};
+function loadS(){try{const d=localStorage.getItem(KEY);if(d)S={...S,...JSON.parse(d)};}catch(e){}}
+function saveS(){localStorage.setItem(KEY,JSON.stringify(S));}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+loadS();
+
+const DIAS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const MESES=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+function hoje(){return new Date();}
+function hojeISO(){return hoje().toISOString().split('T')[0];}
+function hojeStr(){const d=hoje();return `${DIAS[d.getDay()]}, ${d.getDate()} ${MESES[d.getMonth()]} ${d.getFullYear()}`;}
+function dataFmt(iso){const d=new Date(iso+'T12:00:00');return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;}
+function pct(a,b){return b>0?Math.min(100,Math.round(a/b*100)):0;}
+
+/* ═══════════════════════ TABS ═══════════════════════ */
+let tabAtual = 'peso';
+function mudarTab(t){
+  tabAtual=t;
+  document.querySelectorAll('.pg-tab').forEach(p=>p.classList.remove('act'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('act'));
+  document.getElementById('pg-'+t)?.classList.add('act');
+  document.getElementById('tab-'+t)?.classList.add('act');
+  fabLabels[t]?.();
+  ({peso:renderPeso,treinos:renderTreinos,sono:renderSono,nutricao:renderNutricao})[t]?.();
+}
+const fabLabels={
+  peso:()=>{document.getElementById('fab').textContent='⚖️';},
+  treinos:()=>{document.getElementById('fab').textContent='💪';},
+  sono:()=>{document.getElementById('fab').textContent='😴';},
+  nutricao:()=>{document.getElementById('fab').textContent='🥗';},
+};
+function fabAction(){
+  ({peso:abrirRegistroPeso,treinos:abrirRegistroTreino,sono:abrirRegistroSono,nutricao:abrirRegistroRefeicao})[tabAtual]?.();
+}
+
+/* ═══════════════════════ PESO ═══════════════════════ */
+function renderPeso(){
+  const ultimos = S.peso.slice(-10);
+  const atual = ultimos.length ? ultimos[ultimos.length-1] : null;
+  const meta = S.config.peso_meta||75;
+  const ini = S.config.peso_inicial || (ultimos.length ? ultimos[0].valor : null);
+  const diff = atual ? (atual.valor - meta).toFixed(1) : null;
+  const perdeu = ini && atual ? (ini - atual.valor).toFixed(1) : 0;
+  const progPeso = ini && ini>meta ? pct(ini-atual?.valor||0, ini-meta) : 0;
+
+  document.getElementById('peso-summary').innerHTML = `
+    <div class="sum-grid" style="margin-bottom:12px">
+      <div class="sum-card c">
+        <div class="sum-label">Peso Atual</div>
+        <div class="sum-val">${atual?atual.valor:'--'}<span style="font-size:.75rem;font-weight:500"> kg</span></div>
+        <div class="sum-sub">Meta: ${meta} kg</div>
+        ${atual&&S.peso.length>1?`<div class="sum-trend">${atual.valor<S.peso[S.peso.length-2]?.valor?'↓':'↑'}</div>`:''}
+      </div>
+      <div class="sum-card ${parseFloat(diff)<0?'g':'p'}">
+        <div class="sum-label">${parseFloat(diff)<0?'Abaixo':'Acima'} da meta</div>
+        <div class="sum-val">${diff!==null?Math.abs(diff):'--'}<span style="font-size:.75rem;font-weight:500"> kg</span></div>
+        <div class="sum-sub">${parseFloat(perdeu)>0?`↓ ${perdeu}kg perdidos`:'Registre seu peso'}</div>
+      </div>
+    </div>`;
+
+  // gráfico simples canvas
+  renderGraficoPeso(ultimos);
+
+  // meta progress
+  document.getElementById('peso-meta-wrap').innerHTML = `
+    <div class="prog-wrap" style="margin-bottom:14px">
+      <div class="prog-top">
+        <span class="prog-label">Progresso para ${meta} kg</span>
+        <span class="prog-val">${progPeso}%</span>
+      </div>
+      <div class="prog-track" style="height:10px">
+        <div class="prog-fill" style="width:${progPeso}%;background:${progPeso>=75?'var(--grn)':progPeso>=40?'var(--yel)':'var(--pink)'}"></div>
+      </div>
+    </div>
+    <div class="fr2" style="margin-bottom:0">
+      <div class="fg" style="margin-bottom:0">
+        <label class="fl">Peso atual</label>
+        <input class="fi" type="number" id="meta-atual" value="${atual?.valor||''}" placeholder="kg" step="0.1">
+      </div>
+      <div class="fg" style="margin-bottom:0">
+        <label class="fl">Meta (kg)</label>
+        <input class="fi" type="number" id="meta-peso" value="${meta}" step="0.5">
+      </div>
+    </div>
+    <button class="btn btn-ghost" onclick="salvarMeta()" style="margin-top:10px;margin-bottom:0">💾 Salvar meta</button>
+  `;
+
+  // histórico
+  document.getElementById('peso-historico').innerHTML = S.peso.length===0
+    ? `<div style="text-align:center;padding:20px;color:var(--sub);font-size:.82rem">Nenhum registro ainda.<br>Registre seu peso toda manhã em jejum.</div>`
+    : S.peso.slice(-8).reverse().map((p,i,arr)=>{
+      const ant = arr[i+1];
+      const dif = ant ? (p.valor-ant.valor).toFixed(1) : null;
+      return `<div class="list-item">
+        <div class="list-ico" style="background:rgba(0,245,212,.08)">⚖️</div>
+        <div class="list-info">
+          <div class="list-title">${p.valor} kg</div>
+          <div class="list-sub">${p.data}</div>
+        </div>
+        <div class="list-right ${dif===null?'neu':parseFloat(dif)<0?'pos':'neg'}">
+          ${dif===null?'—':parseFloat(dif)<0?`↓ ${Math.abs(dif)}`:parseFloat(dif)===0?'→':'↑ +'+dif}
+        </div>
+      </div>`;
+    }).join('');
+}
+
+function renderGraficoPeso(dados){
+  const canvas = document.getElementById('peso-chart');
+  if(!canvas||!dados.length) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth * window.devicePixelRatio || 400;
+  canvas.height = 100 * window.devicePixelRatio || 100;
+  ctx.scale(window.devicePixelRatio||1, window.devicePixelRatio||1);
+  const W = canvas.offsetWidth||400, H=100;
+
+  if(dados.length < 2){ ctx.fillStyle='rgba(102,102,170,.3)'; ctx.font='12px Space Grotesk'; ctx.textAlign='center'; ctx.fillText('Registre pelo menos 2 pesagens para ver o gráfico',W/2,H/2); return; }
+
+  const vals = dados.map(d=>d.valor);
+  const min = Math.min(...vals)-1, max = Math.max(...vals)+1;
+  const scaleY = v => H - ((v-min)/(max-min))*(H-20)-10;
+  const scaleX = i => (i/(dados.length-1))*(W-20)+10;
+
+  // gradient fill
+  const grad = ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,'rgba(0,245,212,.25)');
+  grad.addColorStop(1,'rgba(0,245,212,0)');
+
+  ctx.beginPath();
+  ctx.moveTo(scaleX(0),scaleY(vals[0]));
+  for(let i=1;i<vals.length;i++){
+    const cp1x=(scaleX(i-1)+scaleX(i))/2, cp1y=scaleY(vals[i-1]);
+    const cp2x=(scaleX(i-1)+scaleX(i))/2, cp2y=scaleY(vals[i]);
+    ctx.bezierCurveTo(cp1x,cp1y,cp2x,cp2y,scaleX(i),scaleY(vals[i]));
+  }
+  ctx.lineTo(scaleX(vals.length-1),H);
+  ctx.lineTo(scaleX(0),H);
+  ctx.closePath();
+  ctx.fillStyle=grad; ctx.fill();
+
+  // linha
+  ctx.beginPath();
+  ctx.moveTo(scaleX(0),scaleY(vals[0]));
+  for(let i=1;i<vals.length;i++){
+    const cp1x=(scaleX(i-1)+scaleX(i))/2;
+    ctx.bezierCurveTo(cp1x,scaleY(vals[i-1]),cp1x,scaleY(vals[i]),scaleX(i),scaleY(vals[i]));
+  }
+  ctx.strokeStyle='var(--cyan)'; ctx.lineWidth=2; ctx.stroke();
+
+  // pontos
+  vals.forEach((v,i)=>{
+    ctx.beginPath();
+    ctx.arc(scaleX(i),scaleY(v),4,0,Math.PI*2);
+    ctx.fillStyle='var(--cyan)'; ctx.fill();
+    ctx.strokeStyle='var(--bg)'; ctx.lineWidth=2; ctx.stroke();
+  });
+
+  // meta line
+  if(S.config.peso_meta && S.config.peso_meta>=min && S.config.peso_meta<=max){
+    const my = scaleY(S.config.peso_meta);
+    ctx.beginPath();
+    ctx.setLineDash([4,4]);
+    ctx.moveTo(10,my); ctx.lineTo(W-10,my);
+    ctx.strokeStyle='rgba(34,197,94,.5)'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='rgba(34,197,94,.8)'; ctx.font='10px JetBrains Mono'; ctx.textAlign='right';
+    ctx.fillText(`meta ${S.config.peso_meta}kg`,W-4,my-4);
+  }
+}
+
+function salvarMeta(){
+  const m = parseFloat(document.getElementById('meta-peso').value);
+  const a = parseFloat(document.getElementById('meta-atual').value);
+  if(m>0) S.config.peso_meta=m;
+  if(a>0 && !S.config.peso_inicial) S.config.peso_inicial=a;
+  saveS(); renderPeso(); toast('✓ Meta salva!');
+}
+
+/* ═══════════════════════ TREINOS ═══════════════════════ */
+const MODALIDADES = [
+  {key:'academia',ic:'🏋️',nome:'Academia'},
+  {key:'corrida',ic:'🏃',nome:'Corrida'},
+  {key:'natacao',ic:'🏊',nome:'Natação'},
+  {key:'tenis',ic:'🎾',nome:'Tênis'},
+  {key:'boxe',ic:'🥊',nome:'Boxe'},
+  {key:'caminhada',ic:'🚶',nome:'Caminhada'},
+];
+
+function renderTreinos(){
+  const semana = S.treinos.filter(t=>(hoje()-new Date(t.data_iso+'T12:00:00'))/864e5<7);
+  const mes = S.treinos.filter(t=>(hoje()-new Date(t.data_iso+'T12:00:00'))/864e5<30);
+
+  document.getElementById('treinos-summary').innerHTML = `
+    <div class="sum-grid" style="margin-bottom:12px">
+      <div class="sum-card g">
+        <div class="sum-label">Esta Semana</div>
+        <div class="sum-val">${semana.length}<span style="font-size:.75rem;font-weight:500">/4</span></div>
+        <div class="sum-sub">Meta: 4–5 sessões</div>
+      </div>
+      <div class="sum-card y">
+        <div class="sum-label">Este Mês</div>
+        <div class="sum-val">${mes.length}</div>
+        <div class="sum-sub">${mes.length>0?Math.round(mes.reduce((a,t)=>a+(t.duracao||60),0)/60)+'h total':''}</div>
+      </div>
+      <div class="sum-card c">
+        <div class="sum-label">Sequência</div>
+        <div class="sum-val">${calcularSequencia()}<span style="font-size:.75rem"> dias</span></div>
+        <div class="sum-sub">consecutivos</div>
+      </div>
+      <div class="sum-card o">
+        <div class="sum-label">Favorita</div>
+        <div class="sum-val" style="font-size:1rem">${modalidadeFavorita()}</div>
+        <div class="sum-sub">mais praticada</div>
+      </div>
+    </div>`;
+
+  // heatmap 28 dias
+  renderHeatmap();
+
+  // treino grid
+  document.getElementById('treino-grid').innerHTML = MODALIDADES.map(m=>{
+    const cnt = semana.filter(t=>t.tipo===m.key).length;
+    return `<div class="treino-card ${cnt>0?'ativo':''}" onclick="abrirRegistroTreino('${m.key}')">
+      <div class="treino-ic">${m.ic}</div>
+      <div class="treino-nome">${m.nome}</div>
+      <div class="treino-cnt">${cnt}x/sem</div>
+    </div>`;
+  }).join('');
+
+  // lista recente
+  document.getElementById('treinos-lista').innerHTML = S.treinos.length===0
+    ? `<div style="text-align:center;padding:20px;color:var(--sub);font-size:.82rem">Nenhum treino registrado ainda.</div>`
+    : S.treinos.slice(-6).reverse().map(t=>{
+      const mod = MODALIDADES.find(m=>m.key===t.tipo)||{ic:'💪',nome:t.tipo};
+      return `<div class="list-item">
+        <div class="list-ico" style="background:rgba(34,197,94,.08)">${mod.ic}</div>
+        <div class="list-info">
+          <div class="list-title">${mod.nome}</div>
+          <div class="list-sub">${t.data_iso} · ${t.duracao||60} min · ${t.intensidade||'Moderada'}</div>
+          ${t.obs?`<div class="list-sub" style="margin-top:2px;color:var(--yel)">💬 ${t.obs}</div>`:''}
+        </div>
+        <div class="list-right pos">✓</div>
+      </div>`;
+    }).join('');
+
+  // planos
+  document.getElementById('planos-lista').innerHTML = S.planos_treino.length===0
+    ? `<div style="font-size:.8rem;color:var(--sub)">Nenhum plano gerado ainda. Toque em "Gerar plano com IA" para criar um plano personalizado por modalidade, objetivo e disponibilidade.</div>`
+    : S.planos_treino.map(p=>`
+      <div class="list-item" onclick="verPlano('${p.id}')">
+        <div class="list-ico" style="background:rgba(123,58,237,.08)">📋</div>
+        <div class="list-info">
+          <div class="list-title">${p.nome}</div>
+          <div class="list-sub">${p.data} · ${p.semanas} semanas</div>
+        </div>
+        <div class="list-right neu">→</div>
+      </div>`).join('');
+}
+
+function calcularSequencia(){
+  if(!S.treinos.length) return 0;
+  const datas = [...new Set(S.treinos.map(t=>t.data_iso))].sort().reverse();
+  let seq=0, d=new Date();
+  for(const dt of datas){
+    const diff=Math.round((d-new Date(dt+'T12:00:00'))/864e5);
+    if(diff<=1){seq++;d=new Date(dt+'T12:00:00');}
+    else break;
+  }
+  return seq;
+}
+
+function modalidadeFavorita(){
+  if(!S.treinos.length) return '--';
+  const cnt={};
+  S.treinos.forEach(t=>{cnt[t.tipo]=(cnt[t.tipo]||0)+1;});
+  const fav=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0]?.[0];
+  return MODALIDADES.find(m=>m.key===fav)?.ic||'💪';
+}
+
+function renderHeatmap(){
+  const cells=[];
+  const dias_label=['D','S','T','Q','Q','S','S'];
+  const hoje_d=new Date(); hoje_d.setHours(0,0,0,0);
+  for(let i=27;i>=0;i--){
+    const d=new Date(hoje_d); d.setDate(d.getDate()-i);
+    const iso=d.toISOString().split('T')[0];
+    const treinos_dia=S.treinos.filter(t=>t.data_iso===iso);
+    cells.push({iso,treinos:treinos_dia,dia:d.getDay()});
+  }
+  document.getElementById('hm-dias').innerHTML=dias_label.map(l=>`<span>${l}</span>`).join('');
+  document.getElementById('heatmap').innerHTML=cells.map(c=>`
+    <div class="hm-cell ${c.treinos.length>1?'treino':c.treinos.length===1?'treino-leve':''}"
+      onclick="verDiaTreino('${c.iso}')"
+      title="${c.iso}: ${c.treinos.length} treino${c.treinos.length!==1?'s':''}">
+    </div>`).join('');
+}
+
+function verDiaTreino(iso){
+  const treinos_dia=S.treinos.filter(t=>t.data_iso===iso);
+  if(!treinos_dia.length){toast(`📅 ${iso}: sem treino registrado`);return;}
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">📅 ${dataFmt(iso)}</div>
+    ${treinos_dia.map(t=>{
+      const mod=MODALIDADES.find(m=>m.key===t.tipo)||{ic:'💪',nome:t.tipo};
+      return `<div class="list-item">
+        <div class="list-ico" style="background:rgba(34,197,94,.08)">${mod.ic}</div>
+        <div class="list-info">
+          <div class="list-title">${mod.nome} · ${t.duracao||60} min</div>
+          <div class="list-sub">${t.intensidade||'—'}</div>
+          ${t.obs?`<div class="list-sub" style="color:var(--yel)">💬 ${t.obs}</div>`:''}
+        </div>
+        <button onclick="deletarTreino('${t.id}')" style="background:none;border:none;color:var(--pink);font-size:1rem;cursor:pointer">🗑</button>
+      </div>`;}).join('')}
+    <button class="btn btn-ghost" onclick="fecharSheet()" style="margin-top:12px">Fechar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function deletarTreino(id){
+  S.treinos=S.treinos.filter(t=>t.id!==id);
+  saveS();fecharSheet();renderTreinos();toast('🗑 Treino removido');
+}
+
+function verPlano(id){
+  const p=S.planos_treino.find(x=>x.id===id);
+  if(!p) return;
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">📋 ${p.nome}</div>
+    <div style="font-size:.82rem;line-height:1.8;color:var(--sub);white-space:pre-line">${p.conteudo}</div>
+    <button class="btn btn-danger" onclick="S.planos_treino=S.planos_treino.filter(x=>x.id!=='${id}');saveS();fecharSheet();renderTreinos()" style="margin-top:14px">🗑 Excluir plano</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Fechar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+/* ═══════════════════════ SONO ═══════════════════════ */
+function renderSono(){
+  const ultimos7=S.sono.slice(-7);
+  const media=ultimos7.length?Math.round(ultimos7.reduce((a,s)=>a+s.horas+(s.min||0)/60,0)/ultimos7.length*10)/10:null;
+  const meta=7.5;
+
+  document.getElementById('sono-summary').innerHTML=`
+    <div class="sum-grid" style="margin-bottom:12px">
+      <div class="sum-card p">
+        <div class="sum-label">Média 7 dias</div>
+        <div class="sum-val">${media||'--'}<span style="font-size:.75rem;font-weight:500">h</span></div>
+        <div class="sum-sub">Meta: ${meta}h</div>
+      </div>
+      <div class="sum-card ${media>=meta?'g':media>=6?'y':'p'}">
+        <div class="sum-label">Qualidade</div>
+        <div class="sum-val" style="font-size:1rem">${media>=meta?'🟢 Boa':media>=6?'🟡 Ok':'🔴 Ruim'}</div>
+        <div class="sum-sub">${media?`${media>=meta?'+':''}${(media-meta).toFixed(1)}h vs meta`:'sem dados'}</div>
+      </div>
+    </div>`;
+
+  // strip visual
+  const strip=document.getElementById('sono-strip');
+  const ultimos=S.sono.slice(-10);
+  strip.innerHTML=ultimos.length===0
+    ? `<div style="font-size:.78rem;color:var(--sub);padding:10px 0">Nenhum registro ainda.</div>`
+    : ultimos.map(s=>{
+      const hrs=s.horas+(s.min||0)/60;
+      const pct_h=Math.min(100,Math.round(hrs/10*100));
+      const cor=hrs>=7.5?'var(--grn)':hrs>=6?'var(--yel)':'var(--pink)';
+      const d=new Date(s.data_iso+'T12:00:00');
+      return `<div class="sono-bar-wrap">
+        <div class="sono-bar-bg">
+          <div class="sono-bar-fill" style="height:${pct_h}%;background:${cor}"></div>
+        </div>
+        <div class="sono-bar-label">${s.horas}h</div>
+        <div class="sono-bar-dia">${['D','S','T','Q','Q','S','S'][d.getDay()]}</div>
+      </div>`;
+    }).join('');
+
+  // historico
+  document.getElementById('sono-historico').innerHTML=S.sono.length===0?'':
+    `<div class="divider"></div>`+
+    S.sono.slice(-5).reverse().map(s=>`
+      <div class="list-item">
+        <div class="list-ico" style="background:rgba(123,58,237,.08)">🌙</div>
+        <div class="list-info">
+          <div class="list-title">${s.horas}h${s.min?s.min+'min':''} · ${s.qualidade||'—'}</div>
+          <div class="list-sub">${s.data_iso}</div>
+        </div>
+        <div class="list-right ${s.horas>=7.5?'pos':s.horas>=6?'neu':'neg'}">${s.horas}h</div>
+      </div>`).join('');
+
+  // análise
+  const analise=gerarAnaliseSono(media,ultimos7);
+  document.getElementById('sono-analise').innerHTML=`
+    <div class="ia-bubble jarvis">${analise}</div>`;
+}
+
+function gerarAnaliseSono(media,ultimos){
+  if(!media) return '📊 Registre seu sono por alguns dias para ver a análise aqui.';
+  const ruins=ultimos.filter(s=>s.horas<6).length;
+  const bons=ultimos.filter(s=>s.horas>=7.5).length;
+  let txt='';
+  if(media>=7.5) txt=`✅ Excelente! Média de ${media}h está acima da meta. Continue assim.`;
+  else if(media>=6.5) txt=`⚠️ Média de ${media}h está próxima da meta (7h30). ${bons} noite${bons!==1?'s':''} com sono adequado na semana.`;
+  else txt=`🔴 Atenção: média de ${media}h está abaixo do necessário. ${ruins} noite${ruins!==1?'s':''} com menos de 6h essa semana. Sono insuficiente impacta desempenho clínico e cognitivo.`;
+  txt+=` Sua rotina de pós-graduação (até 22h10 seg/ter) compromete o tempo de sono. Tente dormir até 23h e acordar às 7h.`;
+  return txt;
+}
+
+/* ═══════════════════════ NUTRICAO ═══════════════════════ */
+function renderNutricao(){
+  const plano=S.plano_alimentar;
+  const refHoje=S.refeicoes.filter(r=>r.data_iso===hojeISO());
+
+  document.getElementById('nutri-status').textContent=plano?`Ativo · ${plano.kcal} kcal/dia`:'Sem plano ativo';
+
+  if(!plano){
+    document.getElementById('plano-wrap').innerHTML=`
+      <div style="text-align:center;padding:16px 0;color:var(--sub)">
+        <div style="font-size:2rem;margin-bottom:10px">🥗</div>
+        <div style="font-size:.84rem;line-height:1.6;margin-bottom:16px">Nenhum plano alimentar ativo.<br>A IA pode criar um plano personalizado<br>baseado no seu objetivo e rotina.</div>
+      </div>
+      <button class="btn btn-primary" onclick="gerarPlanoAlimentar()" style="margin-bottom:8px">🤖 Gerar plano com IA</button>
+      <button class="btn btn-ghost" onclick="abrirPlanoManual()" style="margin-bottom:0">✏️ Inserir plano manualmente</button>`;
+  } else {
+    const macrosTotais={kcal:0,prot:0,carb:0,gord:0};
+    plano.refeicoes?.forEach(r=>{macrosTotais.kcal+=r.kcal||0;macrosTotais.prot+=r.prot||0;macrosTotais.carb+=r.carb||0;macrosTotais.gord+=r.gord||0;});
+    document.getElementById('plano-wrap').innerHTML=`
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+        <span style="background:rgba(0,245,212,.08);border:1px solid rgba(0,245,212,.2);color:var(--cyan);padding:4px 10px;border-radius:8px;font-size:.72rem;font-weight:700">${plano.objetivo||'Equilíbrio'}</span>
+        <span style="background:rgba(255,214,10,.08);border:1px solid rgba(255,214,10,.2);color:var(--yel);padding:4px 10px;border-radius:8px;font-size:.72rem;font-weight:700">${plano.kcal} kcal/dia</span>
+      </div>
+      <div class="macro-row">
+        <div class="macro-box"><div class="macro-val" style="color:var(--cyan)">${plano.proteina||'--'}g</div><div class="macro-label">Proteína</div></div>
+        <div class="macro-box"><div class="macro-val" style="color:var(--yel)">${plano.carboidrato||'--'}g</div><div class="macro-label">Carboidrato</div></div>
+        <div class="macro-box"><div class="macro-val" style="color:var(--ora)">${plano.gordura||'--'}g</div><div class="macro-label">Gordura</div></div>
+      </div>
+      ${plano.refeicoes?.map(r=>`
+        <div class="refeicao-item">
+          <div class="ref-time">${r.hora}</div>
+          <div class="ref-content">
+            <div class="ref-nome">${r.nome}</div>
+            <div class="ref-macro">${r.descricao||''}</div>
+            <div class="ref-macro">${r.kcal}kcal · P:${r.prot}g C:${r.carb}g G:${r.gord}g</div>
+          </div>
+        </div>`).join('')||''}
+      <div class="divider"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-ghost" onclick="verListaComprasPlano()" style="margin-bottom:0;flex:1;padding:10px;font-size:.8rem">🛒 Lista de compras</button>
+        <button class="btn btn-danger" onclick="if(confirm('Remover plano?')){S.plano_alimentar=null;saveS();renderNutricao();}" style="margin-bottom:0;flex:1;padding:10px;font-size:.8rem">🗑 Remover</button>
+      </div>`;
+  }
+
+  // execução do dia
+  const macrosHoje={kcal:0,prot:0,carb:0,gord:0};
+  refHoje.forEach(r=>{macrosHoje.kcal+=r.kcal||0;macrosHoje.prot+=r.prot||0;macrosHoje.carb+=r.carb||0;macrosHoje.gord+=r.gord||0;});
+
+  document.getElementById('refeicoes-hoje').innerHTML=refHoje.length===0
+    ? `<div style="font-size:.8rem;color:var(--sub);padding:8px 0">Nenhuma refeição registrada hoje.</div>`
+    : refHoje.map(r=>`
+      <div class="refeicao-item">
+        <div class="ref-time">${r.hora||'--'}</div>
+        <div class="ref-content">
+          <div class="ref-nome">${r.nome}</div>
+          <div class="ref-macro">${r.kcal}kcal · P:${r.prot}g C:${r.carb}g G:${r.gord}g</div>
+        </div>
+        <button onclick="S.refeicoes=S.refeicoes.filter(x=>x.id!=='${r.id}');saveS();renderNutricao()" style="background:none;border:none;color:var(--pink);font-size:.9rem;cursor:pointer">🗑</button>
+      </div>`).join('');
+
+  document.getElementById('macros-hoje').innerHTML=refHoje.length===0?'':
+    `<div style="background:rgba(0,245,212,.05);border:1px solid rgba(0,245,212,.12);border-radius:12px;padding:12px">
+      <div class="macro-row" style="margin:0">
+        <div class="macro-box" style="background:transparent;border:none"><div class="macro-val" style="color:var(--cyan)">${macrosHoje.kcal}</div><div class="macro-label">kcal hoje</div></div>
+        <div class="macro-box" style="background:transparent;border:none"><div class="macro-val" style="color:var(--cyan)">${macrosHoje.prot}g</div><div class="macro-label">Proteína</div></div>
+        <div class="macro-box" style="background:transparent;border:none"><div class="macro-val" style="color:var(--cyan)">${macrosHoje.carb}g</div><div class="macro-label">Carb</div></div>
+      </div>
+      ${plano?`<div class="prog-wrap" style="margin:8px 0 0">
+        <div class="prog-top"><span class="prog-label" style="font-size:.72rem">Calorias (${macrosHoje.kcal}/${plano.kcal} kcal)</span><span class="prog-val">${pct(macrosHoje.kcal,plano.kcal)}%</span></div>
+        <div class="prog-track"><div class="prog-fill" style="width:${pct(macrosHoje.kcal,plano.kcal)}%;background:var(--g1)"></div></div>
+      </div>`:''}
+    </div>`;
+}
+
+function verListaComprasPlano(){
+  if(!S.plano_alimentar?.lista_compras?.length){toast('📋 Sem lista gerada ainda.');return;}
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">🛒 Lista de Compras — Plano</div>
+    ${S.plano_alimentar.lista_compras.map(i=>`
+      <div class="list-item">
+        <div class="list-ico" style="background:rgba(0,245,212,.06)">🛒</div>
+        <div class="list-info"><div class="list-title">${i.nome}</div><div class="list-sub">${i.qtd}</div></div>
+        <div class="list-right neu">${i.categoria}</div>
+      </div>`).join('')}
+    <button class="btn btn-ghost" onclick="fecharSheet()" style="margin-top:12px">Fechar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+/* ═══════════════════════ SHEETS — REGISTROS ═══════════════════════ */
+function abrirRegistroPeso(){
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">⚖️ Registrar Peso</div>
+    <div class="fg"><label class="fl">Peso (kg)</label>
+      <input class="fi" type="number" id="rp-val" inputmode="decimal" placeholder="78.5" step="0.1" autofocus></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Data</label>
+        <input class="fi" type="date" id="rp-data" value="${hojeISO()}"></div>
+      <div class="fg"><label class="fl">Horário</label>
+        <input class="fi" type="time" id="rp-hora" value="07:00"></div>
+    </div>
+    <div class="fg"><label class="fl">Observação (opcional)</label>
+      <input class="fi" id="rp-obs" placeholder="Ex: pós-treino, em jejum..."></div>
+    <button class="btn btn-primary" onclick="salvarPeso()">⚖️ Registrar</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('rp-val')?.focus(),100);
+}
+
+function salvarPeso(){
+  const val=parseFloat(document.getElementById('rp-val').value);
+  const iso=document.getElementById('rp-data').value;
+  if(!val||val<20||val>300){toast('⚠️ Peso inválido');return;}
+  const dataFmtd=new Date(iso+'T12:00:00').toLocaleDateString('pt-BR');
+  if(!S.config.peso_inicial) S.config.peso_inicial=val;
+  S.peso.push({id:uid(),valor:val,data:dataFmtd,data_iso:iso,obs:document.getElementById('rp-obs').value||''});
+  saveS();fecharSheet();renderPeso();
+  const ant=S.peso.length>1?S.peso[S.peso.length-2].valor:val;
+  const dif=(val-ant).toFixed(1);
+  toast(`⚖️ ${val}kg · ${parseFloat(dif)===0?'igual':parseFloat(dif)<0?`↓ ${Math.abs(dif)}kg`:`↑ +${dif}kg`}`);
+}
+
+function abrirRegistroTreino(tipoInicial='academia'){
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">💪 Registrar Treino</div>
+    <div class="fg"><label class="fl">Modalidade</label>
+      <select class="fi" id="rt-tipo">
+        ${MODALIDADES.map(m=>`<option value="${m.key}" ${m.key===tipoInicial?'selected':''}>${m.ic} ${m.nome}</option>`).join('')}
+      </select></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Data</label>
+        <input class="fi" type="date" id="rt-data" value="${hojeISO()}"></div>
+      <div class="fg"><label class="fl">Duração (min)</label>
+        <input class="fi" type="number" id="rt-dur" inputmode="numeric" placeholder="60" value="60"></div>
+    </div>
+    <div class="fg"><label class="fl">Intensidade</label>
+      <select class="fi" id="rt-int">
+        <option value="Leve">😌 Leve</option>
+        <option value="Moderada" selected>💪 Moderada</option>
+        <option value="Intensa">🔥 Intensa</option>
+      </select></div>
+    <div id="rt-extra"></div>
+    <div class="fg"><label class="fl">Observações (opcional)</label>
+      <input class="fi" id="rt-obs" placeholder="PR, exercício novo, como se sentiu..."></div>
+    <button class="btn btn-primary" onclick="salvarTreino()">💪 Registrar</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+
+  // campos extras por modalidade
+  document.getElementById('rt-tipo').addEventListener('change',function(){
+    const extras={
+      corrida:`<div class="fr2">
+        <div class="fg"><label class="fl">Distância (km)</label><input class="fi" type="number" id="rt-dist" inputmode="decimal" step="0.1" placeholder="5.0"></div>
+        <div class="fg"><label class="fl">Pace (min/km)</label><input class="fi" id="rt-pace" placeholder="6:30"></div>
+      </div>`,
+      natacao:`<div class="fg"><label class="fl">Metros nadados</label><input class="fi" type="number" id="rt-metros" inputmode="numeric" placeholder="1000"></div>`,
+    };
+    document.getElementById('rt-extra').innerHTML=extras[this.value]||'';
+  });
+}
+
+function salvarTreino(){
+  const tipo=document.getElementById('rt-tipo').value;
+  const treino={
+    id:uid(),tipo,
+    data_iso:document.getElementById('rt-data').value,
+    duracao:parseInt(document.getElementById('rt-dur').value)||60,
+    intensidade:document.getElementById('rt-int').value,
+    obs:document.getElementById('rt-obs').value||'',
+    dist:document.getElementById('rt-dist')?.value||null,
+    pace:document.getElementById('rt-pace')?.value||null,
+    metros:document.getElementById('rt-metros')?.value||null,
+  };
+  S.treinos.push(treino);saveS();fecharSheet();renderTreinos();
+  toast(`✓ ${MODALIDADES.find(m=>m.key===tipo)?.nome||'Treino'} registrado!`);
+}
+
+function abrirRegistroSono(){
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">😴 Registrar Sono</div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Horas</label>
+        <input class="fi" type="number" id="rs-h" inputmode="numeric" placeholder="7" min="0" max="12"></div>
+      <div class="fg"><label class="fl">Minutos</label>
+        <input class="fi" type="number" id="rs-m" inputmode="numeric" placeholder="30" min="0" max="59"></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Data (dormiu em)</label>
+        <input class="fi" type="date" id="rs-data" value="${hojeISO()}"></div>
+      <div class="fg"><label class="fl">Qualidade</label>
+        <select class="fi" id="rs-q">
+          <option value="Boa">😊 Boa</option>
+          <option value="Regular" selected>😐 Regular</option>
+          <option value="Ruim">😩 Ruim</option>
+        </select></div>
+    </div>
+    <div class="fg"><label class="fl">Acordou bem?</label>
+      <select class="fi" id="rs-disp">
+        <option value="Sim">✅ Sim, disposto</option>
+        <option value="Cansado">😴 Ainda cansado</option>
+        <option value="Exausto">🔴 Exausto</option>
+      </select></div>
+    <button class="btn btn-primary" onclick="salvarSono()">😴 Registrar</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function salvarSono(){
+  const h=parseInt(document.getElementById('rs-h').value)||0;
+  const m=parseInt(document.getElementById('rs-m').value)||0;
+  if(!h&&!m){toast('⚠️ Informe as horas');return;}
+  S.sono.push({id:uid(),horas:h,min:m,qualidade:document.getElementById('rs-q').value,
+    disposicao:document.getElementById('rs-disp').value,
+    data_iso:document.getElementById('rs-data').value});
+  saveS();fecharSheet();renderSono();toast(`😴 ${h}h${m?m+'min':''} registrado!`);
+}
+
+function abrirRegistroRefeicao(){
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">🍽️ Registrar Refeição</div>
+    <div class="fg"><label class="fl">Nome da refeição</label>
+      <input class="fi" id="rr-nome" placeholder="Ex: Almoço, Lanche pré-treino..."></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Horário</label>
+        <input class="fi" type="time" id="rr-hora" value="${new Date().toTimeString().slice(0,5)}"></div>
+      <div class="fg"><label class="fl">Calorias (kcal)</label>
+        <input class="fi" type="number" id="rr-kcal" inputmode="numeric" placeholder="500"></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Proteína (g)</label>
+        <input class="fi" type="number" id="rr-prot" inputmode="numeric" placeholder="30"></div>
+      <div class="fg"><label class="fl">Carboidrato (g)</label>
+        <input class="fi" type="number" id="rr-carb" inputmode="numeric" placeholder="60"></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Gordura (g)</label>
+        <input class="fi" type="number" id="rr-gord" inputmode="numeric" placeholder="15"></div>
+      <div class="fg"><label class="fl">Data</label>
+        <input class="fi" type="date" id="rr-data" value="${hojeISO()}"></div>
+    </div>
+    <div class="fg"><label class="fl">O que comeu (opcional)</label>
+      <textarea class="fi" id="rr-desc" rows="2" placeholder="Ex: 150g frango + arroz + salada"></textarea></div>
+    <button class="btn btn-primary" onclick="salvarRefeicao()">✅ Registrar refeição</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function salvarRefeicao(){
+  const nome=document.getElementById('rr-nome').value.trim();
+  if(!nome){toast('⚠️ Informe o nome da refeição');return;}
+  S.refeicoes.push({
+    id:uid(),nome,hora:document.getElementById('rr-hora').value,
+    kcal:parseInt(document.getElementById('rr-kcal').value)||0,
+    prot:parseInt(document.getElementById('rr-prot').value)||0,
+    carb:parseInt(document.getElementById('rr-carb').value)||0,
+    gord:parseInt(document.getElementById('rr-gord').value)||0,
+    desc:document.getElementById('rr-desc').value||'',
+    data_iso:document.getElementById('rr-data').value,
+  });
+  saveS();fecharSheet();renderNutricao();toast(`✅ ${nome} registrado!`);
+}
+
+/* ═══════════════════════ IA GERADORES ═══════════════════════ */
+async function callClaude(prompt,system){
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,system,
+        messages:[{role:'user',content:prompt}]})});
+    const d=await r.json();
+    return d.content?.[0]?.text||'';
+  }catch(e){return null;}
+}
+
+async function gerarPlanoAlimentar(){
+  document.getElementById('plano-wrap').innerHTML=`
+    <div class="sheet-title" style="text-align:left;margin-bottom:14px">🤖 Gerando plano...</div>
+    <div class="fg"><label class="fl">Objetivo</label>
+      <select class="fi" id="gp-obj">
+        <option value="equilibrio">⚖️ Equilíbrio geral</option>
+        <option value="emagrecimento">📉 Emagrecimento</option>
+        <option value="massa">💪 Ganho de massa</option>
+        <option value="performance">🏃 Performance esportiva</option>
+      </select></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Peso atual (kg)</label>
+        <input class="fi" type="number" id="gp-peso" value="${S.peso.length?S.peso[S.peso.length-1].valor:80}" step="0.5"></div>
+      <div class="fg"><label class="fl">Altura (cm)</label>
+        <input class="fi" type="number" id="gp-alt" placeholder="175"></div>
+    </div>
+    <div class="fg"><label class="fl">Restrições alimentares</label>
+      <input class="fi" id="gp-rest" placeholder="Ex: sem glúten, sem lactose, vegetariano..."></div>
+    <div class="fg"><label class="fl">Alimentos que não gosta</label>
+      <input class="fi" id="gp-nao" placeholder="Ex: fígado, beterraba..."></div>
+    <button class="btn btn-primary" onclick="confirmarGerarPlano()">🤖 Gerar plano personalizado</button>
+    <button class="btn btn-ghost" onclick="renderNutricao()">Cancelar</button>`;
+}
+
+async function confirmarGerarPlano(){
+  const obj=document.getElementById('gp-obj').value;
+  const peso=document.getElementById('gp-peso').value;
+  const alt=document.getElementById('gp-alt').value;
+  const rest=document.getElementById('gp-rest').value;
+  const nao=document.getElementById('gp-nao').value;
+
+  document.getElementById('plano-wrap').innerHTML=`<div class="ia-bubble jarvis ia-loading">⏳ Criando seu plano alimentar personalizado...</div>`;
+
+  const system=`Você é um nutricionista especializado. Responda APENAS em JSON válido sem markdown.
+Crie um plano alimentar completo. Formato:
+{
+  "objetivo": "nome do objetivo",
+  "kcal": número,
+  "proteina": número em gramas,
+  "carboidrato": número em gramas,
+  "gordura": número em gramas,
+  "refeicoes": [
+    {"hora":"07:00","nome":"Café da manhã","descricao":"descrição dos alimentos","kcal":400,"prot":25,"carb":40,"gord":12}
+  ],
+  "dicas": ["dica 1","dica 2","dica 3"],
+  "lista_compras": [
+    {"nome":"Frango","qtd":"2kg/semana","categoria":"Proteína"}
+  ]
+}`;
+
+  const prompt=`Médico, 30-40 anos, rotina intensa (trabalho 07h-17h, pós-graduação até 22h, treinos 4x/sem).
+Peso: ${peso}kg. Altura: ${alt||175}cm. Objetivo: ${obj}.
+Restrições: ${rest||'nenhuma'}. Não gosta de: ${nao||'nenhum'}.
+Criar plano com 5-6 refeições adaptadas à rotina (almoço fora de casa, jantar após 22h em dias de pós).
+Lista de compras para 7 dias com quantidades e categorias.`;
+
+  const res=await callClaude(prompt,system);
+  if(!res){
+    document.getElementById('plano-wrap').innerHTML=`<div style="color:var(--pink);font-size:.82rem">⚠️ Sem conexão com IA. Verifique sua internet e tente novamente.</div><button class="btn btn-ghost" onclick="renderNutricao()">Voltar</button>`;
+    return;
+  }
+  try{
+    const plano=JSON.parse(res.replace(/```json|```/g,'').trim());
+    S.plano_alimentar=plano;
+    saveS();renderNutricao();toast('✅ Plano alimentar criado!');
+  }catch(e){
+    document.getElementById('plano-wrap').innerHTML=`<div style="color:var(--pink);font-size:.82rem">⚠️ Erro ao processar resposta da IA.</div><button class="btn btn-ghost" onclick="renderNutricao()">Voltar</button>`;
+  }
+}
+
+async function gerarPlanoTreino(){
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">🤖 Gerar Plano de Treino</div>
+    <div class="fg"><label class="fl">Modalidade principal</label>
+      <select class="fi" id="pt-mod">
+        ${MODALIDADES.map(m=>`<option value="${m.key}">${m.ic} ${m.nome}</option>`).join('')}
+        <option value="misto">🔀 Misto (várias modalidades)</option>
+      </select></div>
+    <div class="fg"><label class="fl">Objetivo</label>
+      <select class="fi" id="pt-obj">
+        <option value="emagrecimento">📉 Emagrecimento</option>
+        <option value="massa">💪 Ganho de massa</option>
+        <option value="condicionamento">🏃 Condicionamento</option>
+        <option value="forca">⚡ Força</option>
+        <option value="equilibrio">⚖️ Equilíbrio geral</option>
+      </select></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Sessões/semana</label>
+        <select class="fi" id="pt-sess">
+          <option value="3">3x</option>
+          <option value="4" selected>4x</option>
+          <option value="5">5x</option>
+        </select></div>
+      <div class="fg"><label class="fl">Duração semanas</label>
+        <select class="fi" id="pt-sem">
+          <option value="4">4 semanas</option>
+          <option value="8" selected>8 semanas</option>
+          <option value="12">12 semanas</option>
+        </select></div>
+    </div>
+    <div class="fg"><label class="fl">Meta específica (opcional)</label>
+      <input class="fi" id="pt-meta" placeholder="Ex: Correr 5km, agachar 100kg..."></div>
+    <button class="btn btn-primary" onclick="confirmarGerarPlanoTreino()">🤖 Gerar plano</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+async function confirmarGerarPlanoTreino(){
+  const mod=document.getElementById('pt-mod').value;
+  const obj=document.getElementById('pt-obj').value;
+  const sess=document.getElementById('pt-sess').value;
+  const sem=document.getElementById('pt-sem').value;
+  const meta=document.getElementById('pt-meta').value;
+
+  document.getElementById('sheet-content').innerHTML=`<div class="ia-bubble jarvis ia-loading">⏳ Criando seu plano de treino personalizado...</div>`;
+
+  const system=`Você é um personal trainer especializado. Responda APENAS em JSON válido sem markdown.
+Formato: {"nome":"nome do plano","semanas":número,"objetivo":"objetivo","descricao":"texto resumo","conteudo":"plano detalhado em texto com semanas e exercícios"}`;
+
+  const res=await callClaude(`Criar plano de treino: modalidade ${mod}, objetivo ${obj}, ${sess}x/semana, ${sem} semanas. Meta: ${meta||'geral'}. Usuário tem disponibilidade qui/sex 18h-19h30, sab 08h-09h30, dom 09h-10h30.`,system);
+
+  if(!res){fecharSheet();toast('⚠️ Sem conexão com IA');return;}
+  try{
+    const plano={...JSON.parse(res.replace(/```json|```/g,'').trim()),id:uid(),data:new Date().toLocaleDateString('pt-BR')};
+    S.planos_treino.push(plano);saveS();fecharSheet();renderTreinos();toast('✅ Plano de treino criado!');
+  }catch(e){fecharSheet();toast('⚠️ Erro ao processar');}
+}
+
+function abrirPlanoManual(){
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">✏️ Plano Manual</div>
+    <div class="fg"><label class="fl">Objetivo</label><input class="fi" id="pm-obj" placeholder="Equilíbrio geral"></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Calorias/dia</label><input class="fi" type="number" id="pm-kcal" placeholder="2400"></div>
+      <div class="fg"><label class="fl">Proteína (g)</label><input class="fi" type="number" id="pm-prot" placeholder="150"></div>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Carboidrato (g)</label><input class="fi" type="number" id="pm-carb" placeholder="240"></div>
+      <div class="fg"><label class="fl">Gordura (g)</label><input class="fi" type="number" id="pm-gord" placeholder="80"></div>
+    </div>
+    <button class="btn btn-primary" onclick="salvarPlanoManual()">💾 Salvar</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function salvarPlanoManual(){
+  S.plano_alimentar={
+    objetivo:document.getElementById('pm-obj').value||'Geral',
+    kcal:parseInt(document.getElementById('pm-kcal').value)||2000,
+    proteina:parseInt(document.getElementById('pm-prot').value)||0,
+    carboidrato:parseInt(document.getElementById('pm-carb').value)||0,
+    gordura:parseInt(document.getElementById('pm-gord').value)||0,
+    refeicoes:[],lista_compras:[]};
+  saveS();fecharSheet();renderNutricao();toast('✓ Plano salvo!');
+}
+
+/* ═══════════════════════ IA CHAT ═══════════════════════ */
+function abrirIA(){
+  const ctx=`Saúde atual:
+- Último peso: ${S.peso.length?S.peso[S.peso.length-1].valor+'kg':'não registrado'}
+- Treinos esta semana: ${S.treinos.filter(t=>(hoje()-new Date(t.data_iso+'T12:00:00'))/864e5<7).length}
+- Último sono: ${S.sono.length?S.sono[S.sono.length-1].horas+'h':'não registrado'}
+- Plano alimentar: ${S.plano_alimentar?S.plano_alimentar.objetivo:'não configurado'}`;
+
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">🤖 Jarvis — Saúde</div>
+    <div style="background:rgba(123,58,237,.08);border:1px solid rgba(123,58,237,.2);border-radius:12px;padding:12px;font-size:.78rem;color:var(--sub);margin-bottom:14px">${ctx}</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+      ${['Analise minha saúde','Devo treinar hoje?','Resumo da semana','Ajuste meu plano alimentar'].map(s=>`
+        <button onclick="perguntarIA('${s}')" style="background:rgba(0,245,212,.06);border:1px solid rgba(0,245,212,.15);color:var(--sub);padding:6px 12px;border-radius:8px;font-size:.73rem;font-weight:600;cursor:pointer;font-family:'Space Grotesk',sans-serif">${s}</button>`).join('')}
+    </div>
+    <div id="ia-resp" style="min-height:60px"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <input class="fi" id="ia-q" placeholder="Pergunte sobre sua saúde..." style="flex:1">
+      <button onclick="perguntarIA(document.getElementById('ia-q').value)" style="background:var(--g1);border:none;border-radius:12px;padding:0 16px;color:#060612;font-weight:700;cursor:pointer;flex-shrink:0">→</button>
+    </div>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+async function perguntarIA(pergunta){
+  if(!pergunta?.trim()) return;
+  const el=document.getElementById('ia-resp');
+  if(el) el.innerHTML=`<div class="ia-bubble jarvis ia-loading">⏳ Analisando...</div>`;
+
+  const peso=S.peso.slice(-5).map(p=>`${p.data_iso}:${p.valor}kg`).join(', ');
+  const treinos=S.treinos.slice(-7).map(t=>`${t.data_iso}:${t.tipo}(${t.duracao}min)`).join(', ');
+  const sono=S.sono.slice(-5).map(s=>`${s.data_iso}:${s.horas}h`).join(', ');
+
+  const system=`Você é o Jarvis, assistente de saúde do Dr. Antonio Roberto, médico em São Paulo.
+Dados recentes:
+- Peso (últimas pesagens): ${peso||'sem dados'}
+- Treinos recentes: ${treinos||'sem dados'}
+- Sono recente: ${sono||'sem dados'}
+- Plano alimentar: ${S.plano_alimentar?JSON.stringify({obj:S.plano_alimentar.objetivo,kcal:S.plano_alimentar.kcal}):'não configurado'}
+Responda em português brasileiro, de forma direta, pessoal e útil. Máximo 3 parágrafos.`;
+
+  const res=await callClaude(pergunta,system);
+  if(el) el.innerHTML=`<div class="ia-bubble jarvis">${res||'⚠️ Sem conexão com IA.'}</div>`;
+}
+
+/* ═══════════════════════ UTILS ═══════════════════════ */
+function fecharSheet(){document.getElementById('overlay').classList.remove('open');}
+let toastT;
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),3000);}
+function updateDate(){document.getElementById('tbar-date').textContent=hojeStr();}
+
+/* ═══════════════════════ INIT ═══════════════════════ */
+updateDate();
+renderPeso();
+</script>
+</body>
+</html>
