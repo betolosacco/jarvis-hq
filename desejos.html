@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Jarvis — Desejos</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060612;--card:#0d0d1f;--card2:#131328;--bdr:#1e1e3f;
+  --cyan:#00f5d4;--pink:#ff2d78;--yel:#ffd60a;--pur:#7c3aed;
+  --blu:#3b82f6;--ora:#ff6b2b;--grn:#22c55e;--red:#ef4444;
+  --txt:#eeeeff;--sub:#6666aa;--r:16px;
+  --g1:linear-gradient(135deg,#00f5d4,#3b82f6);
+  --g2:linear-gradient(135deg,#ff2d78,#7c3aed);
+  --g3:linear-gradient(135deg,#ffd60a,#ff6b2b);
+  --g5:linear-gradient(135deg,#ff6b2b,#ff2d78);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overscroll-behavior:none;}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--txt);
+  min-height:100%;display:flex;flex-direction:column;max-width:480px;margin:0 auto;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 100% 40% at 50% -5%,rgba(255,107,43,.07) 0%,transparent 65%),
+             radial-gradient(ellipse 50% 30% at 95% 85%,rgba(255,45,120,.05) 0%,transparent 60%);}
+
+#scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 0 90px;position:relative;z-index:1;}
+#scroll::-webkit-scrollbar{display:none;}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px 10px;background:rgba(6,6,18,.95);backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:50;}
+.tbar-logo{font-weight:800;font-size:1.05rem;background:var(--g5);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.tbar-date{font-size:.72rem;color:var(--sub);font-family:'JetBrains Mono',monospace;margin-top:1px;}
+.tbar-btn{width:34px;height:34px;border-radius:11px;border:1px solid var(--bdr);
+  background:var(--card2);color:var(--txt);font-size:.95rem;cursor:pointer;display:grid;place-items:center;transition:.15s;}
+.tbar-btn:active{transform:scale(.92);}
+
+.bottomnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;background:rgba(6,6,18,.97);backdrop-filter:blur(24px);
+  border-top:1px solid var(--bdr);display:grid;grid-template-columns:repeat(6,1fr);
+  z-index:100;padding-bottom:env(safe-area-inset-bottom,0px);}
+.bnav{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:9px 2px 7px;cursor:pointer;border:none;background:transparent;
+  color:var(--sub);font-family:'Space Grotesk',sans-serif;font-size:.52rem;font-weight:600;
+  gap:3px;text-transform:uppercase;letter-spacing:.04em;}
+.bnav.act{color:var(--ora);}
+.bnav-ic{font-size:1.1rem;}
+
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:14px 16px 0;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{padding:8px 16px;border-radius:20px;border:1px solid var(--bdr);background:var(--card2);
+  font-size:.76rem;font-weight:700;cursor:pointer;white-space:nowrap;color:var(--sub);
+  font-family:'Space Grotesk',sans-serif;transition:.15s;}
+.tab.act{background:rgba(255,107,43,.1);border-color:rgba(255,107,43,.35);color:var(--ora);}
+
+.sec{padding:14px 16px 0;}
+.pg-tab{display:none;}.pg-tab.act{display:block;}
+.sec-title{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--sub);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--bdr);}
+
+.card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;margin-bottom:12px;}
+.card-title{font-weight:700;font-size:.88rem;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+
+/* HERO */
+.hero-des{background:linear-gradient(135deg,rgba(255,107,43,.1),rgba(255,45,120,.07));
+  border:1px solid rgba(255,107,43,.25);border-radius:20px;padding:18px;margin-bottom:12px;}
+.hero-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ora);margin-bottom:6px;}
+.hero-total{font-size:1.9rem;font-weight:800;font-family:'JetBrains Mono',monospace;letter-spacing:-.04em;}
+.hero-sub{font-size:.75rem;color:var(--sub);margin-top:4px;}
+.hero-chips{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.chip{padding:5px 11px;border-radius:999px;font-size:.7rem;font-weight:700;border:1px solid;}
+.chip-o{color:var(--ora);border-color:rgba(255,107,43,.3);background:rgba(255,107,43,.08);}
+.chip-p{color:var(--pink);border-color:rgba(255,45,120,.3);background:rgba(255,45,120,.08);}
+.chip-y{color:var(--yel);border-color:rgba(255,214,10,.3);background:rgba(255,214,10,.08);}
+.chip-g{color:var(--grn);border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.08);}
+
+/* DESEJO CARD */
+.desejo-card{background:var(--card2);border:1px solid var(--bdr);border-radius:16px;
+  margin-bottom:10px;overflow:hidden;cursor:pointer;transition:.15s;position:relative;}
+.desejo-card:active{transform:scale(.98);}
+.desejo-card.similar-alert{border-color:rgba(255,214,10,.4);}
+.desejo-img{width:100%;height:140px;object-fit:cover;background:var(--card);
+  display:flex;align-items:center;justify-content:center;font-size:3rem;}
+.desejo-img-placeholder{width:100%;height:110px;background:linear-gradient(135deg,var(--card),var(--card2));
+  display:flex;align-items:center;justify-content:center;font-size:2.5rem;}
+.desejo-body{padding:14px;}
+.desejo-cat-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;
+  font-size:.64rem;font-weight:700;border:1px solid;margin-bottom:6px;}
+.desejo-nome{font-weight:800;font-size:.95rem;margin-bottom:4px;line-height:1.3;}
+.desejo-preco{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:800;color:var(--ora);}
+.desejo-preco-est{font-size:.7rem;color:var(--sub);margin-left:4px;}
+.desejo-meta{display:flex;align-items:center;gap:8px;margin-top:10px;}
+.desejo-prog{flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden;}
+.desejo-prog-fill{height:100%;border-radius:999px;background:var(--g3);}
+.desejo-pct{font-size:.68rem;font-weight:700;color:var(--sub);font-family:'JetBrains Mono',monospace;}
+.desejo-actions{display:flex;gap:6px;margin-top:10px;}
+.des-btn{flex:1;padding:8px;border-radius:9px;border:none;cursor:pointer;
+  font-family:'Space Grotesk',sans-serif;font-size:.73rem;font-weight:700;transition:.15s;text-align:center;}
+.des-btn:active{transform:scale(.95);}
+.des-btn-link{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:var(--blu);}
+.des-btn-edit{background:rgba(255,214,10,.08);border:1px solid rgba(255,214,10,.2);color:var(--yel);}
+.des-btn-comprar{background:var(--g3);color:#060612;}
+.des-btn-del{background:rgba(255,45,120,.08);border:1px solid rgba(255,45,120,.2);color:var(--pink);}
+.similar-tag{position:absolute;top:10px;right:10px;background:rgba(255,214,10,.9);
+  color:#060612;font-size:.62rem;font-weight:800;padding:3px 8px;border-radius:999px;}
+.comprado-overlay{position:absolute;inset:0;background:rgba(6,6,18,.7);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:16px;}
+.comprado-ic{font-size:2.5rem;margin-bottom:6px;}
+.comprado-txt{font-weight:800;font-size:.9rem;color:var(--grn);}
+
+/* COMPARACAO */
+.comp-card{background:linear-gradient(135deg,rgba(255,214,10,.08),rgba(255,107,43,.05));
+  border:1px solid rgba(255,214,10,.25);border-radius:14px;padding:14px;margin-bottom:12px;}
+.comp-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--yel);margin-bottom:10px;}
+.comp-row{display:flex;gap:10px;}
+.comp-item{flex:1;background:var(--card2);border:1px solid var(--bdr);border-radius:12px;padding:12px;}
+.comp-nome{font-weight:700;font-size:.84rem;margin-bottom:4px;}
+.comp-preco{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:800;color:var(--ora);}
+.comp-diff{font-size:.72rem;margin-top:6px;}
+.vs-badge{width:32px;height:32px;border-radius:50%;background:var(--card);border:1px solid var(--bdr);
+  display:grid;place-items:center;font-size:.7rem;font-weight:800;flex-shrink:0;align-self:center;color:var(--sub);}
+
+/* SUMMARY */
+.sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.sum-card{background:var(--card);border:1px solid var(--bdr);border-radius:14px;
+  padding:14px 12px;position:relative;overflow:hidden;}
+.sum-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--c,var(--ora));}
+.sum-card.o{--c:var(--ora)}.sum-card.g{--c:var(--grn)}.sum-card.p{--c:var(--pink)}.sum-card.y{--c:var(--yel)}
+.sum-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--sub);margin-bottom:5px;}
+.sum-val{font-weight:800;font-size:1.3rem;letter-spacing:-.03em;font-family:'JetBrains Mono',monospace;}
+.sum-sub{font-size:.68rem;color:var(--sub);margin-top:2px;}
+
+/* CATS GRID */
+.cats-grid{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.cat-pill{padding:6px 12px;border-radius:999px;border:1px solid var(--bdr);background:var(--card2);
+  font-size:.74rem;font-weight:700;cursor:pointer;color:var(--sub);transition:.15s;
+  font-family:'Space Grotesk',sans-serif;}
+.cat-pill.act{background:rgba(255,107,43,.1);border-color:rgba(255,107,43,.35);color:var(--ora);}
+
+/* FAB */
+.fab-area{position:fixed;bottom:76px;right:calc(50% - 230px);
+  display:flex;flex-direction:column;align-items:flex-end;gap:8px;z-index:99;}
+@media(max-width:480px){.fab-area{right:14px;}}
+.fab-menu-item{display:flex;align-items:center;gap:8px;background:var(--card2);
+  border:1px solid var(--bdr);border-radius:12px;padding:9px 14px;font-size:.8rem;
+  font-weight:600;cursor:pointer;opacity:0;transform:translateY(8px);transition:.2s;
+  pointer-events:none;white-space:nowrap;font-family:'Space Grotesk',sans-serif;}
+.fab-menu-item.show{opacity:1;transform:translateY(0);pointer-events:all;}
+.fab{width:52px;height:52px;border-radius:50%;border:none;background:var(--g5);
+  color:#fff;font-size:1.4rem;cursor:pointer;box-shadow:0 4px 24px rgba(255,107,43,.4);
+  display:grid;place-items:center;transition:.2s;}
+.fab:active{transform:scale(.92);}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(12px);
+  z-index:200;display:none;flex-direction:column;justify-content:flex-end;}
+.overlay.open{display:flex;}
+.sheet{background:var(--card);border-radius:24px 24px 0 0;border:1px solid var(--bdr);
+  border-bottom:none;padding:6px 20px calc(24px + env(safe-area-inset-bottom,0px));
+  max-height:92vh;overflow-y:auto;}
+.sheet::-webkit-scrollbar{display:none;}
+.sheet-handle{width:36px;height:4px;border-radius:2px;background:var(--bdr);margin:10px auto 16px;}
+.sheet-title{font-weight:800;font-size:1.05rem;margin-bottom:18px;text-align:center;}
+
+.fg{margin-bottom:14px;}
+.fl{display:block;font-size:.7rem;font-weight:700;color:var(--sub);margin-bottom:6px;
+  text-transform:uppercase;letter-spacing:.07em;}
+.fi{width:100%;background:var(--card2);border:1px solid var(--bdr);border-radius:12px;
+  padding:12px 14px;color:var(--txt);font-family:'Space Grotesk',sans-serif;font-size:.9rem;outline:none;transition:.15s;}
+.fi:focus{border-color:var(--ora);box-shadow:0 0 0 3px rgba(255,107,43,.1);}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+select.fi{appearance:none;cursor:pointer;}
+textarea.fi{resize:none;line-height:1.5;}
+
+.btn{width:100%;padding:13px;border-radius:13px;border:none;cursor:pointer;
+  font-family:'Space Grotesk',sans-serif;font-size:.9rem;font-weight:700;margin-bottom:8px;transition:.15s;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--g5);color:#fff;}
+.btn-ghost{background:transparent;border:1px solid var(--bdr);color:var(--txt);}
+.btn-danger{background:rgba(255,45,120,.1);border:1px solid rgba(255,45,120,.3);color:var(--pink);}
+.btn-ia{background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(0,245,212,.1));
+  border:1px solid rgba(124,58,237,.3);color:var(--cyan);}
+
+.ia-bubble{padding:10px 14px;border-radius:14px;font-size:.84rem;line-height:1.6;margin-bottom:8px;}
+.ia-bubble.jarvis{background:rgba(255,107,43,.08);border:1px solid rgba(255,107,43,.2);border-radius:14px 14px 14px 4px;}
+
+/* UPLOAD IMG */
+.img-upload{border:2px dashed var(--bdr);border-radius:12px;padding:20px;text-align:center;
+  cursor:pointer;transition:.15s;margin-bottom:14px;}
+.img-upload:hover{border-color:var(--ora);}
+.img-upload input{display:none;}
+.img-preview{width:100%;height:140px;object-fit:cover;border-radius:10px;margin-bottom:10px;}
+
+.toast{position:fixed;bottom:98px;left:50%;transform:translateX(-50%) translateY(10px);
+  background:var(--card2);border:1px solid var(--bdr);border-radius:12px;
+  padding:10px 18px;font-size:.82rem;font-weight:600;opacity:0;transition:.25s;
+  z-index:300;white-space:nowrap;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+.divider{height:1px;background:var(--bdr);margin:14px 0;}
+.spacer{height:12px;}
+.prog-wrap{margin-bottom:8px;}
+.prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.prog-label{font-size:.8rem;font-weight:600;}
+.prog-val{font-size:.72rem;color:var(--sub);font-family:'JetBrains Mono',monospace;}
+.prog-track{height:7px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:999px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="tbar-logo">🛍️ Desejos</div>
+    <div class="tbar-date" id="tbar-date">—</div>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="tbar-btn" onclick="abrirIADesejos()">🤖</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab act" onclick="mudarTab('lista')" id="tab-lista">🛍️ Lista</button>
+  <button class="tab" onclick="mudarTab('comprados')" id="tab-comprados">✅ Comprados</button>
+  <button class="tab" onclick="mudarTab('resumo')" id="tab-resumo">📊 Resumo</button>
+</div>
+
+<div id="scroll">
+  <div class="sec">
+
+    <!-- ══ LISTA ══ -->
+    <div class="pg-tab act" id="pg-lista">
+      <div class="spacer"></div>
+      <div id="hero-wrap"></div>
+      <div id="similares-wrap"></div>
+      <div class="cats-grid" id="cats-grid"></div>
+      <div id="desejos-lista"></div>
+    </div>
+
+    <!-- ══ COMPRADOS ══ -->
+    <div class="pg-tab" id="pg-comprados">
+      <div class="spacer"></div>
+      <div id="comprados-lista"></div>
+    </div>
+
+    <!-- ══ RESUMO ══ -->
+    <div class="pg-tab" id="pg-resumo">
+      <div class="spacer"></div>
+      <div id="resumo-wrap"></div>
+    </div>
+
+    <div class="spacer"></div>
+  </div>
+</div>
+
+<!-- FAB -->
+<div class="fab-area" id="fab-area">
+  <div class="fab-menu-item" id="fm-manual" onclick="abrirAddDesejo()">✏️ Adicionar manualmente</div>
+  <div class="fab-menu-item" id="fm-ia" onclick="abrirAddIA()">🤖 Descrever para IA</div>
+  <div class="fab-menu-item" id="fm-img" onclick="abrirAddImagem()">📸 Subir imagem</div>
+  <button class="fab" id="fab-btn" onclick="toggleFab()">＋</button>
+</div>
+
+<nav class="bottomnav">
+  <button class="bnav"><span class="bnav-ic">🏠</span><span>Hoje</span></button>
+  <button class="bnav"><span class="bnav-ic">💪</span><span>Saúde</span></button>
+  <button class="bnav"><span class="bnav-ic">📚</span><span>Estudos</span></button>
+  <button class="bnav"><span class="bnav-ic">💰</span><span>Finanças</span></button>
+  <button class="bnav act"><span class="bnav-ic">🛍️</span><span>Desejos</span></button>
+  <button class="bnav"><span class="bnav-ic">☰</span><span>Mais</span></button>
+</nav>
+
+<div class="overlay" id="overlay" onclick="fecharSheet()">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle"></div>
+    <div id="sheet-content"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════ STATE ═══════ */
+const KEY='jarvis_desejos_v1';
+let S={desejos:[]};
+function loadS(){try{const d=localStorage.getItem(KEY);if(d)S={...S,...JSON.parse(d)};}catch(e){}}
+function saveS(){localStorage.setItem(KEY,JSON.stringify(S));}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function fm(v){return 'R$\u00a0'+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});}
+function pct(a,b){return b>0?Math.min(100,Math.round(a/b*100)):0;}
+loadS();
+
+const DIAS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const MESES=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+function hoje(){return new Date();}
+function hojeISO(){return hoje().toISOString().split('T')[0];}
+function hojeStr(){const d=hoje();return `${DIAS[d.getDay()]}, ${d.getDate()} ${MESES[d.getMonth()]} ${d.getFullYear()}`;}
+
+const CATEGORIAS={
+  relogios:{ic:'⌚',label:'Relógios',cor:'var(--yel)'},
+  eletronicos:{ic:'💻',label:'Eletrônicos',cor:'var(--cyan)'},
+  vestuario:{ic:'👕',label:'Vestuário',cor:'var(--pur)'},
+  calcados:{ic:'👟',label:'Calçados',cor:'var(--blu)'},
+  casa:{ic:'🏠',label:'Casa & Decoração',cor:'var(--grn)'},
+  esporte:{ic:'🏋️',label:'Esporte & Fitness',cor:'var(--grn)'},
+  viagem:{ic:'✈️',label:'Viagem',cor:'var(--cyan)'},
+  livros:{ic:'📚',label:'Livros & Cursos',cor:'var(--pur)'},
+  saude:{ic:'💊',label:'Saúde & Bem-estar',cor:'var(--pink)'},
+  outros:{ic:'🎁',label:'Outros',cor:'var(--sub)'},
+};
+
+/* ═══════ TABS ═══════ */
+let tabAtual='lista';
+let catFiltro='todas';
+function mudarTab(t){
+  tabAtual=t;
+  document.querySelectorAll('.pg-tab').forEach(p=>p.classList.remove('act'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('act'));
+  document.getElementById('pg-'+t)?.classList.add('act');
+  document.getElementById('tab-'+t)?.classList.add('act');
+  ({lista:renderLista,comprados:renderComprados,resumo:renderResumo})[t]?.();
+}
+
+/* ═══════ FAB ═══════ */
+let fabOpen=false;
+function toggleFab(){
+  fabOpen=!fabOpen;
+  const btn=document.getElementById('fab-btn');
+  btn.textContent=fabOpen?'✕':'＋';
+  btn.style.transform=fabOpen?'rotate(45deg)':'';
+  ['fm-manual','fm-ia','fm-img'].forEach((id,i)=>{
+    setTimeout(()=>document.getElementById(id)?.classList.toggle('show',fabOpen),i*50);
+  });
+}
+function fecharFab(){
+  fabOpen=false;
+  document.getElementById('fab-btn').textContent='＋';
+  document.getElementById('fab-btn').style.transform='';
+  ['fm-manual','fm-ia','fm-img'].forEach(id=>document.getElementById(id)?.classList.remove('show'));
+}
+
+/* ═══════ RENDER LISTA ═══════ */
+function renderLista(){
+  const pendentes=S.desejos.filter(d=>!d.comprado);
+  const totalPendente=pendentes.reduce((a,d)=>a+(d.preco_estimado||0),0);
+  const totalCats=[...new Set(pendentes.map(d=>d.categoria))].length;
+
+  // Hero
+  document.getElementById('hero-wrap').innerHTML=`
+    <div class="hero-des">
+      <div class="hero-label">🛍️ Lista de Desejos</div>
+      <div class="hero-total">${fm(totalPendente)}</div>
+      <div class="hero-sub">${pendentes.length} item${pendentes.length!==1?'s':''} · ${totalCats} categoria${totalCats!==1?'s':''}</div>
+      <div class="hero-chips">
+        ${Object.entries(CATEGORIAS).filter(([k])=>pendentes.some(d=>d.categoria===k)).map(([k,v])=>`
+          <div class="chip chip-o">${v.ic} ${pendentes.filter(d=>d.categoria===k).length}</div>`).join('')}
+      </div>
+    </div>`;
+
+  // Similares alert
+  const similares=detectarSimilares();
+  if(similares.length>0){
+    document.getElementById('similares-wrap').innerHTML=`
+      <div class="comp-card">
+        <div class="comp-label">⚠️ ITENS SIMILARES DETECTADOS</div>
+        ${similares.map(par=>`
+          <div class="comp-row" style="margin-bottom:10px">
+            <div class="comp-item">
+              <div class="comp-nome">${par[0].nome}</div>
+              <div class="comp-preco">${fm(par[0].preco_estimado||0)}</div>
+            </div>
+            <div class="vs-badge">VS</div>
+            <div class="comp-item">
+              <div class="comp-nome">${par[1].nome}</div>
+              <div class="comp-preco">${fm(par[1].preco_estimado||0)}</div>
+              <div class="comp-diff" style="color:${(par[1].preco_estimado||0)<(par[0].preco_estimado||0)?'var(--grn)':'var(--pink)'}">
+                ${(par[1].preco_estimado||0)<(par[0].preco_estimado||0)?'✓ Mais barato':'↑ Mais caro'} ${fm(Math.abs((par[1].preco_estimado||0)-(par[0].preco_estimado||0)))}
+              </div>
+            </div>
+          </div>
+          <button onclick="compararIA('${par[0].id}','${par[1].id}')" style="width:100%;padding:8px;background:rgba(255,214,10,.08);border:1px solid rgba(255,214,10,.2);border-radius:10px;color:var(--yel);font-size:.78rem;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif;margin-bottom:8px">🤖 Comparar com IA</button>
+        `).join('')}
+      </div>`;
+  } else {
+    document.getElementById('similares-wrap').innerHTML='';
+  }
+
+  // Filtros de categoria
+  const cats=['todas',...[...new Set(pendentes.map(d=>d.categoria))]];
+  document.getElementById('cats-grid').innerHTML=cats.map(c=>`
+    <button class="cat-pill ${catFiltro===c?'act':''}" onclick="filtrarCat('${c}')">
+      ${c==='todas'?'🛍️ Todas':CATEGORIAS[c]?.ic+' '+CATEGORIAS[c]?.label||c}
+    </button>`).join('');
+
+  // Lista de desejos
+  const filtrados=catFiltro==='todas'?pendentes:pendentes.filter(d=>d.categoria===catFiltro);
+  const porCat={};
+  filtrados.forEach(d=>{
+    if(!porCat[d.categoria]) porCat[d.categoria]=[];
+    porCat[d.categoria].push(d);
+  });
+
+  if(filtrados.length===0){
+    document.getElementById('desejos-lista').innerHTML=`
+      <div style="text-align:center;padding:40px 20px;color:var(--sub)">
+        <div style="font-size:3rem;margin-bottom:12px">🛍️</div>
+        <div style="font-size:.9rem;font-weight:600;margin-bottom:6px">Lista vazia</div>
+        <div style="font-size:.8rem;line-height:1.6">Adicione produtos que deseja comprar.<br>A IA estima preços, compara e avisa itens similares.</div>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('desejos-lista').innerHTML=Object.entries(porCat).map(([cat,itens])=>`
+    <div class="sec-title">${CATEGORIAS[cat]?.ic||'🎁'} ${CATEGORIAS[cat]?.label||cat}</div>
+    ${itens.sort((a,b)=>(b.preco_estimado||0)-(a.preco_estimado||0)).map(d=>buildDesejoCard(d,similares)).join('')}
+  `).join('');
+}
+
+function detectarSimilares(){
+  const pendentes=S.desejos.filter(d=>!d.comprado);
+  const pares=[];
+  for(let i=0;i<pendentes.length;i++){
+    for(let j=i+1;j<pendentes.length;j++){
+      if(pendentes[i].categoria===pendentes[j].categoria){
+        const sim=calcSimilaridade(pendentes[i].nome,pendentes[j].nome);
+        if(sim>0.4) pares.push([pendentes[i],pendentes[j]]);
+      }
+    }
+  }
+  return pares.slice(0,3);
+}
+
+function calcSimilaridade(a,b){
+  const wa=a.toLowerCase().split(/\s+/);
+  const wb=b.toLowerCase().split(/\s+/);
+  const comuns=wa.filter(w=>wb.includes(w)&&w.length>3).length;
+  return comuns/Math.max(wa.length,wb.length);
+}
+
+function buildDesejoCard(d,similares){
+  const cat=CATEGORIAS[d.categoria]||{ic:'🎁',label:'Outros',cor:'var(--sub)'};
+  const ehSimilar=similares.some(p=>p[0].id===d.id||p[1].id===d.id);
+  const reservado=d.reservado||0;
+  const pctRes=pct(reservado,d.preco_estimado||1);
+
+  return `
+    <div class="desejo-card ${ehSimilar?'similar-alert':''}" id="dc-${d.id}">
+      ${ehSimilar?'<div class="similar-tag">⚠️ Similar</div>':''}
+      ${d.imagem
+        ?`<img class="desejo-img" src="${d.imagem}" alt="${d.nome}" onclick="verDetalhes('${d.id}')">`
+        :`<div class="desejo-img-placeholder" onclick="verDetalhes('${d.id}')">${cat.ic}</div>`}
+      <div class="desejo-body">
+        <div class="desejo-cat-badge" style="color:${cat.cor};border-color:${cat.cor}44;background:${cat.cor}11">
+          ${cat.ic} ${cat.label}
+        </div>
+        <div class="desejo-nome">${d.nome}</div>
+        <div>
+          <span class="desejo-preco">${d.preco_estimado?fm(d.preco_estimado):'Preço não definido'}</span>
+          ${d.preco_estimado&&d.ia_estimou?'<span class="desejo-preco-est">~estimado</span>':''}
+        </div>
+        ${d.onde_comprar?`<div style="font-size:.72rem;color:var(--sub);margin-top:4px">🛒 ${d.onde_comprar}</div>`:''}
+        ${d.notas?`<div style="font-size:.72rem;color:var(--sub);margin-top:4px;line-height:1.4">💬 ${d.notas}</div>`:''}
+        ${d.preco_estimado?`
+          <div class="desejo-meta">
+            <div class="desejo-prog"><div class="desejo-prog-fill" style="width:${pctRes}%"></div></div>
+            <div class="desejo-pct">${pctRes}% guardado</div>
+          </div>`:''
+        }
+        <div class="desejo-actions">
+          ${d.link?`<button class="des-btn des-btn-link" onclick="abrirLink('${d.id}')">🔗 Ver</button>`:''}
+          <button class="des-btn des-btn-edit" onclick="editarDesejo('${d.id}')">✏️</button>
+          <button class="des-btn des-btn-comprar" onclick="marcarComprado('${d.id}')">✓ Comprei</button>
+          <button class="des-btn des-btn-del" onclick="deletarDesejo('${d.id}')">🗑</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function filtrarCat(c){catFiltro=c;renderLista();}
+
+/* ═══════ RENDER COMPRADOS ═══════ */
+function renderComprados(){
+  const comprados=S.desejos.filter(d=>d.comprado);
+  if(comprados.length===0){
+    document.getElementById('comprados-lista').innerHTML=`
+      <div style="text-align:center;padding:40px 20px;color:var(--sub)">
+        <div style="font-size:3rem;margin-bottom:12px">✅</div>
+        <div style="font-size:.88rem">Nenhum item comprado ainda.</div>
+      </div>`;
+    return;
+  }
+  const totalGasto=comprados.reduce((a,d)=>a+(d.preco_estimado||0),0);
+  document.getElementById('comprados-lista').innerHTML=`
+    <div style="background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:14px;padding:14px;margin-bottom:12px">
+      <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--grn);margin-bottom:4px">Total realizado</div>
+      <div style="font-size:1.6rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--grn)">${fm(totalGasto)}</div>
+      <div style="font-size:.72rem;color:var(--sub);margin-top:2px">${comprados.length} item${comprados.length!==1?'s':''} adquirido${comprados.length!==1?'s':''}</div>
+    </div>
+    ${comprados.sort((a,b)=>(b.data_compra||'').localeCompare(a.data_compra||'')).map(d=>{
+      const cat=CATEGORIAS[d.categoria]||{ic:'🎁',label:'Outros'};
+      return `<div class="desejo-card" style="opacity:.85">
+        <div class="desejo-img-placeholder" style="height:60px;font-size:1.5rem">${cat.ic}</div>
+        <div class="desejo-body" style="padding:10px 14px">
+          <div class="desejo-nome">${d.nome}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+            <span class="desejo-preco" style="font-size:.9rem">${d.preco_estimado?fm(d.preco_estimado):''}</span>
+            <span style="font-size:.7rem;color:var(--sub)">${d.data_compra||''}</span>
+          </div>
+          <button onclick="desmarcarComprado('${d.id}')" style="margin-top:8px;width:100%;padding:7px;background:rgba(255,45,120,.08);border:1px solid rgba(255,45,120,.2);border-radius:9px;color:var(--pink);font-size:.75rem;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif">↩ Desfazer</button>
+        </div>
+      </div>`;
+    }).join('')}`;
+}
+
+/* ═══════ RENDER RESUMO ═══════ */
+function renderResumo(){
+  const pendentes=S.desejos.filter(d=>!d.comprado);
+  const comprados=S.desejos.filter(d=>d.comprado);
+  const totalPend=pendentes.reduce((a,d)=>a+(d.preco_estimado||0),0);
+  const totalComp=comprados.reduce((a,d)=>a+(d.preco_estimado||0),0);
+
+  const porCat={};
+  pendentes.forEach(d=>{porCat[d.categoria]=(porCat[d.categoria]||0)+(d.preco_estimado||0);});
+  const catsSorted=Object.entries(porCat).sort((a,b)=>b[1]-a[1]);
+  const maxCat=catsSorted[0]?.[1]||1;
+
+  document.getElementById('resumo-wrap').innerHTML=`
+    <div class="sum-grid">
+      <div class="sum-card o">
+        <div class="sum-label">Na lista</div>
+        <div class="sum-val">${fm(totalPend)}</div>
+        <div class="sum-sub">${pendentes.length} itens</div>
+      </div>
+      <div class="sum-card g">
+        <div class="sum-label">Realizados</div>
+        <div class="sum-val">${fm(totalComp)}</div>
+        <div class="sum-sub">${comprados.length} itens</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📊 Por Categoria</div>
+      ${catsSorted.map(([cat,val])=>{
+        const c=CATEGORIAS[cat]||{ic:'🎁',label:cat,cor:'var(--sub)'};
+        return `<div class="prog-wrap">
+          <div class="prog-top">
+            <span class="prog-label">${c.ic} ${c.label}</span>
+            <span class="prog-val">${fm(val)}</span>
+          </div>
+          <div class="prog-track">
+            <div class="prog-fill" style="width:${pct(val,maxCat)}%;background:${c.cor}"></div>
+          </div>
+        </div>`;
+      }).join('')||'<div style="color:var(--sub);font-size:.82rem">Nenhum item na lista.</div>'}
+    </div>
+
+    <div class="card">
+      <div class="card-title">💰 Integração Financeira</div>
+      <div style="font-size:.82rem;line-height:1.8;color:var(--sub)">
+        <div>📋 Lista total: <strong style="color:var(--txt)">${fm(totalPend)}</strong></div>
+        <div>✅ Já realizado: <strong style="color:var(--grn)">${fm(totalComp)}</strong></div>
+        <div style="margin-top:8px;font-size:.78rem">💡 Para incluir um desejo no seu planejamento financeiro, edite o item e defina quanto já guardou para ele.</div>
+      </div>
+      <button class="btn btn-ia" onclick="analisarDesejos()" style="margin-top:10px;margin-bottom:0">🤖 Analisar prioridades com IA</button>
+    </div>`;
+}
+
+/* ═══════ AÇÕES ═══════ */
+function marcarComprado(id){
+  const d=S.desejos.find(x=>x.id===id);
+  if(!d)return;
+  d.comprado=true;d.data_compra=hojeISO();
+  saveS();renderLista();toast(`✅ "${d.nome}" marcado como comprado!`);
+}
+
+function desmarcarComprado(id){
+  const d=S.desejos.find(x=>x.id===id);
+  if(!d)return;
+  d.comprado=false;delete d.data_compra;
+  saveS();renderComprados();toast('↩ Item devolvido à lista');
+}
+
+function deletarDesejo(id){
+  if(!confirm('Remover este item?'))return;
+  S.desejos=S.desejos.filter(x=>x.id!==id);
+  saveS();renderLista();toast('🗑 Removido');
+}
+
+function abrirLink(id){
+  const d=S.desejos.find(x=>x.id===id);
+  if(d?.link) window.open(d.link,'_blank');
+}
+
+function verDetalhes(id){
+  const d=S.desejos.find(x=>x.id===id);if(!d)return;
+  const cat=CATEGORIAS[d.categoria]||{ic:'🎁',label:'Outros'};
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">${d.nome}</div>
+    ${d.imagem?`<img src="${d.imagem}" style="width:100%;height:160px;object-fit:cover;border-radius:12px;margin-bottom:14px">`:`<div style="text-align:center;font-size:3rem;margin-bottom:14px">${cat.ic}</div>`}
+    <div style="font-size:.82rem;line-height:2;color:var(--sub)">
+      <div>🏷 Categoria: <strong style="color:var(--txt)">${cat.label}</strong></div>
+      <div>💰 Preço estimado: <strong style="color:var(--ora)">${d.preco_estimado?fm(d.preco_estimado):'Não definido'}</strong>${d.ia_estimou?' (IA)':''}</div>
+      ${d.onde_comprar?`<div>🛒 Onde comprar: <strong style="color:var(--txt)">${d.onde_comprar}</strong></div>`:''}
+      ${d.link?`<div>🔗 <a href="${d.link}" target="_blank" style="color:var(--cyan)">Ver produto</a></div>`:''}
+      ${d.reservado?`<div>💵 Guardado: <strong style="color:var(--grn)">${fm(d.reservado)}</strong> (${pct(d.reservado,d.preco_estimado||1)}%)</div>`:''}
+      ${d.notas?`<div style="margin-top:8px">📝 ${d.notas}</div>`:''}
+      ${d.ia_analise?`<div style="margin-top:12px;background:rgba(255,107,43,.08);border:1px solid rgba(255,107,43,.2);border-radius:10px;padding:10px;font-size:.78rem;line-height:1.6"><strong style="color:var(--ora)">🤖 Análise IA:</strong><br>${d.ia_analise}</div>`:''}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">
+      <button class="btn btn-ghost" style="margin-bottom:0" onclick="editarDesejo('${id}')">✏️ Editar</button>
+      <button class="btn btn-primary" style="margin-bottom:0" onclick="marcarComprado('${id}');fecharSheet()">✓ Comprei!</button>
+    </div>
+    <button class="btn btn-ghost" onclick="fecharSheet()" style="margin-top:8px">Fechar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+/* ═══════ ADD MANUAL ═══════ */
+function abrirAddDesejo(){
+  fecharFab();
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">✏️ Novo Desejo</div>
+    <div class="fg"><label class="fl">Nome do produto</label>
+      <input class="fi" id="nd-nome" placeholder="Ex: Apple Watch Series 10, Nike Air Max..."></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Categoria</label>
+        <select class="fi" id="nd-cat">
+          ${Object.entries(CATEGORIAS).map(([k,v])=>`<option value="${k}">${v.ic} ${v.label}</option>`).join('')}
+        </select></div>
+      <div class="fg"><label class="fl">Preço estimado (R$)</label>
+        <input class="fi" type="number" id="nd-preco" inputmode="decimal" placeholder="0" step="10"></div>
+    </div>
+    <div class="fg"><label class="fl">Onde comprar</label>
+      <input class="fi" id="nd-onde" placeholder="Ex: Apple Store, Amazon, Shopee..."></div>
+    <div class="fg"><label class="fl">Link (opcional)</label>
+      <input class="fi" id="nd-link" placeholder="https://..." type="url"></div>
+    <div class="fg"><label class="fl">Valor já guardado (R$)</label>
+      <input class="fi" type="number" id="nd-res" inputmode="decimal" placeholder="0" step="10" value="0"></div>
+    <div class="fg"><label class="fl">Notas / Observações</label>
+      <textarea class="fi" id="nd-notas" rows="2" placeholder="Por que você quer? Ocasião?..."></textarea></div>
+    <button class="btn btn-primary" onclick="salvarDesejo()">🛍️ Adicionar</button>
+    <button class="btn btn-ia" onclick="fecharSheet();abrirAddIA()">🤖 Deixar a IA preencher</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function salvarDesejo(extra={}){
+  const nome=document.getElementById('nd-nome')?.value?.trim()||extra.nome||'';
+  if(!nome){toast('⚠️ Informe o nome do produto');return;}
+  const desejo={
+    id:uid(),nome,
+    categoria:document.getElementById('nd-cat')?.value||extra.categoria||'outros',
+    preco_estimado:parseFloat(document.getElementById('nd-preco')?.value||extra.preco||0)||null,
+    onde_comprar:document.getElementById('nd-onde')?.value||extra.onde||'',
+    link:document.getElementById('nd-link')?.value||extra.link||'',
+    reservado:parseFloat(document.getElementById('nd-res')?.value||0)||0,
+    notas:document.getElementById('nd-notas')?.value||extra.notas||'',
+    ia_estimou:extra.ia_estimou||false,
+    ia_analise:extra.ia_analise||'',
+    imagem:extra.imagem||'',
+    comprado:false,
+    data_criacao:hojeISO(),
+  };
+  S.desejos.push(desejo);
+  saveS();fecharSheet();renderLista();
+  toast(`✓ "${nome}" adicionado!`);
+  // verificar similares
+  const similares=detectarSimilares();
+  if(similares.some(p=>p[0].id===desejo.id||p[1].id===desejo.id)){
+    setTimeout(()=>toast('⚠️ Item similar detectado na lista!'),1500);
+  }
+}
+
+/* ═══════ ADD VIA IA ═══════ */
+function abrirAddIA(){
+  fecharFab();
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">🤖 Descrever para IA</div>
+    <div style="font-size:.82rem;color:var(--sub);margin-bottom:14px;line-height:1.6">
+      Descreva o produto que quer. A IA vai categorizar, estimar o preço e sugerir onde comprar.
+    </div>
+    <div class="fg"><label class="fl">Descreva o produto</label>
+      <textarea class="fi" id="ia-desc" rows="3" placeholder="Ex: Quero um relógio smartwatch bom para academia com GPS, algo parecido com Apple Watch ou Garmin..."></textarea></div>
+    <div class="fg"><label class="fl">Orçamento máximo (R$) — opcional</label>
+      <input class="fi" type="number" id="ia-orca" inputmode="decimal" placeholder="3000"></div>
+    <button class="btn btn-ia" onclick="processarComIA()">🤖 Analisar e adicionar</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+async function processarComIA(){
+  const desc=document.getElementById('ia-desc')?.value?.trim();
+  const orca=document.getElementById('ia-orca')?.value;
+  if(!desc){toast('⚠️ Descreva o produto');return;}
+
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">🤖 Analisando...</div>
+    <div class="ia-bubble jarvis">⏳ A IA está analisando o produto, estimando preço e verificando onde comprar...</div>`;
+
+  const system=`Você é um assistente de compras. Responda APENAS em JSON válido sem markdown.
+Formato:
+{
+  "nome": "nome comercial exato do produto",
+  "categoria": "relogios|eletronicos|vestuario|calcados|casa|esporte|viagem|livros|saude|outros",
+  "preco_estimado": número em reais (valor médio de mercado brasileiro),
+  "preco_min": número (mínimo encontrado),
+  "preco_max": número (máximo encontrado),
+  "onde_comprar": "melhor local ou loja sugerida",
+  "link_sugerido": "URL de busca ou loja (não invente, use amazon.com.br, mercadolivre.com.br)",
+  "analise": "2-3 frases sobre o produto, custo-benefício e se vale o preço"
+}`;
+
+  const res=await callClaude(
+    `Produto desejado: "${desc}". Orçamento: ${orca?'até R$'+orca:'sem limite'}.
+    Analise, identifique o produto mais provável, estime o preço atual no Brasil e sugira onde comprar.`,system);
+
+  if(!res){
+    document.getElementById('sheet-content').innerHTML=`
+      <div class="sheet-title">⚠️ Sem conexão</div>
+      <div class="ia-bubble jarvis">Não consegui conectar com a IA. Tente adicionar manualmente.</div>
+      <button class="btn btn-ghost" onclick="fecharSheet();abrirAddDesejo()">✏️ Adicionar manualmente</button>
+      <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+    return;
+  }
+
+  try{
+    const obj=JSON.parse(res.replace(/```json|```/g,'').trim());
+    document.getElementById('sheet-content').innerHTML=`
+      <div class="sheet-title">🤖 Produto identificado</div>
+      <div class="ia-bubble jarvis" style="margin-bottom:14px">
+        <div style="font-weight:800;font-size:.95rem;margin-bottom:6px">${obj.nome}</div>
+        <div style="font-size:.8rem;line-height:1.6;color:var(--sub)">${obj.analise}</div>
+      </div>
+      <div style="background:var(--card2);border:1px solid var(--bdr);border-radius:12px;padding:14px;margin-bottom:14px;font-size:.82rem;line-height:2">
+        <div>🏷 Categoria: <strong>${CATEGORIAS[obj.categoria]?.label||obj.categoria}</strong></div>
+        <div>💰 Preço estimado: <strong style="color:var(--ora)">${obj.preco_estimado?fm(obj.preco_estimado):'-'}</strong></div>
+        ${obj.preco_min?`<div style="color:var(--sub)">↕ Faixa: ${fm(obj.preco_min)} – ${fm(obj.preco_max)}</div>`:''}
+        <div>🛒 Onde comprar: <strong>${obj.onde_comprar||'-'}</strong></div>
+      </div>
+      <div class="fg"><label class="fl">Ajustar nome (opcional)</label>
+        <input class="fi" id="conf-nome" value="${obj.nome}"></div>
+      <div class="fr2">
+        <div class="fg" style="margin-bottom:0"><label class="fl">Preço (R$)</label>
+          <input class="fi" type="number" id="conf-preco" value="${obj.preco_estimado||''}"></div>
+        <div class="fg" style="margin-bottom:0"><label class="fl">Já guardou (R$)</label>
+          <input class="fi" type="number" id="conf-res" value="0"></div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:12px" onclick="confirmarDesejo(${JSON.stringify(JSON.stringify(obj))})">✅ Confirmar e adicionar</button>
+      <button class="btn btn-ghost" onclick="fecharSheet();abrirAddDesejo()">✏️ Editar manualmente</button>
+      <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  }catch(e){
+    document.getElementById('sheet-content').innerHTML=`
+      <div class="sheet-title">⚠️ Erro</div>
+      <div class="ia-bubble jarvis">Não consegui interpretar. Tente descrição mais específica.</div>
+      <button class="btn btn-ghost" onclick="fecharSheet();abrirAddIA()">← Tentar novamente</button>`;
+  }
+}
+
+function confirmarDesejo(objStr){
+  const obj=JSON.parse(objStr);
+  const nome=document.getElementById('conf-nome')?.value?.trim()||obj.nome;
+  const preco=parseFloat(document.getElementById('conf-preco')?.value)||obj.preco_estimado||null;
+  const reservado=parseFloat(document.getElementById('conf-res')?.value)||0;
+  S.desejos.push({
+    id:uid(),nome,categoria:obj.categoria||'outros',
+    preco_estimado:preco,onde_comprar:obj.onde_comprar||'',
+    link:obj.link_sugerido||'',reservado,notas:'',
+    ia_estimou:true,ia_analise:obj.analise||'',
+    imagem:'',comprado:false,data_criacao:hojeISO(),
+  });
+  saveS();fecharSheet();renderLista();
+  toast(`✓ "${nome}" adicionado!`);
+  const similares=detectarSimilares();
+  if(similares.length>0) setTimeout(()=>toast('⚠️ Item similar detectado!'),1500);
+}
+
+/* ═══════ ADD VIA IMAGEM ═══════ */
+function abrirAddImagem(){
+  fecharFab();
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">📸 Subir Imagem</div>
+    <div style="font-size:.82rem;color:var(--sub);margin-bottom:14px;line-height:1.6">
+      Tire um print do produto (Instagram, site, etc.) e a IA vai identificar e preencher as informações.
+    </div>
+    <div class="img-upload" onclick="document.getElementById('img-input').click()">
+      <input type="file" id="img-input" accept="image/*" onchange="processarImagem(event)">
+      <div style="font-size:2rem;margin-bottom:8px">📷</div>
+      <div style="font-size:.84rem;font-weight:600">Toque para escolher imagem</div>
+      <div style="font-size:.72rem;color:var(--sub);margin-top:4px">JPG, PNG — da câmera ou galeria</div>
+    </div>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+async function processarImagem(event){
+  const file=event.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=async(e)=>{
+    const base64=e.target.result;
+    const base64data=base64.split(',')[1];
+    const mediaType=file.type||'image/jpeg';
+
+    document.getElementById('sheet-content').innerHTML=`
+      <div class="sheet-title">🤖 Analisando imagem...</div>
+      <img src="${base64}" style="width:100%;height:160px;object-fit:cover;border-radius:12px;margin-bottom:14px">
+      <div class="ia-bubble jarvis">⏳ Identificando o produto na imagem...</div>`;
+
+    const system=`Você é um assistente de compras. Analise a imagem e responda APENAS em JSON válido sem markdown.
+Formato:
+{
+  "nome": "nome do produto identificado",
+  "categoria": "relogios|eletronicos|vestuario|calcados|casa|esporte|viagem|livros|saude|outros",
+  "preco_estimado": número em reais,
+  "onde_comprar": "melhor local",
+  "analise": "descrição breve do produto identificado"
+}`;
+
+    try{
+      const resp=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,system,
+          messages:[{role:'user',content:[
+            {type:'image',source:{type:'base64',media_type:mediaType,data:base64data}},
+            {type:'text',text:'Identifique o produto nesta imagem e retorne as informações em JSON.'}
+          ]}]})});
+      const data=await resp.json();
+      const txt=data.content?.[0]?.text||'';
+      const obj=JSON.parse(txt.replace(/```json|```/g,'').trim());
+
+      document.getElementById('sheet-content').innerHTML=`
+        <div class="sheet-title">🤖 Produto identificado</div>
+        <img src="${base64}" style="width:100%;height:140px;object-fit:cover;border-radius:12px;margin-bottom:14px">
+        <div class="ia-bubble jarvis" style="margin-bottom:14px">
+          <div style="font-weight:800;font-size:.95rem;margin-bottom:4px">${obj.nome}</div>
+          <div style="font-size:.78rem;color:var(--sub)">${obj.analise}</div>
+        </div>
+        <div class="fr2">
+          <div class="fg"><label class="fl">Nome</label><input class="fi" id="img-nome" value="${obj.nome}"></div>
+          <div class="fg"><label class="fl">Preço (R$)</label><input class="fi" type="number" id="img-preco" value="${obj.preco_estimado||''}"></div>
+        </div>
+        <button class="btn btn-primary" onclick="salvarDesejoImagem('${base64data.slice(0,50)}','${mediaType}',${JSON.stringify(JSON.stringify(obj))})">✅ Confirmar</button>
+        <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+    }catch(err){
+      document.getElementById('sheet-content').innerHTML=`
+        <div class="sheet-title">⚠️ Não identificou</div>
+        <img src="${base64}" style="width:100%;height:140px;object-fit:cover;border-radius:12px;margin-bottom:14px">
+        <div class="ia-bubble jarvis">Não consegui identificar o produto. Adicione manualmente.</div>
+        <button class="btn btn-ghost" onclick="fecharSheet();abrirAddDesejo()">✏️ Adicionar manualmente</button>
+        <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function salvarDesejoImagem(b64,mime,objStr){
+  const obj=JSON.parse(objStr);
+  const nome=document.getElementById('img-nome')?.value?.trim()||obj.nome;
+  const preco=parseFloat(document.getElementById('img-preco')?.value)||obj.preco_estimado||null;
+  S.desejos.push({
+    id:uid(),nome,categoria:obj.categoria||'outros',
+    preco_estimado:preco,onde_comprar:obj.onde_comprar||'',
+    link:'',reservado:0,notas:'',
+    ia_estimou:true,ia_analise:obj.analise||'',
+    imagem:'',comprado:false,data_criacao:hojeISO(),
+  });
+  saveS();fecharSheet();renderLista();toast(`✓ "${nome}" adicionado!`);
+}
+
+/* ═══════ EDITAR ═══════ */
+function editarDesejo(id){
+  const d=S.desejos.find(x=>x.id===id);if(!d)return;
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">✏️ Editar</div>
+    <div class="fg"><label class="fl">Nome</label><input class="fi" id="nd-nome" value="${d.nome}"></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl">Categoria</label>
+        <select class="fi" id="nd-cat">
+          ${Object.entries(CATEGORIAS).map(([k,v])=>`<option value="${k}" ${d.categoria===k?'selected':''}>${v.ic} ${v.label}</option>`).join('')}
+        </select></div>
+      <div class="fg"><label class="fl">Preço (R$)</label>
+        <input class="fi" type="number" id="nd-preco" value="${d.preco_estimado||''}"></div>
+    </div>
+    <div class="fg"><label class="fl">Onde comprar</label><input class="fi" id="nd-onde" value="${d.onde_comprar||''}"></div>
+    <div class="fg"><label class="fl">Link</label><input class="fi" id="nd-link" value="${d.link||''}" type="url"></div>
+    <div class="fg"><label class="fl">Já guardado (R$)</label><input class="fi" type="number" id="nd-res" value="${d.reservado||0}"></div>
+    <div class="fg"><label class="fl">Notas</label><textarea class="fi" id="nd-notas" rows="2">${d.notas||''}</textarea></div>
+    <button class="btn btn-primary" onclick="salvarEdicaoDesejo('${id}')">💾 Salvar</button>
+    <button class="btn btn-danger" onclick="deletarDesejo('${id}');fecharSheet()">🗑 Excluir</button>
+    <button class="btn btn-ghost" onclick="fecharSheet()">Cancelar</button>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function salvarEdicaoDesejo(id){
+  const d=S.desejos.find(x=>x.id===id);if(!d)return;
+  d.nome=document.getElementById('nd-nome').value.trim();
+  d.categoria=document.getElementById('nd-cat').value;
+  d.preco_estimado=parseFloat(document.getElementById('nd-preco').value)||null;
+  d.onde_comprar=document.getElementById('nd-onde').value;
+  d.link=document.getElementById('nd-link').value;
+  d.reservado=parseFloat(document.getElementById('nd-res').value)||0;
+  d.notas=document.getElementById('nd-notas').value;
+  saveS();fecharSheet();renderLista();toast('✓ Atualizado!');
+}
+
+/* ═══════ IA COMPARAÇÃO E ANÁLISE ═══════ */
+async function compararIA(id1,id2){
+  const d1=S.desejos.find(x=>x.id===id1);
+  const d2=S.desejos.find(x=>x.id===id2);
+  if(!d1||!d2)return;
+
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">🤖 Comparando...</div>
+    <div class="ia-bubble jarvis">⏳ Analisando os dois produtos...</div>`;
+  document.getElementById('overlay').classList.add('open');
+
+  const system=`Você é um consultor de compras. Responda em português de forma direta e útil. Máximo 3 parágrafos.`;
+  const res=await callClaude(
+    `Compare estes dois produtos e me diga qual devo comprar:
+    1. ${d1.nome} — ~${d1.preco_estimado?fm(d1.preco_estimado):'preço não definido'}
+    2. ${d2.nome} — ~${d2.preco_estimado?fm(d2.preco_estimado):'preço não definido'}
+    Considere custo-benefício e diga uma recomendação clara.`,system);
+
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">🤖 Comparação</div>
+    <div class="comp-row" style="margin-bottom:14px">
+      <div class="comp-item"><div class="comp-nome">${d1.nome}</div><div class="comp-preco">${d1.preco_estimado?fm(d1.preco_estimado):'-'}</div></div>
+      <div class="vs-badge">VS</div>
+      <div class="comp-item"><div class="comp-nome">${d2.nome}</div><div class="comp-preco">${d2.preco_estimado?fm(d2.preco_estimado):'-'}</div></div>
+    </div>
+    <div class="ia-bubble jarvis">${res||'⚠️ Sem conexão com IA.'}</div>
+    <button class="btn btn-ghost" onclick="fecharSheet()" style="margin-top:8px">Fechar</button>`;
+}
+
+async function analisarDesejos(){
+  const pendentes=S.desejos.filter(d=>!d.comprado);
+  document.getElementById('resumo-wrap').innerHTML+='<div class="ia-bubble jarvis" style="margin-top:10px">⏳ Analisando prioridades...</div>';
+  const lista=pendentes.map(d=>`${d.nome} (${d.preco_estimado?fm(d.preco_estimado):'sem preço'})`).join(', ');
+  const system=`Você é um consultor financeiro pessoal. Responda em português, máximo 3 parágrafos.`;
+  const res=await callClaude(
+    `Lista de desejos: ${lista||'vazia'}. Total estimado: ${fm(pendentes.reduce((a,d)=>a+(d.preco_estimado||0),0))}.
+    Analise as prioridades, sugira uma ordem de compra e dê dicas para realizar esses desejos.`,system);
+  const iaBubble=document.querySelector('#resumo-wrap .ia-bubble.jarvis');
+  if(iaBubble) iaBubble.innerHTML=res||'⚠️ Sem conexão.';
+}
+
+async function abrirIADesejos(){
+  document.getElementById('sheet-content').innerHTML=`
+    <div class="sheet-title">🤖 Jarvis — Desejos</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+      ${['Priorize minha lista','O que comprar primeiro?','Analise meu orçamento','Compare itens similares'].map(s=>`
+        <button onclick="perguntarIADes('${s}')" style="background:rgba(255,107,43,.08);border:1px solid rgba(255,107,43,.2);color:var(--sub);padding:6px 12px;border-radius:8px;font-size:.72rem;font-weight:600;cursor:pointer;font-family:'Space Grotesk',sans-serif">${s}</button>`).join('')}
+    </div>
+    <div id="ia-des-resp" style="min-height:60px"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <input class="fi" id="ia-des-q" placeholder="Pergunte sobre seus desejos..." style="flex:1">
+      <button onclick="perguntarIADes(document.getElementById('ia-des-q').value)" style="background:var(--g5);border:none;border-radius:12px;padding:0 16px;color:#fff;font-weight:700;cursor:pointer;flex-shrink:0">→</button>
+    </div>`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+async function perguntarIADes(q){
+  if(!q?.trim())return;
+  const el=document.getElementById('ia-des-resp');
+  if(el) el.innerHTML=`<div class="ia-bubble jarvis" style="color:var(--sub)">⏳ Pensando...</div>`;
+  const pendentes=S.desejos.filter(d=>!d.comprado);
+  const lista=pendentes.map(d=>`${d.nome}(${d.preco_estimado?fm(d.preco_estimado):'sem preço'})`).join('; ');
+  const system=`Assistente de compras do Dr. Antonio Roberto, médico em SP.
+Lista de desejos: ${lista||'vazia'}. Total: ${fm(pendentes.reduce((a,d)=>a+(d.preco_estimado||0),0))}.
+Responda direto, em português, máximo 2 parágrafos.`;
+  const res=await callClaude(q,system);
+  if(el) el.innerHTML=`<div class="ia-bubble jarvis">${res||'⚠️ Sem conexão.'}</div>`;
+}
+
+/* ═══════ IA ═══════ */
+async function callClaude(prompt,system){
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system,
+        messages:[{role:'user',content:prompt}]})});
+    const d=await r.json();
+    return d.content?.[0]?.text||'';
+  }catch(e){return null;}
+}
+
+/* ═══════ UTILS ═══════ */
+function fecharSheet(){document.getElementById('overlay').classList.remove('open');fecharFab();}
+let toastT;
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),3200);}
+function updateDate(){document.getElementById('tbar-date').textContent=hojeStr();}
+
+/* ═══════ INIT ═══════ */
+updateDate();
+renderLista();
+</script>
+</body>
+</html>
