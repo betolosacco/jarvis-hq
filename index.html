@@ -8,197 +8,69 @@
 <meta name="apple-mobile-web-app-title" content="Jarvis HQ">
 <meta name="theme-color" content="#07071a">
 <title>Jarvis HQ</title>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#07071a;--card:#111128;--card2:#181835;--bdr:#22224a;
-  --grn:#00e5a0;--red:#ff3366;--yel:#ffc107;--pur:#8b5cf6;--blu:#00d4ff;
-  --ora:#ff6b35;--cyan:#00f5d4;--txt:#f0f0ff;--sub:#8888bb;--r:16px;
-  --g1:linear-gradient(135deg,#8b5cf6,#00d4ff);
-}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;overflow:hidden;background:var(--bg);}
-body{font-family:"Outfit",sans-serif;color:var(--txt);max-width:480px;margin:0 auto;display:flex;flex-direction:column;}
-
-/* TOP BAR */
-.topbar{display:flex;align-items:center;justify-content:space-between;
-  padding:14px 18px 10px;background:rgba(7,7,26,.97);backdrop-filter:blur(20px);
-  border-bottom:1px solid var(--bdr);flex-shrink:0;position:relative;z-index:10;}
-.tbar-logo{font-weight:900;font-size:1.1rem;background:var(--g1);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-.tbar-sub{font-size:.68rem;color:var(--sub);font-family:"JetBrains Mono",monospace;margin-top:1px;}
-.tbar-right{display:flex;gap:7px;align-items:center;}
-.tbar-btn{width:34px;height:34px;border-radius:11px;border:1px solid var(--bdr);
-  background:var(--card2);color:var(--txt);font-size:.95rem;cursor:pointer;display:grid;place-items:center;}
-.clima-mini{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:10px;
-  background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.15);font-size:.74rem;font-weight:700;color:var(--blu);cursor:pointer;}
-
-/* FRAME AREA */
-#frame-container{flex:1;position:relative;overflow:hidden;}
-iframe{position:absolute;inset:0;width:100%;height:100%;border:none;background:var(--bg);}
-
-/* BOTTOM NAV */
-.bottomnav{background:rgba(7,7,26,.97);backdrop-filter:blur(24px);
-  border-top:1px solid var(--bdr);display:grid;grid-template-columns:repeat(7,1fr);
-  padding-bottom:env(safe-area-inset-bottom,0px);flex-shrink:0;}
-.bnav{display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:8px 2px 6px;cursor:pointer;border:none;background:transparent;
-  color:var(--sub);font-family:"Outfit",sans-serif;font-size:.48rem;font-weight:700;
-  gap:2px;text-transform:uppercase;letter-spacing:.04em;transition:.1s;}
-.bnav.act{color:var(--blu);}
-.bnav.act .bnav-ic{transform:scale(1.1);}
-.bnav-ic{font-size:1.05rem;line-height:1;transition:.1s;}
-
-/* TOAST */
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(10px);
-  background:var(--card2);border:1px solid var(--bdr);border-radius:12px;
-  padding:10px 18px;font-size:.81rem;font-weight:700;opacity:0;transition:.25s;
-  z-index:400;white-space:nowrap;pointer-events:none;}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-
-/* SPLASH */
-#splash{position:fixed;inset:0;background:var(--bg);z-index:500;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  animation:fadeOut 0.5s ease 1.5s forwards;}
-@keyframes fadeOut{to{opacity:0;pointer-events:none;}}
-.splash-logo{font-size:3.5rem;margin-bottom:16px;animation:bounceIn .6s ease;}
-.splash-title{font-size:1.4rem;font-weight:900;background:var(--g1);
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:"Outfit",sans-serif;background:#07071a;color:#f0f0ff;
+  height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  max-width:480px;margin:0 auto;padding:24px;}
+.logo{font-size:4rem;margin-bottom:16px;animation:bounce .6s ease;}
+@keyframes bounce{0%{transform:scale(.5);opacity:0}80%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+h1{font-size:1.5rem;font-weight:900;background:linear-gradient(135deg,#8b5cf6,#00d4ff);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px;}
-.splash-sub{font-size:.82rem;color:var(--sub);}
-@keyframes bounceIn{0%{transform:scale(0.5);opacity:0}80%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+p{font-size:.85rem;color:#8888bb;margin-bottom:32px;text-align:center;line-height:1.6;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;margin-bottom:20px;}
+.btn-aba{padding:16px 12px;border-radius:16px;border:1px solid #22224a;background:#111128;
+  cursor:pointer;text-align:center;text-decoration:none;color:#f0f0ff;display:flex;
+  flex-direction:column;align-items:center;gap:6px;transition:.15s;}
+.btn-aba:active{transform:scale(.96);}
+.btn-aba .ic{font-size:1.6rem;}
+.btn-aba .nm{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#8888bb;}
+.btn-hoje{grid-column:1/-1;padding:18px;border-color:rgba(0,212,255,.3);background:rgba(0,212,255,.07);}
+.btn-hoje .nm{color:#00d4ff;}
+.note{font-size:.72rem;color:#8888bb;text-align:center;line-height:1.6;
+  background:#111128;border:1px solid #22224a;border-radius:12px;padding:12px;width:100%;}
 </style>
 </head>
 <body>
+<div class="logo">🧠</div>
+<h1>JARVIS HQ</h1>
+<p>Abra a aba que deseja usar.<br>Salve cada uma na Tela de Início para acesso rápido.</p>
 
-<!-- SPLASH -->
-<div id="splash">
-  <div class="splash-logo">🧠</div>
-  <div class="splash-title">JARVIS HQ</div>
-  <div class="splash-sub">Sistema Operacional Pessoal</div>
+<div class="grid">
+  <a class="btn-aba btn-hoje" href="hoje.html">
+    <div class="ic">🏠</div>
+    <div class="nm">Hoje — Hub Principal</div>
+  </a>
+  <a class="btn-aba" href="saude.html">
+    <div class="ic">💪</div>
+    <div class="nm">Saúde</div>
+  </a>
+  <a class="btn-aba" href="estudos.html">
+    <div class="ic">📚</div>
+    <div class="nm">Estudos</div>
+  </a>
+  <a class="btn-aba" href="financas.html">
+    <div class="ic">💰</div>
+    <div class="nm">Finanças</div>
+  </a>
+  <a class="btn-aba" href="desejos.html">
+    <div class="ic">🛍️</div>
+    <div class="nm">Desejos</div>
+  </a>
+  <a class="btn-aba" href="aprendizado.html">
+    <div class="ic">🧠</div>
+    <div class="nm">Aprendizado</div>
+  </a>
+  <a class="btn-aba" href="mais.html">
+    <div class="ic">☰</div>
+    <div class="nm">Mais</div>
+  </a>
 </div>
 
-<div class="topbar">
-  <div>
-    <div class="tbar-logo">🧠 JARVIS HQ</div>
-    <div class="tbar-sub" id="tbar-date">Carregando...</div>
-  </div>
-  <div class="tbar-right">
-    <div class="clima-mini" id="clima-mini" onclick="abrirClima()">⛅ --°</div>
-    <button class="tbar-btn" onclick="abrirIAGlobal()">🤖</button>
-    <button class="tbar-btn" onclick="irPara('mais')">⚙️</button>
-  </div>
+<div class="note">
+  💡 <strong>Para usar como app:</strong> Abra <strong>hoje.html</strong> no Safari → 
+  Compartilhar → Adicionar à Tela de Início
 </div>
-
-<div id="frame-container">
-  <iframe id="frame-main" src="hoje.html" title="Jarvis Hoje"></iframe>
-</div>
-
-<nav class="bottomnav">
-  <button class="bnav act" id="bn-hoje" onclick="irPara('hoje')"><span class="bnav-ic">🏠</span>Hoje</button>
-  <button class="bnav" id="bn-saude" onclick="irPara('saude')"><span class="bnav-ic">💪</span>Saúde</button>
-  <button class="bnav" id="bn-estudos" onclick="irPara('estudos')"><span class="bnav-ic">📚</span>Estudos</button>
-  <button class="bnav" id="bn-financas" onclick="irPara('financas')"><span class="bnav-ic">💰</span>Finanças</button>
-  <button class="bnav" id="bn-desejos" onclick="irPara('desejos')"><span class="bnav-ic">🛍️</span>Desejos</button>
-  <button class="bnav" id="bn-aprendizado" onclick="irPara('aprendizado')"><span class="bnav-ic">🧠</span>Aprend.</button>
-  <button class="bnav" id="bn-mais" onclick="irPara('mais')"><span class="bnav-ic">☰</span>Mais</button>
-</nav>
-
-<div class="toast" id="toast"></div>
-
-<script>
-const PAGES = {
-  hoje: 'hoje.html',
-  saude: 'saude.html',
-  estudos: 'estudos.html',
-  financas: 'financas.html',
-  desejos: 'desejos.html',
-  aprendizado: 'aprendizado.html',
-  mais: 'mais.html'
-};
-
-let curPg = 'hoje';
-let toastT;
-
-const DIAS = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
-const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-
-function hojeStr() {
-  const d = new Date();
-  return DIAS[d.getDay()] + ', ' + d.getDate() + ' de ' + MESES[d.getMonth()] + ' ' + d.getFullYear();
-}
-
-function irPara(pg) {
-  if (curPg === pg) return;
-  curPg = pg;
-  document.querySelectorAll('.bnav').forEach(b => b.classList.remove('act'));
-  const btn = document.getElementById('bn-' + pg);
-  if (btn) btn.classList.add('act');
-  const frame = document.getElementById('frame-main');
-  frame.style.opacity = '0';
-  frame.style.transition = 'opacity .15s';
-  setTimeout(() => {
-    frame.src = PAGES[pg] || 'hoje.html';
-    frame.onload = () => {
-      frame.style.opacity = '1';
-    };
-  }, 150);
-}
-
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastT);
-  toastT = setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-async function buscarClima() {
-  try {
-    const geo = await new Promise((res) =>
-      navigator.geolocation.getCurrentPosition(
-        p => res({ lat: p.coords.latitude, lon: p.coords.longitude }),
-        () => res({ lat: -23.6278, lon: -46.6993 })
-      )
-    );
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${geo.lat}&longitude=${geo.lon}&current=temperature_2m,weathercode&forecast_days=1&timezone=America%2FSao_Paulo`;
-    const data = await (await fetch(url)).json();
-    const temp = Math.round(data.current.temperature_2m);
-    const code = data.current.weathercode;
-    const ic = code === 0 ? '☀️' : code <= 2 ? '⛅' : code <= 3 ? '☁️' : code <= 67 ? '🌧️' : '⛈️';
-    document.getElementById('clima-mini').textContent = ic + ' ' + temp + '°';
-    // Salvar no localStorage para as abas usarem
-    localStorage.setItem('jarvis_clima', JSON.stringify({ temp, code, ic, ts: Date.now() }));
-  } catch(e) {}
-}
-
-function abrirClima() {
-  const c = JSON.parse(localStorage.getItem('jarvis_clima') || 'null');
-  if (!c) { toast('⏳ Buscando clima...'); buscarClima(); return; }
-  toast(c.ic + ' ' + c.temp + '°C em São Paulo');
-}
-
-function abrirIAGlobal() {
-  irPara('hoje');
-  // Dá tempo do iframe carregar e então abre o modal de IA
-  setTimeout(() => {
-    try {
-      document.getElementById('frame-main').contentWindow.abrirIAGlobal?.();
-    } catch(e) {}
-  }, 500);
-}
-
-// Init
-document.getElementById('tbar-date').textContent = hojeStr();
-buscarClima();
-setInterval(() => {
-  document.getElementById('tbar-date').textContent = hojeStr();
-}, 60000);
-
-// Remove splash
-setTimeout(() => {
-  const s = document.getElementById('splash');
-  if (s) s.remove();
-}, 2000);
-</script>
 </body>
 </html>
