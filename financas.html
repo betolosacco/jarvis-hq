@@ -247,13 +247,11 @@ textarea.fi{resize:none;line-height:1.5;}
           <div class="fg" style="margin-bottom:0">
             <label class="fl">Mês</label>
             <select class="fi" id="filtro-mes" onchange="renderGastos()">
-              ${Array.from({length:12},(_,i)=>`<option value="${i}" ${i===new Date().getMonth()?'selected':''}>${['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][i]}</option>`).join('')}
             </select>
           </div>
           <div class="fg" style="margin-bottom:0">
             <label class="fl">Ano</label>
             <select class="fi" id="filtro-ano" onchange="renderGastos()">
-              ${[2024,2025,2026].map(a=>`<option value="${a}" ${a===new Date().getFullYear()?'selected':''}>${a}</option>`).join('')}
             </select>
           </div>
         </div>
@@ -1133,6 +1131,32 @@ function updateDate(){document.getElementById('tbar-date').textContent=hojeStr()
 
 /* ═══════ INIT ═══════ */
 updateDate();
+
+// Preencher selects de mês e ano
+(function initSelects(){
+  const selMes = document.getElementById('filtro-mes');
+  const selAno = document.getElementById('filtro-ano');
+  const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const mesAtualV = new Date().getMonth();
+  const anoAtualV = new Date().getFullYear();
+  if(selMes){
+    meses.forEach((m,i) => {
+      const opt = document.createElement('option');
+      opt.value = i; opt.textContent = m;
+      if(i === mesAtualV) opt.selected = true;
+      selMes.appendChild(opt);
+    });
+  }
+  if(selAno){
+    [2024,2025,2026,2027].forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a; opt.textContent = a;
+      if(a === anoAtualV) opt.selected = true;
+      selAno.appendChild(opt);
+    });
+  }
+})();
+
 renderPainel();
 </script>
 </body>
