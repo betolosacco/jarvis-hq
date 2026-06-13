@@ -6847,13 +6847,173 @@ renderCompras();
 // ══════════════════════════════════════════════════════════════
 // WRAPPERS DE ROTA DAS ABAS
 // ══════════════════════════════════════════════════════════════
-function rHoje(){if(typeof renderHoje==='function')renderHoje();else if(typeof renderTudo==='function')renderTudo();}
-function rSaude(){if(typeof renderSaude==='function')renderSaude();}
-function rEstudos(){if(typeof renderEstudos==='function')renderEstudos();}
-function rFin(){if(typeof renderFinanceiro==='function')renderFinanceiro();}
-function rDes(){if(typeof renderDesejos==='function')renderDesejos();}
-function rApr(){if(typeof renderAprendizado==='function')renderAprendizado();}
-function rMais(){if(typeof renderMais==='function')renderMais();}
+function rHoje(){
+  try{if(typeof renderHoje==='function')renderHoje();else if(typeof renderTudo==='function')renderTudo();else rHojeFallback();}
+  catch(e){console.error('rHoje:',e);rHojeFallback();}
+}
+function rHojeFallback(){
+  const el=document.getElementById('hoje-root');if(!el)return;
+  const evs=getEvHoje();const hmNow=hm();
+  const atual=evs.find(e=>!e.livre&&hmNow>=e.ini&&hmNow<e.fim);
+  const prox=evs.find(e=>!e.livre&&e.ini>hmNow);
+  const up=S.peso.length?S.peso[S.peso.length-1]:null;
+  const en=S.energia[hojeISO()]||'';
+  const ts=S.treinos.filter(t=>(agora()-new Date(t.data_iso+'T12:00:00'))/864e5<7).length;
+  el.innerHTML=`
+    <div style="height:12px"></div>
+    <div style="background:linear-gradient(135deg,rgba(139,92,246,.12),rgba(0,212,255,.08));border:1px solid rgba(139,92,246,.28);border-radius:20px;padding:18px;margin-bottom:12px">
+      <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#00f5d4;margin-bottom:7px;display:flex;align-items:center;gap:6px">
+        <span style="width:6px;height:6px;border-radius:50%;background:#00f5d4;display:inline-block;animation:pulse 1.5s infinite"></span>
+        Agora · ${hs(hmNow)}
+      </div>
+      <div style="font-weight:900;font-size:1.15rem;margin-bottom:3px">${atual?atual.titulo:prox?'Bloco livre ✨':'Dia encerrado 🌙'}</div>
+      <div style="font-size:.76rem;color:#8888bb">${atual&&atual.local?'📍 '+atual.local+' · ':''} ${prox?'Próximo: '+hs(prox.ini)+' '+prox.titulo:''}</div>
+    </div>
+    <div style="background:#111128;border:1px solid #22224a;border-radius:16px;padding:16px;margin-bottom:12px">
+      <div style="font-weight:700;font-size:.87rem;margin-bottom:12px">⚡ Energia</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        ${['alta','media','baixa'].map(v=>`<button onclick="setEnergia('${v}')" style="padding:10px 4px;border-radius:12px;border:2px solid ${en===v?{alta:'#00e5a0',media:'#ffc107',baixa:'#ff3366'}[v]:'#22224a'};background:${en===v?{alta:'rgba(0,229,160,.12)',media:'rgba(255,193,7,.12)',baixa:'rgba(255,51,102,.12)'}[v]:'#181835'};cursor:pointer;text-align:center;font-family:'Outfit',sans-serif;font-size:.76rem;font-weight:700;color:${en===v?{alta:'#00e5a0',media:'#ffc107',baixa:'#ff3366'}[v]:'#8888bb'}">${{alta:'🟢 Alta',media:'🟡 Média',baixa:'🔴 Baixa'}[v]}</button>`).join('')}
+      </div>
+    </div>
+    <div style="background:#111128;border:1px solid #22224a;border-radius:16px;padding:16px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px">
+        <div style="font-weight:700;font-size:.87rem">📅 Agenda</div>
+        <div style="display:flex;gap:5px">
+          <button onclick="abrirAddEvento()" style="padding:5px 11px;border-radius:9px;border:none;background:linear-gradient(135deg,#8b5cf6,#00d4ff);color:#fff;font-size:.73rem;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif">+ Evento</button>
+          <button onclick="abrirAddTarefa_?abrirAddTarefa_():null" style="padding:5px 11px;border-radius:9px;border:1px solid #22224a;background:#181835;color:#f0f0ff;font-size:.73rem;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif">+ Tarefa</button>
+        </div>
+      </div>
+      <div class="timeline"><div class="tl-line"></div>
+      ${evs.slice(0,8).map(ev=>{const cors={trabalho:'#00d4ff',pos:'#8b5cf6',treino:'#00e5a0',pessoal:'#ff6b35',protegido:'#8888bb',tarefa:'#ffc107',livre:'#00f5d4'};const cor=cors[ev.tipo]||'#8888bb';return `<div class="tl-item" style="opacity:${hmNow>ev.fim&&hmNow>=ev.ini?'.45':'1'}"><div class="tl-dot ${hmNow>=ev.ini&&hmNow<ev.fim?'now':''}" style="background:${cor}"></div><div class="tl-time">${ev.hora_ini} → ${ev.hora_fim}</div><div class="tl-card ${ev.tipo||'pessoal'}"><div class="tl-nome">${ev.titulo}</div>${ev.local&&!ev.livre?`<div class="tl-detalhe">📍 ${ev.local}</div>`:''}</div></div>`;}).join('')}
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div onclick="navTo('saude')" style="background:#111128;border:1px solid #22224a;border-radius:14px;padding:14px 12px;cursor:pointer;position:relative;overflow:hidden"><div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:#00f5d4"></div><div style="font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#8888bb;margin-bottom:5px">Peso</div><div style="font-weight:900;font-size:1.35rem;font-family:'JetBrains Mono',monospace">${up?up.valor:'--'}<span style="font-size:.7rem"> kg</span></div><div style="font-size:.66rem;color:#8888bb;margin-top:2px">Meta: ${S.config.peso_meta}kg</div></div>
+      <div onclick="navTo('saude')" style="background:#111128;border:1px solid #22224a;border-radius:14px;padding:14px 12px;cursor:pointer;position:relative;overflow:hidden"><div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:#00e5a0"></div><div style="font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#8888bb;margin-bottom:5px">Treinos</div><div style="font-weight:900;font-size:1.35rem;font-family:'JetBrains Mono',monospace">${ts}<span style="font-size:.7rem">/4</span></div><div style="font-size:.66rem;color:#8888bb;margin-top:2px">esta semana</div></div>
+    </div>
+    <div style="background:#111128;border:1px solid #22224a;border-radius:16px;padding:16px;margin-bottom:12px">
+      <div style="font-weight:700;font-size:.87rem;margin-bottom:10px">✅ Tarefas</div>
+      ${S.tarefas.filter(t=>!t.done).slice(0,4).map(t=>`<div onclick="toggleTarefaG('${t.id}')" style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid #22224a;cursor:pointer"><div style="width:20px;height:20px;border-radius:6px;border:2px solid #22224a;flex-shrink:0;margin-top:1px"></div><div style="flex:1;font-size:.82rem">${t.titulo}</div><span style="font-size:.66rem;padding:2px 7px;border-radius:999px;background:${{alta:'rgba(255,51,102,.1)',media:'rgba(255,193,7,.1)',baixa:'rgba(0,229,160,.1)'}[t.prioridade]||'transparent'};color:${{alta:'#ff3366',media:'#ffc107',baixa:'#00e5a0'}[t.prioridade]||'#8888bb'}">${t.prioridade}</span></div>`).join('')}
+      ${S.tarefas.filter(t=>!t.done).length===0?'<div style="text-align:center;padding:16px;color:#8888bb;font-size:.82rem">Sem tarefas pendentes ✨</div>':''}
+      <button onclick="abrirAddTarefa_()" style="width:100%;margin-top:10px;padding:10px;border-radius:11px;border:1px solid #22224a;background:#181835;color:#8888bb;font-family:'Outfit',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer">+ Adicionar tarefa</button>
+    </div>
+    <div style="background:#111128;border:1px solid #22224a;border-radius:16px;padding:16px">
+      <div style="font-weight:700;font-size:.87rem;margin-bottom:10px">🤖 Jarvis</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+        ${['Organiza meu dia','Estou sem energia','O que estudar?','Resumo da semana'].map(q=>`<button onclick="envIAG('${q}')" style="background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.2);color:#8888bb;padding:5px 10px;border-radius:8px;font-size:.69rem;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif">${q}</button>`).join('')}
+      </div>
+      <div id="hoje-ia-resp" style="min-height:10px;margin-bottom:8px"></div>
+      <div style="display:flex;gap:8px;align-items:flex-end">
+        <button onclick="vozGlobal()" style="width:36px;height:36px;border-radius:10px;border:1px solid #22224a;background:#181835;cursor:pointer;font-size:.85rem;flex-shrink:0">🎤</button>
+        <textarea id="hoje-ia-inp" style="flex:1;background:rgba(255,255,255,.04);border:1.5px solid #22224a;border-radius:12px;padding:10px 12px;color:#f0f0ff;font-family:'Outfit',sans-serif;font-size:.84rem;outline:none;resize:none;max-height:90px" placeholder="Fale com o Jarvis..." rows="1"
+          oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();envHojeIA()}"></textarea>
+        <button onclick="envHojeIA()" style="width:36px;height:36px;border-radius:11px;border:none;background:linear-gradient(135deg,#8b5cf6,#00d4ff);color:#fff;font-size:.95rem;cursor:pointer;display:grid;place-items:center;flex-shrink:0">➤</button>
+      </div>
+    </div>
+    <div style="height:20px"></div>
+  `;
+}
+
+function setEnergia(nivel){
+  S.energia[hojeISO()]=nivel;
+  sbSync('jarvis_energia',{id:uid(),user_id:USUARIO,nivel,data_iso:hojeISO()});
+  rHoje();
+  toast({alta:'🟢 Boa energia!',media:'🟡 Foco no essencial.',baixa:'🔴 Simplificando o dia.'}[nivel]);
+}
+
+function toggleTarefaG(id){
+  const t=S.tarefas.find(x=>x.id===id);
+  if(!t)return;
+  t.done=!t.done;
+  sbSync('jarvis_tarefas',t);
+  rHoje();
+  toast(t.done?'✅ Concluída!':'↩ Reaberta');
+}
+
+function abrirAddTarefa_(textoI){
+  abrirSheet(`<div class="sheet-title">✅ Nova Tarefa</div>
+    <div style="margin-bottom:14px"><label style="display:block;font-size:.67rem;font-weight:700;color:#8888bb;margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em">O que fazer?</label>
+      <input class="fi" id="nt2-titulo" placeholder="Ex: Ligar para paciente, comprar remédio..." value="${textoI||''}">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div><label style="display:block;font-size:.67rem;font-weight:700;color:#8888bb;margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em">Prioridade</label>
+        <select class="fi" id="nt2-prio"><option value="alta">🔴 Urgente</option><option value="media" selected>🟡 Normal</option><option value="baixa">🟢 Baixa</option></select>
+      </div>
+      <div><label style="display:block;font-size:.67rem;font-weight:700;color:#8888bb;margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em">Duração</label>
+        <select class="fi" id="nt2-dur"><option value="15">15min</option><option value="30">30min</option><option value="60" selected>1h</option><option value="120">2h</option></select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div><label style="display:block;font-size:.67rem;font-weight:700;color:#8888bb;margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em">Horário</label>
+        <input class="fi" type="time" id="nt2-hora">
+      </div>
+      <div><label style="display:block;font-size:.67rem;font-weight:700;color:#8888bb;margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em">Local</label>
+        <input class="fi" id="nt2-local" placeholder="Opcional">
+      </div>
+    </div>
+    <button onclick="salvarTarefaG()" style="width:100%;padding:13px;border-radius:13px;border:none;background:linear-gradient(135deg,#8b5cf6,#00d4ff);color:#fff;font-family:'Outfit',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;margin-bottom:8px">✅ Adicionar</button>
+    <button onclick="fecharSheet()" style="width:100%;padding:13px;border-radius:13px;border:1.5px solid #22224a;background:transparent;color:#f0f0ff;font-family:'Outfit',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer">Cancelar</button>
+  `);
+}
+window.abrirAddTarefa=abrirAddTarefa_;
+
+function salvarTarefaG(){
+  const titulo=document.getElementById('nt2-titulo')?.value?.trim();
+  if(!titulo){toast('⚠️ Informe o título');return;}
+  const t={id:uid(),user_id:USUARIO,titulo,prioridade:document.getElementById('nt2-prio').value,duracao:parseInt(document.getElementById('nt2-dur').value)||30,horario:document.getElementById('nt2-hora').value||null,local:document.getElementById('nt2-local')?.value||'',done:false,data_iso:hojeISO()};
+  if(!S.tarefas)S.tarefas=[];
+  S.tarefas.push(t);
+  sbSync('jarvis_tarefas',t);
+  fecharSheet();rHoje();
+  toast('✅ "'+titulo+'" adicionada!');
+}
+
+function abrirAddEvento(){
+  abrirSheet(`<div class="sheet-title">📅 Novo Evento</div>
+    <div style="margin-bottom:14px"><label style="display:block;font-size:.67rem;font-weight:700;color:#8888bb;margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em">Título</label><input class="fi" id="ne2-titulo" placeholder="Ex: Reunião, Dentista..."></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div><label style="display:block;font-size:.67rem;font-weight:700;color:#8888bb;margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em">Início</label><input class="fi" type="time" id="ne2-ini" value="09:00"></div>
+      <div><label style="display:block;font-size:.67rem;font-weight:700;color:#8888bb;margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em">Fim</label><input class="fi" type="time" id="ne2-fim" value="10:00"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <div><label style="display:block;font-size:.67rem;font-weight:700;color:#8888bb;margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em">Tipo</label><select class="fi" id="ne2-tipo"><option value="trabalho">🔵 Trabalho</option><option value="pos">🟣 Pós</option><option value="treino">🟢 Treino</option><option value="pessoal" selected>🟠 Pessoal</option></select></div>
+      <div><label style="display:block;font-size:.67rem;font-weight:700;color:#8888bb;margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em">Recorrência</label><select class="fi" id="ne2-rec"><option value="hoje">📅 Só hoje</option><option value="semanal">🔁 Semanal</option><option value="diario">📆 Diário</option></select></div>
+    </div>
+    <div style="margin-bottom:14px"><label style="display:block;font-size:.67rem;font-weight:700;color:#8888bb;margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em">Local</label><input class="fi" id="ne2-local" placeholder="Opcional"></div>
+    <button onclick="salvarEventoG()" style="width:100%;padding:13px;border-radius:13px;border:none;background:linear-gradient(135deg,#8b5cf6,#00d4ff);color:#fff;font-family:'Outfit',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;margin-bottom:8px">📅 Adicionar</button>
+    <button onclick="fecharSheet()" style="width:100%;padding:13px;border-radius:13px;border:1.5px solid #22224a;background:transparent;color:#f0f0ff;font-family:'Outfit',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer">Cancelar</button>
+  `);
+}
+
+function salvarEventoG(){
+  const titulo=document.getElementById('ne2-titulo')?.value?.trim();
+  if(!titulo){toast('⚠️ Informe o título');return;}
+  const rec=document.getElementById('ne2-rec').value;
+  const ev={id:uid(),user_id:USUARIO,titulo,hora_ini:document.getElementById('ne2-ini').value,hora_fim:document.getElementById('ne2-fim').value,tipo:document.getElementById('ne2-tipo').value,local:document.getElementById('ne2-local').value||'',data_iso:rec==='hoje'?hojeISO():null,dias:rec==='diario'?[0,1,2,3,4,5,6]:rec==='semanal'?[diaW()]:null};
+  if(!S.eventos)S.eventos=[];
+  S.eventos.push(ev);
+  sbSync('jarvis_eventos',ev);
+  fecharSheet();rHoje();
+  toast('📅 "'+titulo+'" adicionado!');
+}
+
+async function envHojeIA(){
+  const inp=document.getElementById('hoje-ia-inp');
+  const txt=inp?.value?.trim();if(!txt)return;
+  inp.value='';inp.style.height='auto';
+  const el=document.getElementById('hoje-ia-resp');
+  if(el)el.innerHTML='<div style="padding:10px 13px;border-radius:14px;font-size:.82rem;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.2);color:#8888bb;font-style:italic">⏳</div>';
+  const res=await callClaude(txt,ctxGlobal()+'\nResponda direto, máx 2 parágrafos.');
+  if(el)el.innerHTML=`<div style="padding:10px 13px;border-radius:14px;font-size:.82rem;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.2);line-height:1.65">${res||'⚠️ Sem conexão.'}</div>`;
+}
+
+function rSaude(){try{if(typeof renderSaude==='function')renderSaude();}catch(e){document.getElementById('saude-root').innerHTML='<div style="padding:24px;text-align:center;color:#8888bb">Aba Saúde carregando...</div>';console.error(e);}}
+function rEstudos(){try{if(typeof renderEstudos==='function')renderEstudos();}catch(e){document.getElementById('estudos-root').innerHTML='<div style="padding:24px;text-align:center;color:#8888bb">Aba Estudos carregando...</div>';console.error(e);}}
+function rFin(){try{if(typeof renderFinanceiro==='function')renderFinanceiro();}catch(e){document.getElementById('fin-root').innerHTML='<div style="padding:24px;text-align:center;color:#8888bb">Aba Finanças carregando...</div>';console.error(e);}}
+function rDes(){try{if(typeof renderDesejos==='function')renderDesejos();}catch(e){document.getElementById('des-root').innerHTML='<div style="padding:24px;text-align:center;color:#8888bb">Aba Desejos carregando...</div>';console.error(e);}}
+function rApr(){try{if(typeof renderAprendizado==='function')renderAprendizado();}catch(e){document.getElementById('apr-root').innerHTML='<div style="padding:24px;text-align:center;color:#8888bb">Aba Aprendizado carregando...</div>';console.error(e);}}
+function rMais(){try{if(typeof renderMais==='function')renderMais();}catch(e){document.getElementById('mais-root').innerHTML='<div style="padding:24px;text-align:center;color:#8888bb">Aba Mais carregando...</div>';console.error(e);}}
 
 // Stubs para funções que algumas abas podem não ter definido
 function abrirAddTarefa(t){if(typeof window.abrirAddTarefa_==='function')abrirAddTarefa_(t);}
