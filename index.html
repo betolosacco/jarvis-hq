@@ -771,34 +771,63 @@ const OB_STEPS=[
   {ic:'🤖',title:'IA em Todo o App',sub:'Fale por voz para registrar qualquer coisa. A IA interpreta e confirma antes de salvar.'}
 ];
 let obIdx=0;
-function obNext(){
-  if(obIdx>=OB_STEPS.length-1){S.config.onboarding=true;saveS();document.getElementById('onboard').classList.add('hide');rHoje();buscarClima();return;}
-  obIdx++;const s=OB_STEPS[obIdx];
-  document.getElementById('ob-ic').textContent=s.ic;
-  document.getElementById('ob-title').textContent=s.title;
-  document.getElementById('ob-sub').textContent=s.sub;
-  document.getElementById('ob-btn').textContent=obIdx===OB_STEPS.length-1?'Começar! 🚀':'Próximo →';
+function _obRenderStep(){
+  const s=OB_STEPS[obIdx];
+  const ic=document.getElementById('ob-ic');const ti=document.getElementById('ob-title');
+  const su=document.getElementById('ob-sub');const bn=document.getElementById('ob-btn');
   const dots=document.getElementById('ob-dots');
-  dots.innerHTML=OB_STEPS.map((_,i)=>`<div class="ob-dot ${i===obIdx?'act':''}" style="width:${i===obIdx?'22':'8'}px"></div>`).join('');
+  if(ic)ic.textContent=s.ic;
+  if(ti)ti.textContent=s.title;
+  if(su)su.textContent=s.sub;
+  if(bn)bn.textContent=obIdx===OB_STEPS.length-1?'Começar! 🚀':'Próximo →';
+  if(dots)dots.innerHTML=OB_STEPS.map((_,i)=>
+    '<div style="height:8px;border-radius:4px;transition:.3s;background:'+(i===obIdx?'#00d4ff':'#22224a')+';width:'+(i===obIdx?'22':'8')+'px"></div>'
+  ).join('');
+}
+function obNext(){
+  if(obIdx>=OB_STEPS.length-1){
+    S.config.onboarding=true;saveS();
+    document.getElementById('onboard').classList.add('hide');
+    rHoje();buscarClima();
+    setTimeout(solicitarChave,1500);
+    return;
+  }
+  obIdx++;_obRenderStep();
 }
 function solicitarChave(){
-  // Se não tem chave configurada, pedir para configurar
-  const key = localStorage.getItem('jv_claude_key');
-  if(!key){
-    abrirSheet(`<div class="sheet-title">🔑 Chave da IA</div>
-      <div style="font-size:.84rem;color:var(--sub);line-height:1.7;margin-bottom:16px">Para usar a IA, cole sua chave da Anthropic (Claude). Começa com <code style="background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px">sk-ant-api03-</code></div>
-      <div class="fg"><label class="fl">API Key Claude</label><input class="fi" id="cfg-key" placeholder="sk-ant-api03-..." type="password" autocomplete="off"></div>
-      <button class="btn btn-primary" onclick="salvarChave()">🔑 Salvar e ativar</button>
-      <button class="btn btn-outline" onclick="fecharSheet()">Usar sem IA</button>`);
+  const key=localStorage.getItem('jv_claude_key');
+  if(key)return; // já configurado
+  abrirSheet(`<div class="sheet-title">🔑 Configurar IA</div>
+    <div style="font-size:.85rem;color:#8888bb;line-height:1.7;margin-bottom:16px">
+      Para usar a inteligência artificial, cole sua chave do Claude (Anthropic).
+      <br><br>Começa com <code style="background:rgba(255,255,255,.08);padding:2px 7px;border-radius:4px;font-size:.78rem">sk-ant-api03-</code>
+    </div>
+    <div style="margin-bottom:14px">
+      <label style="display:block;font-size:.67rem;font-weight:700;color:#8888bb;margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em">API Key Claude</label>
+      <input class="fi" id="cfg-api-key" placeholder="sk-ant-api03-..." type="password" autocomplete="off">
+    </div>
+    <button onclick="salvarChaveAPI()" style="width:100%;padding:13px;border-radius:13px;border:none;background:linear-gradient(135deg,#8b5cf6,#00d4ff);color:#fff;font-family:'Outfit',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;margin-bottom:8px">🔑 Ativar IA</button>
+    <button onclick="fecharSheet()" style="width:100%;padding:13px;border-radius:13px;border:1.5px solid #22224a;background:transparent;color:#f0f0ff;font-family:'Outfit',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer">Usar sem IA</button>
+  `);
+}
+function salvarChaveAPI(){
+  const k=document.getElementById('cfg-api-key')?.value?.trim();
+  if(k&&k.startsWith('sk-')){
+    localStorage.setItem('jv_claude_key',k);
+    fecharSheet();
+    toast('✅ IA ativada com sucesso!');
+  } else {
+    toast('⚠️ Chave inválida. Deve começar com sk-ant-api03-');
   }
 }
-function salvarChave(){
-  const k=document.getElementById('cfg-key')?.value?.trim();
-  if(k&&k.startsWith('sk-')){localStorage.setItem('jv_claude_key',k);fecharSheet();toast('✅ Chave configurada! IA ativada.');}
-  else toast('⚠️ Chave inválida');
+
+function obSkip(){
+  S.config.onboarding=true;saveS();
+  document.getElementById('onboard').classList.add('hide');
+  rHoje();buscarClima();
+  setTimeout(solicitarChave,1500);
 }
-function obSkip(){S.config.onboarding=true;saveS();document.getElementById('onboard').classList.add('hide');rHoje();buscarClima();}
-function initOB(){document.getElementById('ob-dots').innerHTML=OB_STEPS.map((_,i)=>`<div class="ob-dot ${i===0?'act':''}" style="width:${i===0?'22':'8'}px"></div>`).join('');}
+function initOB(){obIdx=0;_obRenderStep();}" style="width:${i===0?'22':'8'}px"></div>`).join('');}
 
 // ══════════════════════════════════════════════════════════════
 // DARK MODE ADAPTATIVO (após 22h)
