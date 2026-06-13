@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teste</title>
+<style>
+body { background: #07071a; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; gap: 20px; }
+.btn { background: #8b5cf6; color: white; padding: 20px 40px; border-radius: 14px; font-size: 1.2rem; font-weight: 700; cursor: pointer; border: none; width: 280px; text-align: center; }
+#resultado { color: #00e5a0; font-size: 1.1rem; min-height: 30px; }
+</style>
+</head>
+<body>
+<div id="resultado">Toque em um dos botões abaixo</div>
+
+<button class="btn" onclick="document.getElementById('resultado').textContent = 'BUTTON funcionou! ✅'">
+  Testar BUTTON
+</button>
+
+<div class="btn" onclick="document.getElementById('resultado').textContent = 'DIV funcionou! ✅'">
+  Testar DIV
+</div>
+
+<a class="btn" href="javascript:void(0)" onclick="document.getElementById('resultado').textContent = 'LINK funcionou! ✅'; return false;">
+  Testar LINK
+</a>
+
+</body>
+</html>
