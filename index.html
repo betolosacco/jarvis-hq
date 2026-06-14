@@ -7095,6 +7095,36 @@ function verificarAlinhamento(){
 async function enviarAlinhamento(){const resp=document.getElementById('al-resp')?.value?.trim();fecharSheet();if(resp){const res=await callClaude('Check-in: "'+resp+'"',ctxGlobal()+'\nDê uma resposta útil e encorajadora em 1-2 frases.',300);if(res)setTimeout(()=>toast('🤖 '+res.slice(0,80)),500);}}
 
 init();
+
+// ══ FUNÇÕES CRÍTICAS INJETADAS ══
+function irPara(pg){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('act'));
+  document.querySelectorAll('.bn,.bnav').forEach(b=>b.classList.remove('act'));
+  var pgEl=document.getElementById('pg-'+pg);
+  var bnEl=document.getElementById('bn-'+pg);
+  if(pgEl)pgEl.classList.add('act');
+  if(bnEl)bnEl.classList.add('act');
+  curPg=pg;
+  var main=document.getElementById('main');
+  if(main)main.scrollTop=0;
+  fecharFab();
+  if(navigator.vibrate)navigator.vibrate(10);
+  var r={hoje:rHoje||renderHoje,saude:rSaude||renderSaude,estudos:rEstudos||renderEstudos,fin:rFin||renderFin,des:rDes||renderDes,apr:rApr||renderApr,mais:rMais||renderMais};
+  var fn=r[pg];if(typeof fn==='function')fn();
+}
+function togTarefa(id){
+  var t=(S.tarefas||[]).find(function(x){return x.id===id;});
+  if(!t)return;
+  t.done=!t.done;
+  try{sync('jarvis_tarefas',t);}catch(e){}
+  try{sv();}catch(e){}
+  if(typeof rHoje==='function')rHoje();
+  else if(typeof renderHoje==='function')renderHoje();
+  var toast2=document.getElementById('toast');
+  if(toast2){toast2.textContent=t.done?'✅ Concluída!':'↩ Reaberta';toast2.classList.add('show');setTimeout(function(){toast2.classList.remove('show');},3000);}
+}
+// ══ FIM INJEÇÃO ══
+
 </script>
 </body>
 </html>
